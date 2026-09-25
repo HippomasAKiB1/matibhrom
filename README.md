@@ -1,4 +1,4 @@
-# Matibhrom --- Bengali LLM Hallucination Experiment Platform
+# Matibhrom - Bengali LLM Hallucination Experiment Platform
 # Team Turtlers
 # ELITE Research Lab LLC
 

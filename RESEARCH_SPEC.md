@@ -1,11 +1,10 @@
 # Matibhrom - Bengali LLM Hallucination Experiment Platform
-# Team Turtlers
-# ELITE Research Lab LLC
+## *When Do LLMs Hallucinate in Bangla? A Controlled Study Across Register, Domain, and Evidence Conditions*
+# Team Turtlers — ELITE Research Lab LLC
+# Authors: Akib Hasan Pyil, Abu Saleh Mohammad Jaeef, Shibli Nomani Sabit
+# Mentor / Supervised By: S M Asif Hossain
 
-# Akib - Jaef - Sabit 
-# Supervised By - S M Asif Hossain
-
-## README.md — Research System Specification (v3, Publishable)
+## Research System Specification (v3, Publishable)
 
 > **Name note:** Project name defaults to **Matibhrom** (মতিভ্রম). Bengali script appears only in the paper title and README header, never in repo paths, package names, config keys, Docker tags, or `run_id` values. If the team chooses a different name, replace `matibhrom` everywhere before feeding this to an agent.
 

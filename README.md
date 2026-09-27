@@ -1,7 +1,10 @@
 # Matibhrom (মতিভ্রম) — Bengali LLM Hallucination Benchmark & Experiment Platform
 
-> **Authors:** Akib Hasan, Jaef, Sabit (Team Turtlers)  
-> **Supervisor:** S M Asif Hossain  
+### *When Do LLMs Hallucinate in Bangla? A Controlled Study Across Register, Domain, and Evidence Conditions*
+
+> **Team:** Team Turtlers  
+> **Authors:** Akib Hasan Pyil, Abu Saleh Mohammad Jaeef, Shibli Nomani Sabit  
+> **Mentor / Supervisor:** S M Asif Hossain  
 > **Lab / Organization:** ELITE Research Lab LLC  
 > **Repository:** [https://github.com/HippomasAKiB1/matibhrom](https://github.com/HippomasAKiB1/matibhrom)  
 > **Specification Version:** v3 (Publishable) · September 2026  
@@ -388,8 +391,8 @@ If you use the Matibhrom platform, benchmark dataset, or evaluation harness in y
 
 ```bibtex
 @misc{matibhrom2026,
-  title={Matibhrom: A Benchmark and Diagnostic Platform for Hallucination in Bengali Large Language Models},
-  author={Hasan, Akib and Jaef and Sabit and Hossain, S M Asif},
+  title={When Do LLMs Hallucinate in Bangla? A Controlled Study Across Register, Domain, and Evidence Conditions},
+  author={Pyil, Akib Hasan and Jaeef, Abu Saleh Mohammad and Sabit, Shibli Nomani and Hossain, S M Asif},
   year={2026},
   publisher={ELITE Research Lab LLC},
   howpublished={\url{https://github.com/HippomasAKiB1/matibhrom}}

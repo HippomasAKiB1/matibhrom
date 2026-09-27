@@ -3,9 +3,9 @@ name = "matibhrom"
 version = "0.1.0"
 description = "Bengali LLM Hallucination Experiment Platform"
 authors = [
-    {name = "Akib Hasan", email = "akib@example.com"},
-    {name = "Jaef", email = "jaef@example.com"},
-    {name = "Sabit", email = "sabit@example.com"},
+    {name = "Akib Hasan Pyil"},
+    {name = "Abu Saleh Mohammad Jaeef"},
+    {name = "Shibli Nomani Sabit"},
 ]
 dependencies = [
     "pydantic>=2.6,<3",

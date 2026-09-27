@@ -1,0 +1,9 @@
+corpus_path: data/benchmark/corpus.jsonl
+index_dir: outputs/{run_id}/retrieval/index
+chunk_size: 384
+chunk_overlap: 64
+embedding_model: "BAAI/bge-m3"
+top_k: 5
+metric: "cosine"
+freeze_corpus: true
+min_corpus_passages: 1000              # fail if corpus is smaller (P0 fix)

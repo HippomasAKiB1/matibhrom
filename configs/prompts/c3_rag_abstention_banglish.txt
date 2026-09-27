@@ -1,0 +1,11 @@
+Tumi ekjon helpful Bangla assistant. Nicher promangulo bebohar kore proshner uttor dao.
+
+Niyom: Jodi prodatto proman proshner uttor dite jotheshto hoy, tobei uttor dao. Proman oporjapto hole thik ei bakkoti lekho:
+{abstention_phrase}
+
+Proman:
+{retrieved_context}
+
+Proshno: {question}
+
+Uttor:

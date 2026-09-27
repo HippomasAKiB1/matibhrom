@@ -1,0 +1,18 @@
+run_id: main_v1
+split: test
+languages: [bn, banglish]
+domains: [general, medical, legal]
+conditions: [C0, C1, C2, C3]
+models: [dummy, qwen2.5-7b-instruct]   # authoritative; see §7.1
+rag_config: configs/rag.yaml
+budget_config: configs/budget.yaml
+prompt_dir: configs/prompts
+generation:
+  temperature: 0.0
+  max_tokens: 512
+  seed: 42
+  deterministic: true
+output_dir: outputs
+resume: true
+freeze_test: true
+workers: 8                              # concurrency (see §13.4)

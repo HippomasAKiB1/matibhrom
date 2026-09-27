@@ -1,0 +1,37 @@
+models:
+  - id: dummy
+    adapter: dummy
+    enabled: true
+    params:
+      response: "ডামি উত্তর।"
+    max_input_tokens: 4096
+
+  - id: qwen2.5-7b-instruct
+    adapter: vllm
+    enabled: true
+    path: "Qwen/Qwen2.5-7B-Instruct"
+    revision: "main"  # pin to a commit SHA before main run
+    params:
+      temperature: 0.0
+      max_tokens: 512
+      top_p: 1.0
+    max_input_tokens: 8192
+
+  - id: tigerllm-9b
+    adapter: hf
+    enabled: false
+    path: "TigerLLM/TigerLLM-9B"  # exact version frozen before main run
+    revision: "main"
+    params:
+      temperature: 0.0
+      max_tokens: 512
+    max_input_tokens: 4096
+
+  - id: gpt-4o-2024-11-20
+    adapter: litellm
+    enabled: false
+    model: "openai/gpt-4o-2024-11-20"  # exact version frozen before main run
+    params:
+      temperature: 0.0
+      max_tokens: 512
+    max_input_tokens: 128000

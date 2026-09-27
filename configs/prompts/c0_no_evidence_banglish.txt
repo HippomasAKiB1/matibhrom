@@ -1,0 +1,5 @@
+Tumi ekjon helpful Bangla assistant. Nicher proshner shothik uttor dao.
+
+Proshno: {question}
+
+Uttor:

@@ -1,0 +1,17 @@
+overlap_fraction: 0.25
+pilot_size: 120
+kappa_threshold: 0.70
+hide_model_identity: true
+randomize_order: true
+scope: A                               # A | B | C — see §3.5
+llm_prelabel: true
+prelabel_model: "gpt-4o-2024-11-20"
+prelabel_verify_fraction: 0.20
+adjudication:
+  trigger_on:
+    - uncertain_label
+    - severe_medical_or_legal
+    - disagreement_in_overlap
+auth:
+  enabled: true
+  provider: "token"                    # token | none

@@ -1,0 +1,12 @@
+# Hard caps. The runner refuses to start if projected cost exceeds these.
+max_usd: 500
+max_gpu_hours: 100
+max_disk_gb: 200
+# Per-million-token pricing used for projection. Update before each run.
+pricing:
+  "openai/gpt-4o-2024-11-20":
+    input_per_million: 2.50
+    output_per_million: 10.00
+  "anthropic/claude-sonnet-4-5":
+    input_per_million: 3.00
+    output_per_million: 15.00

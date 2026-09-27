@@ -1,0 +1,8 @@
+Tumi ekjon helpful Bangla assistant. Nicher promangulo bebohar kore proshner uttor dao.
+
+Proman:
+{retrieved_context}
+
+Proshno: {question}
+
+Uttor:

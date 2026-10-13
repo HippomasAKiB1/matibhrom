@@ -2,6 +2,7 @@
 Atomic lock file helpers for Matibhrom runner.
 """
 
+import json
 import os
 import time
 from pathlib import Path
@@ -13,26 +14,100 @@ class LockError(RuntimeError):
     pass
 
 
-def create_lock_atomic(lock_path: str | Path) -> int:
+def is_pid_alive(pid: int) -> bool:
+    """Check if process with given PID is currently alive."""
+    if pid <= 0:
+        return False
+    try:
+        import psutil
+        return psutil.pid_exists(pid)
+    except ImportError:
+        try:
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            return False
+
+
+def is_lock_stale(lock_path: str | Path, stale_timeout: float = 300.0) -> bool:
+    """Return True if lock file is stale (owning process died or lock timed out)."""
+    path = Path(lock_path)
+    if not path.exists():
+        return False
+    try:
+        content = path.read_text(encoding="utf-8").strip()
+        if not content:
+            # Empty lock file - check age
+            age = time.time() - path.stat().st_mtime
+            return age > 30.0
+        data = json.loads(content)
+        pid = data.get("pid")
+        timestamp = data.get("timestamp", 0)
+        if pid is not None and not is_pid_alive(pid):
+            return True
+        if timestamp and (time.time() - timestamp > stale_timeout):
+            return True
+        return False
+    except Exception:
+        try:
+            return (time.time() - path.stat().st_mtime) > 30.0
+        except OSError:
+            return False
+
+
+def clean_stale_locks(locks_dir: str | Path, stale_timeout: float = 300.0) -> int:
+    """Remove any stale lock files in locks_dir. Returns number of removed locks."""
+    p = Path(locks_dir)
+    if not p.exists():
+        return 0
+    removed = 0
+    for lock_file in p.glob("*.lock"):
+        if is_lock_stale(lock_file, stale_timeout=stale_timeout):
+            try:
+                lock_file.unlink()
+                removed += 1
+            except OSError:
+                pass
+    return removed
+
+
+def create_lock_atomic(lock_path: str | Path, stale_timeout: float = 300.0) -> int:
     """
     Create a lock file atomically using O_EXCL.
+    Writes PID and timestamp to enable stale lock detection.
+    If an existing lock is stale (process died or timed out), it is cleaned up.
 
     Args:
         lock_path: Path to the lock file
+        stale_timeout: Seconds after which a lock is considered timed out
 
     Returns:
         File descriptor of the lock file
 
     Raises:
-        LockError: If lock already exists
+        LockError: If an active lock is already held
     """
     lock_path = Path(lock_path)
     lock_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+        payload = json.dumps({"pid": os.getpid(), "timestamp": time.time()}).encode("utf-8")
+        os.write(fd, payload)
         return fd
     except FileExistsError:
+        if is_lock_stale(lock_path, stale_timeout=stale_timeout):
+            try:
+                lock_path.unlink()
+            except OSError:
+                pass
+            try:
+                fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+                payload = json.dumps({"pid": os.getpid(), "timestamp": time.time()}).encode("utf-8")
+                os.write(fd, payload)
+                return fd
+            except FileExistsError:
+                pass
         raise LockError(f"Lock already exists: {lock_path}")
 
 

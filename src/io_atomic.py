@@ -94,3 +94,39 @@ def stop_all_writers(timeout: float = 5.0) -> None:
         thread = threads.get(path)
         if thread is not None:
             thread.join(timeout=timeout)
+
+
+def read_jsonl_clean(path: str | Path, corrupt_log: str | Path | None = None) -> list[dict[str, Any]]:
+    """Read a JSONL file line-by-line, discarding any partial/corrupt line from a crash.
+
+    Per README §13.7: On process crash, the file may contain a partial trailing line.
+    On resume, the runner reads line-by-line and discards any line failing json.loads,
+    logging the discarded line to corrupt_log (e.g. outputs/{run_id}/corrupt_lines.log).
+    """
+    path = Path(path)
+    if not path.exists():
+        return []
+    records = []
+    has_corrupt = False
+    valid_lines = []
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
+        for line in f:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            try:
+                rec = json.loads(stripped)
+                records.append(rec)
+                valid_lines.append(stripped)
+            except Exception as exc:
+                has_corrupt = True
+                if corrupt_log is not None:
+                    cpath = Path(corrupt_log)
+                    cpath.parent.mkdir(parents=True, exist_ok=True)
+                    with open(cpath, "a", encoding="utf-8") as cf:
+                        cf.write(f"Corrupt line discarded: {stripped}\nError: {exc}\n")
+    if has_corrupt:
+        with open(path, "w", encoding="utf-8") as f:
+            for vline in valid_lines:
+                f.write(vline + "\n")
+    return records

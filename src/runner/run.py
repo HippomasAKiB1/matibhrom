@@ -62,6 +62,8 @@ def pre_flight_checks(
     split: str,
     freeze_test: bool,
     unlocked: bool = False,
+    min_corpus_passages: int = 1000,
+    selected_models: list[dict] | None = None,
 ) -> None:
     """
     Run all pre-flight checks before generation starts.
@@ -72,7 +74,8 @@ def pre_flight_checks(
     errors = []
 
     # 1. Validate inputs
-    validation_errors = validate_artifact(items_path, evidence_path, corpus_path, min_corpus_passages=10)
+    validation_min = min(10, min_corpus_passages)
+    validation_errors = validate_artifact(items_path, evidence_path, corpus_path, min_corpus_passages=validation_min)
     if validation_errors:
         errors.extend(validation_errors)
 
@@ -84,8 +87,8 @@ def pre_flight_checks(
             line = line.strip()
             if line:
                 corpus_raw.append(json.loads(line))
-    if len(corpus_raw) < 1000 and split == "test":
-        errors.append(f"Corpus has {len(corpus_raw)} passages, minimum is 1000 for test split")
+    if len(corpus_raw) < min_corpus_passages and split == "test":
+        errors.append(f"Corpus has {len(corpus_raw)} passages, minimum is {min_corpus_passages} for test split")
 
     # 3. Check budget
     try:
@@ -106,9 +109,9 @@ def pre_flight_checks(
     # 5. Check schema version (done by validate_data)
 
     # 6. Check model revisions
-    models = load_models_config("configs/models.yaml")
-    for model in models:
-        if model.get("revision") == "main" and split == "test":
+    target_models = selected_models if selected_models is not None else load_models_config("configs/models.yaml")
+    for model in target_models:
+        if model.get("adapter") in ("vllm", "hf") and model.get("revision") == "main" and split == "test":
             errors.append(f"Model {model['id']} has revision 'main' - pin to SHA before test split")
 
     # 7. Check freeze guard
@@ -134,25 +137,30 @@ def create_locks(
     prompt_dir: str | Path,
     models_config: list[dict],
     output_dir: str | Path,
+    corpus_path: str | Path = "data/dummy/corpus.jsonl",
 ) -> None:
     """Create lock files after freeze."""
     locks_dir = Path(output_dir) / run_id / "locks"
     locks_dir.mkdir(parents=True, exist_ok=True)
 
     # Config lock
+    config_lock = locks_dir / "CONFIG_LOCK.json"
     config_hash = hash_config(config_paths)
-    write_lock_atomic(locks_dir / "CONFIG_LOCK.json", json.dumps({
-        "hash": config_hash,
-        "paths": config_paths
-    }))
+    if not config_lock.exists():
+        write_lock_atomic(config_lock, json.dumps({
+            "hash": config_hash,
+            "paths": config_paths
+        }))
 
     # Prompt lock
-    prompt_hashes = {}
+    prompt_lock = locks_dir / "PROMPT_LOCK.json"
     builder = PromptBuilder(prompt_dir)
     prompt_hashes = builder.get_template_hashes()
-    write_lock_atomic(locks_dir / "PROMPT_LOCK.json", json.dumps(prompt_hashes))
+    if not prompt_lock.exists():
+        write_lock_atomic(prompt_lock, json.dumps(prompt_hashes))
 
     # Model lock
+    model_lock = locks_dir / "MODEL_LOCK.json"
     model_locks = []
     for m in models_config:
         model_locks.append({
@@ -160,20 +168,23 @@ def create_locks(
             "revision": m.get("revision", "main"),
             "version": hash_model_version(m["id"], m.get("revision", "main"))
         })
-    write_lock_atomic(locks_dir / "MODEL_LOCK.json", json.dumps(model_locks))
+    if not model_lock.exists():
+        write_lock_atomic(model_lock, json.dumps(model_locks))
 
     # Corpus lock
-    corpus_path = "data/dummy/corpus.jsonl"
+    corpus_lock = locks_dir / "CORPUS_LOCK.json"
+    corpus_p = str(corpus_path)
     rag_config = load_experiment_config("configs/rag.yaml")
     chunk_config = {
         "chunk_size": rag_config.get("chunk_size", 384),
         "chunk_overlap": rag_config.get("chunk_overlap", 64)
     }
-    corpus_hash = hash_corpus(corpus_path, chunk_config, rag_config.get("embedding_model", "BAAI/bge-m3"))
-    write_lock_atomic(locks_dir / "CORPUS_LOCK.json", json.dumps({
-        "hash": corpus_hash,
-        "corpus": corpus_path
-    }))
+    corpus_hash = hash_corpus(corpus_p, chunk_config, rag_config.get("embedding_model", "BAAI/bge-m3"))
+    if not corpus_lock.exists():
+        write_lock_atomic(corpus_lock, json.dumps({
+            "hash": corpus_hash,
+            "corpus": corpus_p
+        }))
 
     # Copy locks to repo root
     repo_locks = Path("locks")
@@ -193,6 +204,10 @@ def main() -> None:
     parser.add_argument("--split", default="test", choices=["dev", "test"])
     parser.add_argument("--conditions", help="Comma list of conditions")
     parser.add_argument("--models-filter", help="Comma list of model IDs")
+    parser.add_argument("--items", default="data/dummy/items.jsonl", help="Items jsonl path")
+    parser.add_argument("--evidence", default="data/dummy/evidence.jsonl", help="Evidence jsonl path")
+    parser.add_argument("--corpus", default="data/dummy/corpus.jsonl", help="Corpus jsonl path")
+    parser.add_argument("--min-corpus-passages", type=int, default=None, help="Minimum corpus passages required")
     parser.add_argument("--limit", type=int, help="Run only first N items")
     parser.add_argument("--resume", action="store_true", help="Resume from existing generations")
     parser.add_argument("--dry-run", action="store_true", help="Print planned calls without running")
@@ -226,15 +241,19 @@ def main() -> None:
         logger.error("No models selected")
         sys.exit(1)
 
+    min_corpus = args.min_corpus_passages if args.min_corpus_passages is not None else (1000 if split == "test" else 10)
+
     # Run pre-flight checks
     pre_flight_checks(
-        items_path=Path("data/dummy/items.jsonl"),
-        evidence_path=Path("data/dummy/evidence.jsonl"),
-        corpus_path=Path("data/dummy/corpus.jsonl"),
+        items_path=Path(args.items),
+        evidence_path=Path(args.evidence),
+        corpus_path=Path(args.corpus),
         budget_config=Path(args.budget_config),
         split=split,
         freeze_test=exp_config.get("freeze_test", True),
         unlocked=args.unlock_test,
+        min_corpus_passages=min_corpus,
+        selected_models=selected_models,
     )
 
     # Create output dirs
@@ -245,9 +264,9 @@ def main() -> None:
     from src.schema import Item, Evidence, CorpusPassage
     from src.validate_data import load_jsonl
 
-    items_raw = load_jsonl(Path("data/dummy/items.jsonl"))
-    evidence_raw = load_jsonl(Path("data/dummy/evidence.jsonl"))
-    corpus_raw = load_jsonl(Path("data/dummy/corpus.jsonl"))
+    items_raw = load_jsonl(Path(args.items))
+    evidence_raw = load_jsonl(Path(args.evidence))
+    corpus_raw = load_jsonl(Path(args.corpus))
 
     items = [Item.model_validate(r) for r in items_raw]
 
@@ -265,8 +284,9 @@ def main() -> None:
     # Setup retriever for C2/C3
     retriever = None
     if any(c in conditions for c in ["C2", "C3"]):
+        corpus_p = Path(args.corpus)
         retriever = Retriever(
-            corpus_path=rag_config.get("corpus_path", "data/dummy/corpus.jsonl"),
+            corpus_path=corpus_p,
             index_dir=output_dir / args.run_id / "retrieval" / "index",
             embedding_model=rag_config.get("embedding_model", "BAAI/bge-m3"),
             top_k=rag_config.get("top_k", 5),
@@ -285,11 +305,12 @@ def main() -> None:
         cache=cache,
         retriever=retriever,
         output_dir=output_dir,
+        workers=args.workers,
     )
 
     # Create lock files
     config_paths = [args.config, args.models, args.rag_config, args.budget_config]
-    create_locks(args.run_id, config_paths, exp_config.get("prompt_dir", "configs/prompts"), selected_models, output_dir)
+    create_locks(args.run_id, config_paths, exp_config.get("prompt_dir", "configs/prompts"), selected_models, output_dir, corpus_path=args.corpus)
 
     # Check budget
     if args.check_budget:
@@ -316,11 +337,10 @@ def main() -> None:
     # Run generation
     generations = runner.generate_all()
 
-    # Write generation log
-    from src.io_atomic import write_jsonl_atomic
+    # Flush generation log (records are appended atomically per item during run)
+    from src.io_atomic import flush_writer
     generations_path = output_dir / args.run_id / "generations" / "generations.jsonl"
-    for gen in generations:
-        write_jsonl_atomic(str(generations_path), gen.model_dump())
+    flush_writer(generations_path)
 
     logger.info(f"Generation complete: {len(generations)} generations")
     cache.close()

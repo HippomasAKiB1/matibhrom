@@ -1,8 +1,5 @@
-"""
-Cross-run cache for Matibhrom using SQLite with WAL mode.
-"""
-
 import sqlite3
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -41,16 +38,18 @@ class CacheEntry:
 
 
 class GenerationCache:
-    """SQLite-backed cache for generation results."""
+    """SQLite-backed cache for generation results with thread safety."""
 
     SCHEMA_VERSION = SCHEMA_VERSION
 
     def __init__(self, cache_db_path: str | Path):
         self.cache_path = Path(cache_db_path)
         self.cache_path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(str(self.cache_path), timeout=30)
-        self.conn.execute("PRAGMA journal_mode=WAL")
-        self._create_tables()
+        self._lock = threading.Lock()
+        with self._lock:
+            self.conn = sqlite3.connect(str(self.cache_path), timeout=30, check_same_thread=False)
+            self.conn.execute("PRAGMA journal_mode=WAL")
+            self._create_tables()
 
     def _create_tables(self) -> None:
         """Create the cache table if it doesn't exist."""
@@ -68,21 +67,12 @@ class GenerationCache:
         self.conn.commit()
 
     def get(self, key: str, expected_schema: str | None = None) -> CacheEntry | None:
-        """
-        Get a cache entry by key.
-
-        Args:
-            key: Cache key (hash of prompt + model + params)
-            expected_schema: If provided, invalidate if schema doesn't match
-
-        Returns:
-            CacheEntry if found and valid, None otherwise
-        """
-        cursor = self.conn.execute(
-            "SELECT key, generation_id, response, model_version, schema_version, config_hash, timestamp FROM cache WHERE key = ?",
-            (key,),
-        )
-        row = cursor.fetchone()
+        with self._lock:
+            cursor = self.conn.execute(
+                "SELECT key, generation_id, response, model_version, schema_version, config_hash, timestamp FROM cache WHERE key = ?",
+                (key,),
+            )
+            row = cursor.fetchone()
         if row is None:
             return None
 
@@ -110,16 +100,18 @@ class GenerationCache:
         timestamp: str = "",
     ) -> None:
         """Store a cache entry."""
-        self.conn.execute(
-            "INSERT OR REPLACE INTO cache (key, generation_id, response, model_version, schema_version, config_hash, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (key, generation_id, response, model_version, SCHEMA_VERSION, config_hash, timestamp),
-        )
-        self.conn.commit()
+        with self._lock:
+            self.conn.execute(
+                "INSERT OR REPLACE INTO cache (key, generation_id, response, model_version, schema_version, config_hash, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (key, generation_id, response, model_version, SCHEMA_VERSION, config_hash, timestamp),
+            )
+            self.conn.commit()
 
     def invalidate(self, key: str) -> None:
         """Remove a cache entry."""
-        self.conn.execute("DELETE FROM cache WHERE key = ?", (key,))
-        self.conn.commit()
+        with self._lock:
+            self.conn.execute("DELETE FROM cache WHERE key = ?", (key,))
+            self.conn.commit()
 
     def invalidate_model_version(self, model_version: str) -> int:
         """Invalidate all entries for a model version. Returns number removed."""

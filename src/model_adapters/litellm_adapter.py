@@ -3,8 +3,12 @@ LiteLLM model adapter for Matibhrom - supports OpenAI, Anthropic, Google, and ot
 """
 
 import logging
+import os
 import time
 from typing import Any
+
+from dotenv import load_dotenv
+load_dotenv()
 
 import litellm
 from .base import ModelAdapter, GenerationResult
@@ -32,6 +36,10 @@ class LiteLLMAdapter(ModelAdapter):
             try:
                 start_time = time.time()
 
+                extra_kwargs = {}
+                if self.model.startswith("openrouter/") and os.environ.get("OPENROUTER_API_KEY"):
+                    extra_kwargs["api_key"] = os.environ.get("OPENROUTER_API_KEY")
+
                 response = litellm.completion(
                     model=self.model,
                     messages=[{"role": "user", "content": prompt}],
@@ -39,15 +47,19 @@ class LiteLLMAdapter(ModelAdapter):
                     max_tokens=self.max_tokens,
                     top_p=self.top_p,
                     seed=self.seed if self.seed is not None else None,
+                    **extra_kwargs,
                 )
 
                 latency_ms = int((time.time() - start_time) * 1000)
 
                 # Extract response text
-                text = response.choices[0].message.content or ""
+                msg = response.choices[0].message
+                text = msg.content or ""
+                if not text and hasattr(msg, "reasoning_content") and msg.reasoning_content:
+                    text = msg.reasoning_content
 
                 # Get model version from response
-                model_version = response.model
+                model_version = getattr(response, "model", self.model)
 
                 # Get token counts
                 prompt_tokens = response.usage.prompt_tokens if response.usage else 0
@@ -71,22 +83,23 @@ class LiteLLMAdapter(ModelAdapter):
                     cost_usd=cost_usd
                 )
 
-            except litellm.RateLimitError as e:
+            except (litellm.RateLimitError, litellm.APITimeoutError, litellm.APIConnectionError, litellm.ServiceUnavailableError) as e:
                 last_error = e
                 wait_time = self.base_backoff * (2 ** attempt)
-                logger.warning(f"Rate limit hit, waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries})")
-                time.sleep(wait_time)
-
-            except litellm.APITimeoutError as e:
-                last_error = e
-                wait_time = self.base_backoff * (2 ** attempt)
-                logger.warning(f"Timeout, waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries})")
+                logger.warning(f"Transient error ({type(e).__name__}), waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries})")
                 time.sleep(wait_time)
 
             except Exception as e:
-                last_error = e
-                logger.error(f"Unexpected error: {e}")
-                break
+                err_str = str(e).lower()
+                if any(x in err_str for x in ["429", "503", "rate-limit", "rate limit", "overloaded", "temporarily"]):
+                    last_error = e
+                    wait_time = self.base_backoff * (2 ** attempt)
+                    logger.warning(f"Upstream rate/capacity limit, waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries}): {e}")
+                    time.sleep(wait_time)
+                else:
+                    last_error = e
+                    logger.error(f"Unexpected error for {self.model}: {e}")
+                    break
 
         # All retries failed
         error_msg = str(last_error) if last_error else "Unknown error"

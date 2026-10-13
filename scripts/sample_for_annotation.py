@@ -68,6 +68,26 @@ def select_scope_a(
     return selected[:stratified_max]
 
 
+def select_scope_b(
+    generations: list[dict],
+    max_generations: int = 6000,
+    seed: int = 42,
+) -> list[dict]:
+    """Option B (README §3.5): Reduced design with 100% human annotation.
+    Drops condition C0 (reserved for automated analysis), keeping C1, C2, C3.
+    Targets <= 6,000 human labels."""
+    filtered = [g for g in generations if g.get("condition") != "C0"]
+    if len(filtered) <= max_generations:
+        return filtered
+    return select_scope_a(filtered, stratified_max=max_generations, seed=seed)
+
+
+def select_scope_c(generations: list[dict]) -> list[dict]:
+    """Option C (README §3.5): Full annotation of the full design.
+    100% of all generated responses across all conditions and models."""
+    return list(generations)
+
+
 def stratified_overlap(generations: list[dict], fraction: float, seed: int = 42) -> list[dict]:
     """Sample `fraction` of generations, stratified by
     (domain x condition x model_category), for a second annotator."""
@@ -118,11 +138,10 @@ def main() -> None:
 
     if scope == "A":
         primary = select_scope_a(generations, seed=args.seed)
-    elif scope in ("B", "C"):
-        raise NotImplementedError(
-            f"Annotation scope '{scope}' is not yet implemented (only Option A, the "
-            f"recommended default, is implemented). See README §3.5 for scope B/C definitions."
-        )
+    elif scope == "B":
+        primary = select_scope_b(generations, seed=args.seed)
+    elif scope == "C":
+        primary = select_scope_c(generations)
     else:
         raise ValueError(f"Unknown annotation scope: {scope!r}")
 

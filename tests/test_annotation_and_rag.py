@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -168,3 +169,198 @@ def test_auth_rejects_bad_token_and_unsafe_bind(tmp_path):
 
     # Localhost bind is fine when auth is (deliberately) disabled.
     assert_safe_to_disable_auth("127.0.0.1:8501", {"enabled": False})
+
+
+def test_role_auth_and_adjudication_save(tmp_path):
+    from src.annotation.auth import authenticate_with_role
+    from src.schema import Adjudication
+
+    tokens_path = tmp_path / "tokens.json"
+    tokens_path.write_text(
+        json.dumps({
+            "tok_ann": "annotator_1",
+            "tok_adj": {"annotator_id": "lead_adj", "role": "adjudicator"},
+        }),
+        encoding="utf-8",
+    )
+
+    auth_config = {"enabled": True, "provider": "token"}
+    user_id, role = authenticate_with_role("tok_ann", auth_config, tokens_path)
+    assert user_id == "annotator_1"
+    assert role == "annotator"
+
+    adj_id, adj_role = authenticate_with_role("tok_adj", auth_config, tokens_path)
+    assert adj_id == "lead_adj"
+    assert adj_role == "adjudicator"
+
+    # Test adjudication record creation and store roundtrip
+    store = AnnotationStore(tmp_path)
+    adj = Adjudication(
+        codebook_version="1.0.0",
+        generation_id="gid1",
+        adjudicator_id="lead_adj",
+        final_correctness="correct",
+        final_hallucination="no",
+        final_error_type="none",
+        rationale="Evidence in passage 1 confirms gold answer.",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+    )
+    store.save_adjudication(adj)
+
+    # Verify JSONL and SQLite mirror
+    assert store.adjudications_path.exists()
+    row = store.conn.execute("SELECT adjudicator_id, final_correctness FROM adjudications WHERE generation_id = 'gid1'").fetchone()
+    assert row[0] == "lead_adj"
+    assert row[1] == "correct"
+    store.close()
+
+
+def test_faiss_index_dimension_and_roundtrip(tmp_path):
+    import numpy as np
+    from src.rag.index import Index
+
+    dim = 1024
+    idx = Index(embedding_dim=dim)
+    emb = np.random.randn(5, dim).astype("float32")
+    emb = emb / np.linalg.norm(emb, axis=1, keepdims=True)
+    passage_ids = [f"p_{i}" for i in range(5)]
+    idx.build(emb, passage_ids)
+
+    idx.save(tmp_path, index_version="idx_test_v1")
+
+    # Load in new Index instance
+    loaded_idx = Index()
+    loaded_idx.load(tmp_path)
+    assert loaded_idx.embedding_dim == dim
+    assert loaded_idx.metadata.embedding_dim == dim
+    assert loaded_idx.metadata.n_passages == 5
+    assert loaded_idx.metadata.index_version == "idx_test_v1"
+
+    scores, indices = loaded_idx.search(emb[0], k=2)
+    assert indices[0] == 0
+    assert pytest.approx(scores[0], rel=1e-4) == 1.0
+
+
+def test_retriever_chunked_corpus_and_evidence_id_matching(tmp_path):
+    import json
+    import numpy as np
+    from src.rag.index import Index
+    from src.rag.retriever import Retriever
+
+    dim = 128
+    # Save chunked corpus in index_dir
+    index_dir = tmp_path / "index"
+    index_dir.mkdir(parents=True)
+    chunked = [
+        {"passage_id": "ev_001::chunk_0", "text": "chunk 0 text", "evidence_id": "ev_001"},
+        {"passage_id": "ev_001::chunk_1", "text": "chunk 1 text", "evidence_id": "ev_001"},
+        {"passage_id": "dist_001", "text": "distractor text", "evidence_id": "dist_001"},
+    ]
+    with open(index_dir / "chunked_corpus.jsonl", "w", encoding="utf-8") as f:
+        for c in chunked:
+            f.write(json.dumps(c) + "\n")
+
+    # Build and save index
+    idx = Index(embedding_dim=dim)
+    emb = np.random.randn(3, dim).astype("float32")
+    emb = emb / np.linalg.norm(emb, axis=1, keepdims=True)
+    idx.build(emb, [c["passage_id"] for c in chunked])
+    idx.save(index_dir, index_version="idx_test")
+
+    # Create dummy raw corpus file
+    raw_corpus = tmp_path / "corpus.jsonl"
+    with open(raw_corpus, "w", encoding="utf-8") as f:
+        f.write(json.dumps({"passage_id": "ev_001", "text": "gold full text"}) + "\n")
+        f.write(json.dumps({"passage_id": "dist_001", "text": "distractor text"}) + "\n")
+
+    retriever = Retriever(
+        corpus_path=raw_corpus,
+        index_dir=index_dir,
+        top_k=2,
+    )
+
+    # Mock embedder to return vector closest to index 1 (chunk 1 of gold)
+    class FakeEmbedder:
+        def encode_single(self, query):
+            return emb[1]
+
+    retriever._embedder = FakeEmbedder()
+
+    results, gold_retrieved, recall_at_k = retriever.retrieve_for_item(
+        item_id="item_1",
+        question="test query",
+        evidence_id="ev_001",
+        top_k=2,
+    )
+
+    assert gold_retrieved is True
+    assert recall_at_k == 1.0
+    # Base evidence_id is preserved despite chunk suffix
+    assert results[0]["evidence_id"] == "ev_001"
+    assert results[0]["passage_id"] == "ev_001::chunk_1"
+
+    # get_evidence_chunks returns oracle gold chunks from raw corpus
+    oracle = retriever.get_evidence_chunks("ev_001")
+    assert len(oracle) >= 1
+    assert oracle[0]["evidence_id"] == "ev_001"
+    assert "gold full text" in oracle[0]["text"]
+
+    # build_context truncation test
+    ctx = retriever.build_context(results, max_tokens=2)
+    assert len(ctx.split()) <= 5  # truncated words/tokens
+
+
+def test_annotation_scopes():
+    from scripts.sample_for_annotation import select_scope_a, select_scope_b, select_scope_c
+
+    sample_gens = [
+        {"generation_id": f"g_{i}", "condition": f"C{i%4}", "model_id": "m1", "language": "bn", "domain": "general"}
+        for i in range(20)
+    ]
+
+    # Scope A
+    scope_a = select_scope_a(sample_gens, stratified_max=10)
+    assert len(scope_a) <= 10 and len(scope_a) > 0
+
+    # Scope B: drops C0
+    scope_b = select_scope_b(sample_gens)
+    assert all(g["condition"] != "C0" for g in scope_b)
+    assert len(scope_b) == 15  # 20 - 5 C0 items
+
+    # Scope C: 100% of generations
+    scope_c = select_scope_c(sample_gens)
+    assert len(scope_c) == len(sample_gens)
+
+
+def test_compute_iaa_and_pilot_gate():
+    from scripts.compute_iaa import compute_pairwise_iaa
+
+    # Case 1: High agreement (both raters agree on almost everything)
+    annotations_high = [
+        # gen_1: both say correct, no hallucination
+        {"generation_id": "g1", "annotator_id": "r1", "hallucination": "no", "correctness": "correct", "error_type": "none", "abstention_status": "none"},
+        {"generation_id": "g1", "annotator_id": "r2", "hallucination": "no", "correctness": "correct", "error_type": "none", "abstention_status": "none"},
+        # gen_2: both say yes hallucination, incorrect
+        {"generation_id": "g2", "annotator_id": "r1", "hallucination": "yes", "correctness": "incorrect", "error_type": "H1", "abstention_status": "none"},
+        {"generation_id": "g2", "annotator_id": "r2", "hallucination": "yes", "correctness": "incorrect", "error_type": "H1", "abstention_status": "none"},
+        # gen_3: both say no hallucination, correct
+        {"generation_id": "g3", "annotator_id": "r1", "hallucination": "no", "correctness": "correct", "error_type": "none", "abstention_status": "none"},
+        {"generation_id": "g3", "annotator_id": "r2", "hallucination": "no", "correctness": "correct", "error_type": "none", "abstention_status": "none"},
+    ]
+    res_high = compute_pairwise_iaa(annotations_high)
+    assert res_high["num_overlap_pairs"] == 3
+    assert res_high["metrics"]["hallucination"]["cohens_kappa"] == 1.0
+    assert res_high["metrics"]["correctness"]["cohens_kappa"] == 1.0
+
+    # Case 2: Poor agreement (conflicting ratings)
+    annotations_low = [
+        {"generation_id": "g1", "annotator_id": "r1", "hallucination": "yes", "correctness": "incorrect"},
+        {"generation_id": "g1", "annotator_id": "r2", "hallucination": "no", "correctness": "correct"},
+        {"generation_id": "g2", "annotator_id": "r1", "hallucination": "no", "correctness": "correct"},
+        {"generation_id": "g2", "annotator_id": "r2", "hallucination": "yes", "correctness": "incorrect"},
+    ]
+    res_low = compute_pairwise_iaa(annotations_low)
+    assert res_low["num_overlap_pairs"] == 2
+    assert res_low["metrics"]["hallucination"]["cohens_kappa"] < 0.70
+
+

@@ -5,7 +5,7 @@ hide_model_identity: true
 randomize_order: true
 scope: A                               # A | B | C — see §3.5
 llm_prelabel: true
-prelabel_model: "gpt-4o-2024-11-20"
+prelabel_model: "openrouter/nvidia/nemotron-3-super-120b-a12b:free"
 prelabel_verify_fraction: 0.20
 adjudication:
   trigger_on:

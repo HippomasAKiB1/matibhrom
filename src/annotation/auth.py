@@ -30,17 +30,14 @@ def load_tokens(tokens_path: str | Path = "configs/annotation_tokens.json") -> d
     return data
 
 
-def authenticate(
+def authenticate_with_role(
     token: str | None,
     auth_config: dict,
     tokens_path: str | Path = "configs/annotation_tokens.json",
-) -> str:
-    """Validate `token` against configs/annotation_tokens.json and return the
-    resolved annotator_id. Raises AuthError on any failure.
-
-    `auth_config` is the `auth:` block from configs/annotation.yaml, e.g.
-    {"enabled": True, "provider": "token"}.
-    """
+) -> tuple[str, str]:
+    """Validate `token` against configs/annotation_tokens.json and return
+    (annotator_id, role). Role defaults to 'annotator' if unspecified.
+    Raises AuthError on any failure."""
     if not auth_config.get("enabled", True):
         raise AuthError(
             "Auth is disabled in configs/annotation.yaml (auth.enabled: false). "
@@ -62,10 +59,27 @@ def authenticate(
             f'{{"<token>": "<annotator_id>"}} before annotators can log in.'
         )
 
-    annotator_id = tokens.get(token)
-    if annotator_id is None:
+    entry = tokens.get(token)
+    if entry is None:
         raise AuthError("Invalid token.")
 
+    if isinstance(entry, dict):
+        annotator_id = entry.get("annotator_id", "")
+        role = entry.get("role", "annotator")
+    else:
+        annotator_id = str(entry)
+        role = "annotator"
+
+    return annotator_id, role
+
+
+def authenticate(
+    token: str | None,
+    auth_config: dict,
+    tokens_path: str | Path = "configs/annotation_tokens.json",
+) -> str:
+    """Validate `token` and return resolved annotator_id (backward-compatible)."""
+    annotator_id, _ = authenticate_with_role(token, auth_config, tokens_path)
     return annotator_id
 
 

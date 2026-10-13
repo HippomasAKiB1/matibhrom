@@ -25,9 +25,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import streamlit as st
 import yaml
 
-from src.annotation.auth import AuthError, authenticate
+from src.annotation.auth import AuthError, authenticate, authenticate_with_role
 from src.annotation.store import AnnotationStore
-from src.schema import Annotation
+from src.schema import Annotation, Adjudication
 from src.schema_version import CODEBOOK_VERSION
 from src.validate_data import load_jsonl
 
@@ -193,7 +193,6 @@ def render_annotation_form(
     )
 
     if submitted:
-        was_llm_prelabel_accepted_or_overridden = prelabel is not None
         annotation = Annotation(
             codebook_version=codebook_version,
             generation_id=generation["generation_id"],
@@ -218,6 +217,116 @@ def render_annotation_form(
         st.rerun()
 
 
+def render_adjudication_queue(
+    store: AnnotationStore,
+    generations: list[dict],
+    items_by_id: dict,
+    evidence_by_id: dict,
+    adjudicator_id: str,
+    codebook_version: str,
+) -> None:
+    st.header("Adjudication Dashboard (§14.9)")
+
+    # 1. Collect candidates for adjudication (§14.9 triggers)
+    disagreements = {d["generation_id"] for d in store.disagreements_in_overlap()}
+
+    # Severe medical/legal with hallucination
+    gens_by_id = {g["generation_id"]: g for g in generations}
+    severe_cases = set()
+    for ann in store.conn.execute("SELECT generation_id, hallucination FROM annotations WHERE hallucination = 'yes'").fetchall():
+        gid = ann[0]
+        gen = gens_by_id.get(gid)
+        if gen:
+            item = items_by_id.get(gen["item_id"])
+            if item and item.get("domain") in ("medical", "legal"):
+                severe_cases.add(gid)
+
+    candidate_ids = sorted(list(disagreements.union(severe_cases)))
+    if not candidate_ids:
+        candidate_ids = sorted([g["generation_id"] for g in generations[:5]])
+
+    st.sidebar.info(f"Adjudication Queue: {len(candidate_ids)} items flagged")
+
+    if not candidate_ids:
+        st.write("No items requiring adjudication at this time.")
+        return
+
+    adj_idx = st.sidebar.selectbox(
+        "Select Item to Adjudicate",
+        range(len(candidate_ids)),
+        format_func=lambda i: f"Item {i+1}: {candidate_ids[i][:12]}...",
+    )
+    target_gid = candidate_ids[adj_idx]
+    gen = gens_by_id.get(target_gid)
+    if not gen:
+        st.error(f"Generation {target_gid} not found.")
+        return
+
+    item = items_by_id.get(gen["item_id"])
+    question = item["question_bn"] if gen["language"] == "bn" else item["question_banglish"]
+
+    # Unmasked Metadata Banner for Adjudicator (§14.9)
+    st.info(
+        f"**Unmasked Metadata (Adjudicator View)** | Model: `{gen['model_id']}` | "
+        f"Condition: `{gen['condition']}` | Domain: `{item.get('domain')}` | Item ID: `{item.get('item_id')}`"
+    )
+
+    st.subheader("প্রশ্ন (Question)")
+    st.write(question)
+
+    st.subheader("সঠিক উত্তর (Gold Answer)")
+    st.write(item["gold_answer"])
+
+    ev = evidence_by_id.get(item["evidence_id"])
+    if ev:
+        st.subheader("প্রমাণ (Evidence)")
+        st.write(ev["text"])
+
+    st.subheader("মডেলের উত্তর (Response)")
+    st.write(gen["response"])
+
+    # Existing annotations comparison side-by-side
+    st.subheader("Annotator Submissions (Comparison)")
+    existing_anns = store.get_annotations_for_generation(target_gid)
+    if not existing_anns:
+        st.write("No annotations submitted yet.")
+    else:
+        cols = st.columns(len(existing_anns))
+        for idx, ann in enumerate(existing_anns):
+            with cols[idx]:
+                st.markdown(f"**{ann['annotator_id']}** ({ann['labeler_type']})")
+                st.write(f"- **Correctness:** `{ann['correctness']}`")
+                st.write(f"- **Hallucination:** `{ann['hallucination']}`")
+                st.write(f"- **Error Type:** `{ann['error_type']}`")
+                st.write(f"- **Abstention:** `{ann['abstention_status']}`")
+                if ann.get("notes"):
+                    st.caption(f"Notes: {ann['notes']}")
+
+    # Adjudication input form
+    st.subheader("Final Determination (Adjudication)")
+    with st.form(key=f"adj_form_{target_gid}"):
+        final_corr = st.radio("Final Correctness", CORRECTNESS_OPTIONS, horizontal=True)
+        final_hall = st.radio("Final Hallucination", HALLUCINATION_OPTIONS, horizontal=True)
+        final_err = st.selectbox("Final Error Type", ERROR_TYPE_OPTIONS, format_func=lambda k: ERROR_TYPE_LABELS[k])
+        rationale = st.text_area("Adjudication Rationale", help="Explain reason for final consensus decision")
+        adj_submitted = st.form_submit_button("Submit Final Adjudication")
+
+    if adj_submitted:
+        adj_record = Adjudication(
+            codebook_version=codebook_version,
+            generation_id=target_gid,
+            adjudicator_id=adjudicator_id,
+            final_correctness=final_corr,
+            final_hallucination=final_hall,
+            final_error_type=final_err,
+            rationale=rationale,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        )
+        store.save_adjudication(adj_record)
+        st.success("Adjudication successfully recorded.")
+        st.rerun()
+
+
 def main() -> None:
     args = _parse_cli_args()
 
@@ -231,14 +340,18 @@ def main() -> None:
         token = st.text_input("Annotator token", type="password")
         if st.button("Sign in") and token:
             try:
-                annotator_id = authenticate(token, ann_config.get("auth", {"enabled": True}), args.tokens)
+                annotator_id, role = authenticate_with_role(
+                    token, ann_config.get("auth", {"enabled": True}), args.tokens
+                )
                 st.session_state["annotator_id"] = annotator_id
+                st.session_state["role"] = role
                 st.rerun()
             except AuthError as e:
                 st.error(str(e))
         st.stop()
 
     annotator_id = st.session_state["annotator_id"]
+    role = st.session_state.get("role", "annotator")
 
     generations, items_by_id, evidence_by_id, overlap_ids, verify_required_ids = load_run_data(
         args.run_id, args.output_dir, args.items, args.evidence
@@ -247,6 +360,25 @@ def main() -> None:
     run_dir = Path(args.output_dir) / args.run_id
     store = AnnotationStore(run_dir)
 
+    st.sidebar.write(f"Signed in as **{annotator_id}** (`{role}`)")
+
+    # Mode selection based on role
+    mode = "Annotation"
+    if role == "adjudicator":
+        mode = st.sidebar.radio("Navigation", ["Annotation", "Adjudication Queue"])
+
+    if mode == "Adjudication Queue":
+        render_adjudication_queue(
+            store=store,
+            generations=generations,
+            items_by_id=items_by_id,
+            evidence_by_id=evidence_by_id,
+            adjudicator_id=annotator_id,
+            codebook_version=CODEBOOK_VERSION,
+        )
+        return
+
+    # Regular annotation flow
     if "order" not in st.session_state:
         order = list(range(len(generations)))
         if ann_config.get("randomize_order", True):
@@ -262,7 +394,6 @@ def main() -> None:
         st.session_state["pos"] = min(st.session_state["pos"] + 1, len(order) - 1)
         st.session_state["advance"] = False
 
-    st.sidebar.write(f"Signed in as **{annotator_id}**")
     n_done = sum(1 for i in order if generations[i]["generation_id"] in already_done)
     st.sidebar.progress(n_done / max(1, len(order)))
     st.sidebar.write(f"{n_done} / {len(order)} annotated")
@@ -300,13 +431,13 @@ def main() -> None:
         st.sidebar.info("This item is in the overlap sample (second annotator).")
 
     st.caption(f"generation_id: {generation['generation_id']} — {pos + 1} / {len(order)}")
-    # Hidden per §14.3: model identity, condition, domain — not rendered
-    # above. They're only surfaced in st.sidebar under an explicit toggle so
-    # adjudicators (who legitimately need them) can opt in.
-    if st.sidebar.checkbox("Show model/condition/domain (adjudication only)"):
-        st.sidebar.write(f"model_id: {generation['model_id']}")
-        st.sidebar.write(f"condition: {generation['condition']}")
-        st.sidebar.write(f"domain: {item.get('domain')}")
+
+    # Unmasking toggle available ONLY to adjudicators per §14.3 / §14.9
+    if role == "adjudicator":
+        if st.sidebar.checkbox("Show model/condition/domain (adjudication only)"):
+            st.sidebar.write(f"model_id: {generation['model_id']}")
+            st.sidebar.write(f"condition: {generation['condition']}")
+            st.sidebar.write(f"domain: {item.get('domain')}")
 
     render_annotation_form(store, generation, item, evidence_by_id, annotator_id, is_overlap, CODEBOOK_VERSION)
 

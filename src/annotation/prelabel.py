@@ -79,10 +79,41 @@ VALID_LABELS = {
 }
 
 
+REFORMAT_PROMPT_TEMPLATE = """You previously generated output that was not valid JSON or had missing fields.
+Reformat the evaluation strictly as a single valid JSON object with NO markdown and NO extra text:
+{{
+  "correctness": "correct" | "partially_correct" | "incorrect",
+  "hallucination": "yes" | "no",
+  "error_type": "H1" | "H2" | "H3" | "H4" | "H5" | "A" | "R" | "none",
+  "abstention_status": "none" | "appropriate" | "unnecessary"
+}}
+
+Previous output:
+{previous_output}
+"""
+
+
+def _validate_parsed_labels(text: str) -> dict | None:
+    try:
+        parsed = _extract_json(text)
+    except (json.JSONDecodeError, AttributeError, ValueError, Exception):
+        return None
+
+    if not isinstance(parsed, dict):
+        return None
+
+    for field, valid_values in VALID_LABELS.items():
+        if parsed.get(field) not in valid_values:
+            return None
+
+    return parsed
+
+
 def prelabel_one(adapter, item: dict, generation: dict) -> dict | None:
     """Call the pre-label model for one generation. Returns a parsed,
     validated label dict, or None if the model's output couldn't be parsed
-    (logged, not raised, so one bad response doesn't abort the whole batch)."""
+    (logged, not raised, so one bad response doesn't abort the whole batch).
+    Retries once with strict reformatting prompt if initial output is invalid."""
     evidence = item.get("gold_answer_evidence") or item.get("evidence_text") or item.get("gold_answer", "")
     question = item["question_bn"] if generation["language"] == "bn" else item["question_banglish"]
 
@@ -94,16 +125,19 @@ def prelabel_one(adapter, item: dict, generation: dict) -> dict | None:
     )
 
     result = adapter.generate(prompt)
-    try:
-        parsed = _extract_json(result.text)
-    except (json.JSONDecodeError, AttributeError):
-        return None
+    parsed = _validate_parsed_labels(result.text)
+    if parsed is not None:
+        return parsed
 
-    for field, valid_values in VALID_LABELS.items():
-        if parsed.get(field) not in valid_values:
-            return None
+    # Retry once with strict reformatting prompt if non-empty output failed validation
+    if result.text:
+        retry_prompt = REFORMAT_PROMPT_TEMPLATE.format(previous_output=result.text)
+        retry_result = adapter.generate(retry_prompt)
+        retry_parsed = _validate_parsed_labels(retry_result.text)
+        if retry_parsed is not None:
+            return retry_parsed
 
-    return parsed
+    return None
 
 
 def run_prelabeling(

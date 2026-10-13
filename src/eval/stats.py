@@ -67,9 +67,9 @@ def mcnemar_test(both_correct: int, rater1_only: int, rater2_only: int) -> dict[
     p_value = stats.chi2.sf(chi2, 1)
 
     return {
-        "statistic": chi2,
-        "p_value": p_value,
-        "significant": p_value < 0.05,
+        "statistic": float(chi2),
+        "p_value": float(p_value),
+        "significant": bool(p_value < 0.05),
     }
 
 

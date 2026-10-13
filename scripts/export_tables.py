@@ -58,6 +58,7 @@ def join_generations_and_annotations(
     for gid, ann in best.items():
         gen = gen_by_id[gid]
         row = dict(ann)
+        row["item_id"] = gen["item_id"]
         row["domain"] = item_domain.get(gen["item_id"], "unknown")
         row["condition"] = gen["condition"]
         row["language"] = gen["language"]
@@ -66,17 +67,175 @@ def join_generations_and_annotations(
     return joined
 
 
-def write_latex_table(metrics_by_group: dict[str, dict[str, float]], output_path: Path) -> None:
+import json
+from src.eval.stats import bootstrap_confidence_interval, mcnemar_test
+
+
+def compute_bootstrap_cis(joined_records: list[dict], group_by: str) -> dict[str, dict[str, dict[str, float]]]:
+    """Compute 95% bootstrap confidence intervals for hallucination rate and selective accuracy."""
+    groups = defaultdict(list)
+    for r in joined_records:
+        groups[r.get(group_by, "unknown")].append(r)
+
+    ci_results = {}
+    for g, rows in groups.items():
+        hallucination_vals = [
+            1.0 if r.get("hallucination") == "yes" else 0.0
+            for r in rows if r.get("hallucination") is not None
+        ]
+        correctness_vals = [
+            1.0 if r.get("correctness") == "correct" else 0.0
+            for r in rows if r.get("correctness") is not None
+        ]
+        ci_results[g] = {
+            "hallucination": (
+                bootstrap_confidence_interval(hallucination_vals)
+                if hallucination_vals
+                else {"mean": 0.0, "lower": 0.0, "upper": 0.0}
+            ),
+            "correctness": (
+                bootstrap_confidence_interval(correctness_vals)
+                if correctness_vals
+                else {"mean": 0.0, "lower": 0.0, "upper": 0.0}
+            ),
+        }
+    return ci_results
+
+
+def compute_paired_comparisons(joined_records: list[dict]) -> dict[str, Any]:
+    """Pairwise McNemar tests for register and evidence conditions."""
+    by_item_model_cond = defaultdict(dict)
+    for r in joined_records:
+        key = (r.get("item_id"), r.get("model_id"), r.get("condition"))
+        by_item_model_cond[key][r.get("language")] = r
+
+    # 1. Standard Bangla vs Banglish on correctness
+    both_correct, bn_only, bg_only = 0, 0, 0
+    for key, langs in by_item_model_cond.items():
+        if "bn" in langs and "banglish" in langs:
+            bn_corr = langs["bn"].get("correctness") == "correct"
+            bg_corr = langs["banglish"].get("correctness") == "correct"
+            if bn_corr and bg_corr:
+                both_correct += 1
+            elif bn_corr and not bg_corr:
+                bn_only += 1
+            elif not bn_corr and bg_corr:
+                bg_only += 1
+    mcnemar_lang = mcnemar_test(both_correct, bn_only, bg_only)
+
+    # 2. C0 vs C1 and C0 vs C2 on hallucination
+    by_item_model_lang = defaultdict(dict)
+    for r in joined_records:
+        key = (r.get("item_id"), r.get("model_id"), r.get("language"))
+        by_item_model_lang[key][r.get("condition")] = r
+
+    def _paired_cond(c_a, c_b):
+        both_c, a_only, b_only = 0, 0, 0
+        for key, conds in by_item_model_lang.items():
+            if c_a in conds and c_b in conds:
+                a_no_hal = conds[c_a].get("hallucination") == "no"
+                b_no_hal = conds[c_b].get("hallucination") == "no"
+                if a_no_hal and b_no_hal:
+                    both_c += 1
+                elif a_no_hal and not b_no_hal:
+                    a_only += 1
+                elif not a_no_hal and b_no_hal:
+                    b_only += 1
+        return mcnemar_test(both_c, a_only, b_only)
+
+    mcnemar_c0_c1 = _paired_cond("C0", "C1")
+    mcnemar_c0_c2 = _paired_cond("C0", "C2")
+
+    return {
+        "bn_vs_banglish": mcnemar_lang,
+        "c0_vs_c1_hallucination": mcnemar_c0_c1,
+        "c0_vs_c2_hallucination": mcnemar_c0_c2,
+    }
+
+
+def compute_retrieval_diagnostics(retrieval_logs: list[dict], item_domain: dict[str, str]) -> dict[str, Any]:
+    """Break down Recall@k and gold retrieval by language and domain."""
+    by_lang = defaultdict(list)
+    by_domain = defaultdict(list)
+
+    for log in retrieval_logs:
+        lang = log.get("language", "unknown")
+        dom = item_domain.get(log.get("item_id"), "unknown")
+        by_lang[lang].append(log)
+        by_domain[dom].append(log)
+
+    def _summarize_logs(logs):
+        if not logs:
+            return {"queries": 0, "recall_at_k": 0.0, "gold_retrieved_count": 0, "rank_1_rate": 0.0}
+        n = len(logs)
+        retrieved_cnt = sum(1 for l in logs if l.get("gold_retrieved"))
+        rank_1_cnt = 0
+        for l in logs:
+            items = l.get("retrieved", [])
+            if items and items[0].get("evidence_id") == l.get("gold_evidence_id"):
+                rank_1_cnt += 1
+        return {
+            "queries": n,
+            "gold_retrieved_count": retrieved_cnt,
+            "recall_at_k": round(retrieved_cnt / n, 4),
+            "rank_1_rate": round(rank_1_cnt / n, 4),
+        }
+
+    return {
+        "overall": _summarize_logs(retrieval_logs),
+        "by_language": {lang: _summarize_logs(logs) for lang, logs in by_lang.items()},
+        "by_domain": {dom: _summarize_logs(logs) for dom, logs in by_domain.items()},
+    }
+
+
+def write_retrieval_report(diagnostics: dict[str, Any], output_path: Path) -> None:
+    lines = [
+        "# Retrieval Diagnostic Report (§12)",
+        "",
+        "## Overall Retrieval Performance",
+        f"- Total Retrieval Queries: {diagnostics['overall']['queries']}",
+        f"- Gold Retrieved (Recall@k): {diagnostics['overall']['recall_at_k']:.2%}",
+        f"- Gold at Rank 1: {diagnostics['overall']['rank_1_rate']:.2%}",
+        "",
+        "## Breakdown by Language",
+        "| Language | Queries | Recall@k | Gold at Rank 1 |",
+        "|----------|---------|----------|----------------|",
+    ]
+    for lang, s in diagnostics["by_language"].items():
+        lines.append(f"| {lang} | {s['queries']} | {s['recall_at_k']:.2%} | {s['rank_1_rate']:.2%} |")
+
+    lines.extend([
+        "",
+        "## Breakdown by Domain",
+        "| Domain | Queries | Recall@k | Gold at Rank 1 |",
+        "|--------|---------|----------|----------------|",
+    ])
+    for dom, s in diagnostics["by_domain"].items():
+        lines.append(f"| {dom} | {s['queries']} | {s['recall_at_k']:.2%} | {s['rank_1_rate']:.2%} |")
+
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def write_latex_table(
+    metrics_by_group: dict[str, dict[str, float]],
+    cis_by_group: dict[str, dict[str, dict[str, float]]] | None,
+    output_path: Path,
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
         r"\begin{tabular}{lrrrr}",
         r"\toprule",
-        r"Group & Hallucination & Coverage & Sel. Accuracy & Abstention \\",
+        r"Group & Hallucination (95\% CI) & Coverage & Sel. Accuracy & Abstention \\",
         r"\midrule",
     ]
     for group, m in metrics_by_group.items():
+        hr = m.get("hallucination_rate", 0)
+        ci_str = ""
+        if cis_by_group and group in cis_by_group:
+            ci = cis_by_group[group].get("hallucination", {})
+            ci_str = f" [{ci.get('lower', 0):.2f}, {ci.get('upper', 0):.2f}]"
         lines.append(
-            f"{group} & {m.get('hallucination_rate', 0):.3f} & {m.get('coverage', 0):.3f} & "
+            f"{group} & {hr:.3f}{ci_str} & {m.get('coverage', 0):.3f} & "
             f"{m.get('selective_accuracy', 0):.3f} & {m.get('abstention_rate', 0):.3f} \\\\"
         )
     lines.append(r"\bottomrule")
@@ -84,9 +243,41 @@ def write_latex_table(metrics_by_group: dict[str, dict[str, float]], output_path
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def append_stats_to_summary(
+    summary_path: Path,
+    cis: dict[str, dict[str, dict[str, float]]],
+    paired: dict[str, Any],
+    retrieval_diag: dict[str, Any] | None,
+) -> None:
+    content = summary_path.read_text(encoding="utf-8")
+    extra = [
+        "\n## Bootstrap 95% Confidence Intervals",
+        "| Group | Hallucination 95% CI | Selective Accuracy 95% CI |",
+        "|---|---|---|",
+    ]
+    for g, vals in cis.items():
+        h = vals["hallucination"]
+        c = vals["correctness"]
+        extra.append(f"| {g} | [{h['lower']:.3f}, {h['upper']:.3f}] | [{c['lower']:.3f}, {c['upper']:.3f}] |")
+
+    extra.extend([
+        "\n## Paired Statistical Comparisons (McNemar Tests)",
+        f"- **Standard Bangla vs Banglish**: chi2={paired['bn_vs_banglish']['statistic']:.3f}, p={paired['bn_vs_banglish']['p_value']:.4f} (significant={paired['bn_vs_banglish']['significant']})",
+        f"- **C0 vs C1 (Oracle)**: chi2={paired['c0_vs_c1_hallucination']['statistic']:.3f}, p={paired['c0_vs_c1_hallucination']['p_value']:.4f} (significant={paired['c0_vs_c1_hallucination']['significant']})",
+        f"- **C0 vs C2 (RAG)**: chi2={paired['c0_vs_c2_hallucination']['statistic']:.3f}, p={paired['c0_vs_c2_hallucination']['p_value']:.4f} (significant={paired['c0_vs_c2_hallucination']['significant']})",
+    ])
+
+    if retrieval_diag and retrieval_diag.get("overall", {}).get("queries", 0) > 0:
+        extra.extend([
+            "\n## Retrieval Diagnostics Overview",
+            f"- Overall Recall@k: {retrieval_diag['overall']['recall_at_k']:.2%}",
+            f"- Rank 1 Precision: {retrieval_diag['overall']['rank_1_rate']:.2%}",
+        ])
+
+    summary_path.write_text(content + "\n" + "\n".join(extra) + "\n", encoding="utf-8")
+
+
 def build_token_counts_by_model_language(generations: list[dict]) -> dict[str, dict[str, float]]:
-    """Average prompt_tokens per model, split by bn/banglish, for the
-    tokenization report (README §7.1 / §16 P0 fix)."""
     sums: dict[str, dict[str, list[int]]] = defaultdict(lambda: defaultdict(list))
     for g in generations:
         sums[g["model_id"]][g["language"]].append(g.get("prompt_tokens", 0))
@@ -100,8 +291,6 @@ def build_token_counts_by_model_language(generations: list[dict]) -> dict[str, d
 
 
 def write_plots(metrics_by_group: dict[str, dict[str, float]], plots_dir: Path) -> list[str]:
-    """Bar chart per metric across groups (README §16). Returns the list of
-    metric names actually plotted (skips a metric if no group has it)."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -156,19 +345,38 @@ def main() -> None:
     reports_dir = run_dir / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
 
+    item_domain = {}
+    items_path = Path(args.items)
+    if items_path.exists():
+        item_domain = {i["item_id"]: i["domain"] for i in load_jsonl(items_path)}
+
     if annotations:
-        item_domain = {}
-        items_path = Path(args.items)
-        if items_path.exists():
-            item_domain = {i["item_id"]: i["domain"] for i in load_jsonl(items_path)}
         joined = join_generations_and_annotations(generations, annotations, item_domain)
         metrics_by_group = compute_metrics_by_group(joined, args.group_by, retrieval_logs)
+        cis_by_group = compute_bootstrap_cis(joined, args.group_by)
+        paired_results = compute_paired_comparisons(joined)
 
         generate_metrics_csv(metrics_by_group, reports_dir / "metrics.csv")
         generate_summary_markdown(metrics_by_group, args.rq_findings, reports_dir / "summary.md")
-        write_latex_table(metrics_by_group, reports_dir / "tables" / "primary_metrics.tex")
+        write_latex_table(metrics_by_group, cis_by_group, reports_dir / "tables" / "primary_metrics.tex")
+
+        # Save paired comparisons JSON
+        with open(reports_dir / "paired_comparisons.json", "w", encoding="utf-8") as f:
+            json.dump(paired_results, f, indent=2)
+
+        # Retrieval diagnostics
+        retrieval_diag = None
+        if retrieval_logs:
+            retrieval_diag = compute_retrieval_diagnostics(retrieval_logs, item_domain)
+            write_retrieval_report(retrieval_diag, reports_dir / "retrieval_diagnostics.md")
+
+        append_stats_to_summary(reports_dir / "summary.md", cis_by_group, paired_results, retrieval_diag)
+
         plotted = write_plots(metrics_by_group, reports_dir / "plots")
-        print(f"Wrote metrics.csv, summary.md, tables/primary_metrics.tex, and plots/{{{','.join(plotted)}}}.png to {reports_dir}")
+        print(
+            f"Wrote metrics.csv, summary.md (with bootstrap CIs & McNemar), "
+            f"tables/primary_metrics.tex, retrieval_diagnostics.md, and plots/ to {reports_dir}"
+        )
     else:
         print(
             f"No annotations found at {annotations_path} — skipping metrics.csv/summary.md/"

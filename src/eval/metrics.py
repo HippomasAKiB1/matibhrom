@@ -134,9 +134,14 @@ def generate_metrics_csv(
 
     with open(output_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["group"] + list(metrics_by_group.get(next(iter(metrics_by_group)), {}).keys()))
+        if not metrics_by_group:
+            writer.writerow(["group"])
+            return
+        first_group = next(iter(metrics_by_group))
+        metric_keys = list(metrics_by_group[first_group].keys())
+        writer.writerow(["group"] + metric_keys)
         for group, metrics in metrics_by_group.items():
-            writer.writerow([group] + [metrics.get(m, "") for m in metrics.keys()])
+            writer.writerow([group] + [metrics.get(m, "") for m in metric_keys])
 
 
 def generate_summary_markdown(

@@ -50,7 +50,7 @@ matibhrom-validate --items data/benchmark/items.jsonl --evidence data/benchmark/
 
 Build dense embeddings (`BAAI/bge-m3`, 1024-dim) and FAISS index:
 ```bash
-matibhrom-build-index --corpus data/dummy/corpus.jsonl --output outputs/dummy_index/retrieval/index --dim 1024 --device cpu
+matibhrom-build-index --run-id dummy_index --corpus data/dummy/corpus.jsonl --min-corpus-passages 5
 ```
 
 ---
@@ -59,7 +59,7 @@ matibhrom-build-index --corpus data/dummy/corpus.jsonl --output outputs/dummy_in
 
 Check estimated token usage and cost bounds against `configs/budget.yaml`:
 ```bash
-matibhrom-check-budget --budget-config configs/budget.yaml --split dev
+matibhrom-check-budget --config configs/experiments.yaml --models configs/models.yaml --budget-config configs/budget.yaml --items data/dummy/items.jsonl
 ```
 
 Run a dry run (prints planned generation calls without invoking LLM APIs):

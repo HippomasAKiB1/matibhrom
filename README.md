@@ -8,6 +8,7 @@
 > **Lab / Organization:** ELITE Research Lab LLC  
 > **Repository:** [https://github.com/HippomasAKiB1/matibhrom](https://github.com/HippomasAKiB1/matibhrom)  
 > **Specification Version:** v3 (Publishable) · September 2026  
+> **Quickstart Guide:** See [QUICKSTART.md](QUICKSTART.md) for step-by-step setup, CLI commands, and execution walkthroughs.
 
 ---
 
@@ -135,6 +136,7 @@ flowchart TD
 ```
 matibhrom/
 ├── README.md                      # Primary project documentation & operational guide
+├── QUICKSTART.md                  # Practical step-by-step operational guide
 ├── RESEARCH_SPEC.md               # Complete reference PRD & research specification (v3)
 ├── DECISIONS.md                   # Architecture & implementation decisions log
 ├── BUDGET.md                      # Cost, compute, and token budget estimations
@@ -157,6 +159,7 @@ matibhrom/
 │   └── prompts/                   # Condition prompts for bn & banglish
 ├── data/                          # Dataset stores
 │   ├── dummy/                     # 6 items + 6 evidence + 20 corpus passages
+│   ├── synthetic_stress/          # 100 items + 1,100 synthetic passages for scale testing
 │   ├── benchmark/                 # Full 600-item research dataset (gitignored)
 │   └── splits/                    # Derived split files (dev.jsonl, test.jsonl)
 ├── src/                           # Core implementation package
@@ -175,13 +178,18 @@ matibhrom/
 ├── scripts/                       # Operational CLI utilities
 │   ├── build_index.py             # Build and freeze FAISS index
 │   ├── check_budget.py            # Calculate projected costs without execution
+│   ├── ci_smoke.py                # Zero-network offline CI smoke suite
+│   ├── compute_iaa.py             # Inter-annotator agreement & pilot gate (§14.5)
 │   ├── export_tables.py           # Generate publication LaTeX tables & plots
 │   ├── make_splits.py             # Generate derived split datasets
+│   ├── make_synthetic_stress.py   # Generate synthetic stress test corpus
 │   ├── migrate_schema.py          # Validate / migrate older schema versions
 │   └── sample_for_annotation.py   # Stratified annotation sampling (Scope A/B/C)
 └── tests/                         # Test suite
     ├── test_core_smoke.py         # Smoke tests (validation, budget, prompts, cache)
-    └── test_annotation_and_rag.py # Annotation store, auth, pre-labeling, RAG context
+    ├── test_annotation_and_rag.py # Annotation store, auth, pre-labeling, RAG context
+    ├── test_failure_injection.py  # Network timeout, empty string, auth error handling
+    └── test_metrics_and_schema.py # Metric edge cases, migration harness, schema validation
 ```
 
 ---
@@ -195,6 +203,7 @@ cp .env.example .env
 ```
 | Variable | Description | Default / Example |
 |---|---|---|
+| `OPENROUTER_API_KEY` | OpenRouter API key (supports free models like Nemotron 3 / auto) | `sk-or-v1-...` |
 | `OPENAI_API_KEY` | OpenAI API key for LiteLLM inference / pre-labeling | `sk-...` |
 | `ANTHROPIC_API_KEY` | Anthropic API key | `sk-ant-...` |
 | `GOOGLE_API_KEY` | Google Gemini API key | `AIza...` |
@@ -224,7 +233,10 @@ source .venv/bin/activate
 # Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
 
-# 3. Install CPU dependencies
+# 3. Install in editable mode (registers all matibhrom-* console scripts)
+pip install -e .
+
+# Or install dependencies directly
 pip install -r requirements-cpu.txt
 
 # 4. Copy environment configuration
@@ -243,26 +255,26 @@ pip install -r requirements-gpu.txt
 ### Step 1: Validate Dataset Integrity
 Verify that all data contracts, evidence references, and corpus links meet strict consistency requirements:
 ```bash
-python -m src.validate_data \
+matibhrom-validate \
   --items data/dummy/items.jsonl \
   --evidence data/dummy/evidence.jsonl \
   --corpus data/dummy/corpus.jsonl \
-  --min-corpus-passages 10
+  --min-corpus-passages 5
 ```
 
 ### Step 2: Build the Vector Index
 Chunk corpus passages, compute embeddings, and build the frozen FAISS retrieval index:
 ```bash
-python scripts/build_index.py \
-  --config configs/rag.yaml \
-  --run-id main_v1 \
-  --min-corpus-passages 10
+matibhrom-build-index \
+  --run-id dev_run_01 \
+  --corpus data/dummy/corpus.jsonl \
+  --min-corpus-passages 5
 ```
 
-### Step 3: Run Pre-Flight Budget Check
+### Step 3: Run Pre-Flight Budget Check & Dry Run
 Check projected costs without generating outputs:
 ```bash
-python scripts/check_budget.py \
+matibhrom-check-budget \
   --config configs/experiments.yaml \
   --models configs/models.yaml \
   --budget-config configs/budget.yaml \
@@ -272,54 +284,122 @@ python scripts/check_budget.py \
 ### Step 4: Execute the Experiment Runner
 Run generations across conditions and models on the dev split:
 ```bash
-python -m src.runner.run \
+matibhrom-run \
   --config configs/experiments.yaml \
   --models configs/models.yaml \
   --rag-config configs/rag.yaml \
   --budget-config configs/budget.yaml \
   --run-id dev_run_01 \
   --split dev \
+  --workers 4 \
   --resume
+```
+
+*Tip: For a quick verification run with zero API costs, filter to OpenRouter free models or dummy adapters and limit item count:*
+```bash
+matibhrom-run \
+  --config configs/experiments.yaml \
+  --models configs/models.yaml \
+  --rag-config configs/rag.yaml \
+  --budget-config configs/budget.yaml \
+  --run-id dev_smoke \
+  --split dev \
+  --models-filter "openrouter/nvidia/nemotron-3-super-120b-a12b:free" \
+  --limit 2
 ```
 
 *To execute on the frozen test split, both the `--unlock-test` flag and `MATIBHROM_UNLOCK_TEST=1` are required:*
 ```bash
-python -m src.runner.run \
+MATIBHROM_UNLOCK_TEST=1 matibhrom-run \
   --config configs/experiments.yaml \
+  --models configs/models.yaml \
+  --rag-config configs/rag.yaml \
+  --budget-config configs/budget.yaml \
+  --run-id test_run_01 \
   --split test \
   --unlock-test
 ```
 
-### Step 5: Launch the Annotation UI
-Launch the double-blind human annotation tool:
+### Step 5: Annotation Sampling & LLM Pre-labeling
+Sample generations for human review and generate first-pass pre-labels:
 ```bash
-# Set up test annotator credentials
-cp configs/annotation_tokens.example.json configs/annotation_tokens.json
+# 1. Stratified sampling (Scope A, B, or C per configs/annotation.yaml)
+matibhrom-sample-annotation --run-id dev_run_01 --config configs/annotation.yaml
 
+# 2. Optional: Run LLM pre-labeling pass with automatic retry-on-malformed-JSON
+python src/annotation/prelabel.py --run-id dev_run_01 --items data/dummy/items.jsonl
+```
+
+### Step 6: Pilot Agreement Gate (§14.5)
+Verify that annotator agreement satisfies the threshold before full-scale annotation:
+```bash
+matibhrom-compute-iaa --run-id dev_run_01 --pilot
+```
+
+### Step 7: Launch Annotation UI & Adjudication Dashboard
+Launch the double-blind annotation and adjudication portal:
+```bash
 # Launch Streamlit app
 streamlit run src/annotation/app.py -- --run-id dev_run_01
 ```
+- **Annotators**: Blinded view (model identity, prompt condition, and domain masked).
+- **Adjudicators**: Sign in with an adjudicator token (`role: "adjudicator"` in `configs/annotation_tokens.json`) to access the Adjudication Queue, view conflicting annotator ratings side-by-side, and unmask metadata.
 
-### Step 6: Export Evaluation Metrics & Tables
-Generate summary tables, LaTeX tables for research papers, and visualization charts:
+#### Annotation Error Taxonomy
+| Code | Error Type | Definition / Pattern |
+|---|---|---|
+| **H1** | Contradiction | Generated claim directly conflicts with benchmark gold evidence |
+| **H2** | Unsupported Addition | Generates factual claim not grounded in provided evidence or sources |
+| **H3** | Fabricated Entity / Citation | Invents non-existent statutes, laws, medical institutions, or drugs |
+| **H4** | Numeric / Temporal Error | Inaccurate dosage, dates, numbers, duration, or statutory sections |
+| **H5** | Inference Error | Evidence is retrieved, but model draws fallacious or unsupported conclusion |
+| **A** | Appropriate Abstention | Correctly declines to answer when available evidence is insufficient |
+| **R** | Unnecessary Refusal | Model erroneously abstains despite sufficient evidence provided |
+
+### Step 8: Export Evaluation Metrics, Bootstrap CIs & Retrieval Diagnostics
+Generate publication-ready artifacts in `outputs/{run_id}/reports/`:
 ```bash
-python scripts/export_tables.py \
+matibhrom-export-tables \
   --run-id dev_run_01 \
   --group-by condition \
   --items data/dummy/items.jsonl
 ```
+This exports:
+- `metrics.csv`: Tabular metrics per group.
+- `summary.md`: Complete summary with 95% bootstrap confidence intervals and McNemar paired tests.
+- `tables/primary_metrics.tex`: Publication LaTeX table with confidence intervals.
+- `retrieval_diagnostics.md`: Recall@k and Rank-1 precision broken down by language and domain.
+- `tokenization_report.md`: Prompt token analysis across Bangla vs Banglish.
+- `plots/*.png`: Metric visualization bar charts.
+
+#### Core Evaluation Metrics
+| Metric | Definition | Research Role |
+|---|---|---|
+| **Hallucination Rate** | $\frac{N_{\text{hallucinated}}}{N_{\text{evaluated}}}$ | Primary outcome metric (lower is better) |
+| **Answer Accuracy** | $\frac{N_{\text{correct}} + 0.5 \times N_{\text{partially\_correct}}}{N_{\text{evaluated}}}$ | Overall factual correctness |
+| **Coverage** | $\frac{N_{\text{answered}}}{N_{\text{evaluated}}}$ | Response rate under abstention conditions (C3) |
+| **Selective Accuracy** | $\frac{N_{\text{correct}}(\text{answered})}{N_{\text{answered}}}$ | Accuracy conditioned on the model choosing to answer |
+| **Cohen's Kappa ($\kappa$)** | $\frac{P_o - P_e}{1 - P_e}$ | Inter-annotator agreement on binary hallucination labels ($\ge 0.70$ pilot threshold) |
+| **McNemar's Paired Test** | $\chi^2 = \frac{(b - c)^2}{b + c}$ | Statistical significance across register (`bn` vs `banglish`) and evidence conditions |
 
 ---
 
-## 9. Running Tests
+## 9. Running Tests & Offline CI Smoke
 
-The test suite validates data schemas, budget enforcement, prompt templates, atomic caching, RAG context matching, and annotation stores:
+### Unit & Regression Test Suite
+The test suite validates data schemas, budget enforcement, prompt templates, atomic caching, RAG context matching, failure recovery, and annotation stores:
 ```bash
 # Run all tests
-python -m pytest -o addopts=""
+pytest tests/ -v
 
-# Run with test coverage (requires pytest-cov)
+# Run with test coverage
 pytest --cov=src --cov-fail-under=80
+```
+
+### Zero-Network CI Smoke Suite
+Run the full benchmark pipeline end-to-end completely offline without API keys or internet access in ~5 seconds:
+```bash
+python scripts/ci_smoke.py
 ```
 
 ---
@@ -335,7 +415,7 @@ docker build -t matibhrom:cpu -f Dockerfile .
 docker run --rm -it \
   -v $(pwd)/outputs:/app/outputs \
   --env-file .env \
-  matibhrom:cpu python -m pytest -o addopts=""
+  matibhrom:cpu python scripts/ci_smoke.py
 ```
 
 ### Build & Run with Docker (GPU / vLLM)
@@ -354,7 +434,7 @@ docker run --gpus all --rm -it \
 
 ## 11. Key Decisions & Trade-Offs
 
-Full rationale and alternatives considered are documented in [DECISIONS.md](file:///e:/ELITE%20Research%20Lab/Bengali%20LLM/matibhrom/DECISIONS.md). Summary:
+Full rationale and alternatives considered are documented in [DECISIONS.md](DECISIONS.md). Summary:
 
 | Decision | Selected Choice | Rationale |
 |---|---|---|
@@ -376,10 +456,11 @@ Full rationale and alternatives considered are documented in [DECISIONS.md](file
 
 ## 13. Documentation Roadmap & References
 
-- **[RESEARCH_SPEC.md](file:///e:/ELITE%20Research%20Lab/Bengali%20LLM/matibhrom/RESEARCH_SPEC.md):** The comprehensive research specification, PRD, formal hypothesis formulations (H1–H4), error taxonomy (H1–H5, A, R), and mathematical metrics definitions.
-- **[DECISIONS.md](file:///e:/ELITE%20Research%20Lab/Bengali%20LLM/matibhrom/DECISIONS.md):** Chronological log of engineering decisions, trade-offs, and design choices.
-- **[BUDGET.md](file:///e:/ELITE%20Research%20Lab/Bengali%20LLM/matibhrom/BUDGET.md):** Comprehensive compute resource, token pricing, and human annotation cost breakdowns.
-- **[CONTRIBUTING.md](file:///e:/ELITE%20Research%20Lab/Bengali%20LLM/matibhrom/CONTRIBUTING.md):** Collaboration standards, branching rules, PR templates, and validation checklists.
+- **[QUICKSTART.md](QUICKSTART.md):** Practical, step-by-step developer guide from clean clone to publication artifacts.
+- **[RESEARCH_SPEC.md](RESEARCH_SPEC.md):** The comprehensive research specification, PRD, formal hypothesis formulations (H1–H4), error taxonomy (H1–H5, A, R), and mathematical metrics definitions.
+- **[DECISIONS.md](DECISIONS.md):** Chronological log of engineering decisions, trade-offs, and design choices.
+- **[BUDGET.md](BUDGET.md):** Comprehensive compute resource, token pricing, and human annotation cost breakdowns.
+- **[CONTRIBUTING.md](CONTRIBUTING.md):** Collaboration standards, branching rules, PR templates, and validation checklists.
 
 ---
 

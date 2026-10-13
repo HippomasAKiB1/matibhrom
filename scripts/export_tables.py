@@ -11,10 +11,13 @@ Usage:
     python scripts/export_tables.py --run-id main_v1 --group-by condition
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 

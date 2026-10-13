@@ -143,6 +143,8 @@ class Index:
         if metadata_path.exists():
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
             self._metadata = CorpusMetadata(**metadata)
+            if self._metadata.embedding_dim:
+                self.embedding_dim = self._metadata.embedding_dim
 
         # Load passage IDs
         ids_path = index_dir / "passage_ids.json"
@@ -153,8 +155,9 @@ class Index:
         index_path = index_dir / "index.faiss"
         if index_path.exists():
             self._index = faiss.read_index(str(index_path))
+            self.embedding_dim = self._index.d
 
-        logger.info(f"Loaded FAISS index from {index_dir}")
+        logger.info(f"Loaded FAISS index from {index_dir} (dim={self.embedding_dim})")
 
     def get_retrieved_passages(
         self,

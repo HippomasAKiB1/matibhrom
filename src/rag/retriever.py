@@ -35,21 +35,39 @@ class Retriever:
         self._index = None
         self._embedder = None
         self._corpus_data = None
+        self._raw_corpus_data = None
         self._passage_ids = None
         self._chunker = None
 
     def _load_corpus(self) -> list[dict]:
-        """Load corpus passages from JSONL."""
+        """Load corpus passages from JSONL (preferring chunked_corpus.jsonl from index)."""
         if self._corpus_data is None:
             import json
+            chunked_path = self.index_dir / "chunked_corpus.jsonl"
+            path_to_load = chunked_path if chunked_path.exists() else self.corpus_path
             passages = []
-            with open(self.corpus_path, encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        passages.append(json.loads(line))
+            if path_to_load.exists():
+                with open(path_to_load, encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            passages.append(json.loads(line))
             self._corpus_data = passages
         return self._corpus_data
+
+    def _load_raw_corpus(self) -> list[dict]:
+        """Load unchunked raw corpus passages for gold/oracle evidence lookups."""
+        if self._raw_corpus_data is None:
+            import json
+            passages = []
+            if self.corpus_path.exists():
+                with open(self.corpus_path, encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            passages.append(json.loads(line))
+            self._raw_corpus_data = passages
+        return self._raw_corpus_data
 
     def _load_embedder(self) -> Embedder:
         if self._embedder is None:
@@ -103,12 +121,14 @@ class Retriever:
         for rank, (score, idx) in enumerate(zip(scores, indices)):
             if idx >= 0 and idx < len(corpus):
                 passage = corpus[idx]
+                pid = passage["passage_id"]
+                base_ev_id = passage.get("evidence_id") or pid.split("::chunk_")[0]
                 results.append({
                     "rank": rank + 1,
-                    "passage_id": passage["passage_id"],
+                    "passage_id": pid,
                     "score": float(score),
                     "text": passage["text"],
-                    "evidence_id": passage["passage_id"],  # For gold matching
+                    "evidence_id": base_ev_id,  # For gold matching and C2/C3 evidence_ids_used
                 })
 
         return results
@@ -136,7 +156,9 @@ class Retriever:
         retrieved = self.retrieve(question, k)
 
         gold_retrieved = any(
-            p["passage_id"] == evidence_id or p["evidence_id"] == evidence_id
+            p["passage_id"] == evidence_id
+            or p.get("evidence_id") == evidence_id
+            or p["passage_id"].split("::chunk_")[0] == evidence_id
             for p in retrieved
         )
         recall_at_k = 1.0 if gold_retrieved else 0.0
@@ -158,12 +180,16 @@ class Retriever:
             List of RetrievedPassage dicts
         """
         k = top_k if top_k is not None else self.top_k
-        corpus = self._load_corpus()
+        corpus = self._load_raw_corpus()
+        if not corpus:
+            corpus = self._load_corpus()
 
         # Find the gold evidence passage
         gold_passage = None
         for p in corpus:
-            if p["passage_id"] == evidence_id:
+            pid = p.get("passage_id", "")
+            base_id = pid.split("::chunk_")[0]
+            if pid == evidence_id or base_id == evidence_id:
                 gold_passage = p
                 break
 
@@ -211,9 +237,21 @@ class Retriever:
         context = "\n".join(parts)
 
         if max_tokens is not None:
-            # Truncate if too long
-            words = context.split()
-            if len(words) > max_tokens:
-                context = " ".join(words[:max_tokens])
+            # Token-aware truncation with tokenizer fallback
+            try:
+                tokenizer = self._load_chunker()._get_tokenizer()
+                tokens = tokenizer.encode(context, add_special_tokens=False)
+                if len(tokens) > max_tokens:
+                    logger.warning(
+                        f"Context tokens ({len(tokens)}) exceed max_tokens ({max_tokens}); truncating."
+                    )
+                    context = tokenizer.decode(tokens[:max_tokens])
+            except Exception:
+                words = context.split()
+                if len(words) > max_tokens:
+                    logger.warning(
+                        f"Context words ({len(words)}) exceed max_tokens ({max_tokens}); truncating."
+                    )
+                    context = " ".join(words[:max_tokens])
 
         return context

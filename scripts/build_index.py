@@ -29,8 +29,8 @@ from src.rag.index import Index
 from src.validate_data import load_jsonl
 
 
-def build_index(rag_config: dict, run_id: str, min_corpus_passages: int | None = None) -> Path:
-    corpus_path = Path(rag_config["corpus_path"])
+def build_index(rag_config: dict, run_id: str, min_corpus_passages: int | None = None, corpus_path: Path | str | None = None) -> Path:
+    corpus_path = Path(corpus_path or rag_config["corpus_path"])
     chunk_size = rag_config.get("chunk_size", 384)
     chunk_overlap = rag_config.get("chunk_overlap", 64)
     embedding_model = rag_config.get("embedding_model", "BAAI/bge-m3")
@@ -85,12 +85,13 @@ def main() -> None:
     parser.add_argument("--config", default="configs/rag.yaml", help="Path to rag.yaml")
     parser.add_argument("--run-id", required=True, help="Run ID (used to namespace the index directory)")
     parser.add_argument("--min-corpus-passages", type=int, help="Override min_corpus_passages guard")
+    parser.add_argument("--corpus", help="Override corpus_path from config")
     args = parser.parse_args()
 
     with open(args.config, encoding="utf-8") as f:
         rag_config = yaml.safe_load(f)
 
-    build_index(rag_config, args.run_id, args.min_corpus_passages)
+    build_index(rag_config, args.run_id, args.min_corpus_passages, corpus_path=args.corpus)
 
 
 if __name__ == "__main__":

@@ -170,27 +170,31 @@ def render_annotation_form(
         submitted = st.form_submit_button("Save")
 
     # Keyboard shortcut: Enter anywhere on the page clicks the visible Save
-    # button (the browser's native Enter-submits-form behavior doesn't fire
-    # reliably across Streamlit's radio/selectbox widgets, so this is bound
-    # explicitly). §14.3 "keyboard shortcuts". st.html (not iframed) is used
-    # rather than the deprecated st.components.v1.html so the script can see
-    # the real page DOM directly instead of reaching through a parent frame.
-    st.html(
-        """
-        <script>
-        document.addEventListener('keydown', function(e) {
+    # button. Handled gracefully across all Streamlit versions without crashing.
+    shortcut_script = """
+    <script>
+    try {
+        const doc = window.parent.document || document;
+        doc.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
-                const buttons = document.querySelectorAll('button[kind="formSubmit"]');
+                const buttons = doc.querySelectorAll('button[kind="formSubmit"]');
                 if (buttons.length > 0) {
                     buttons[buttons.length - 1].click();
                     e.preventDefault();
                 }
             }
         });
-        </script>
-        """,
-        unsafe_allow_javascript=True,
-    )
+    } catch (err) {}
+    </script>
+    """
+    try:
+        import streamlit.components.v1 as components
+        components.html(shortcut_script, height=0, width=0)
+    except Exception:
+        try:
+            st.html(shortcut_script)
+        except Exception:
+            pass
 
     if submitted:
         annotation = Annotation(

@@ -1,4 +1,4 @@
-# Jaeef's Data Collection Workspace
+# Data Collection Workspace
 
 This folder is your staging workspace for collecting benchmark items across the 3 domains for **Matibhrom**.
 

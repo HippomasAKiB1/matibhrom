@@ -24,6 +24,7 @@ class LiteLLMAdapter(ModelAdapter):
         self.seed = params.get("seed", 42)
         self.top_p = params.get("top_p", 1.0)
         self.api_base = params.get("api_base")
+        self.is_ollama = self.model.startswith("ollama/")
 
         # Retry configuration
         self.max_retries = 3
@@ -40,16 +41,19 @@ class LiteLLMAdapter(ModelAdapter):
                 extra_kwargs = {}
                 if self.api_base:
                     extra_kwargs["api_base"] = self.api_base
-                elif self.model.startswith("ollama/"):
+                elif self.is_ollama:
                     extra_kwargs["api_base"] = os.environ.get("OLLAMA_API_BASE", "http://localhost:11434")
 
                 if self.model.startswith("openrouter/") and os.environ.get("OPENROUTER_API_KEY"):
                     extra_kwargs["api_key"] = os.environ.get("OPENROUTER_API_KEY")
 
+                # If repeating, adjust temperature slightly to break repetition loops
+                temp = self.temperature if attempt == 0 else min(0.3, self.temperature + 0.1 * attempt)
+
                 response = litellm.completion(
                     model=self.model,
                     messages=[{"role": "user", "content": prompt}],
-                    temperature=self.temperature,
+                    temperature=temp,
                     max_tokens=self.max_tokens,
                     top_p=self.top_p,
                     seed=self.seed if self.seed is not None else None,

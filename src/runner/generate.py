@@ -239,13 +239,39 @@ class GenerationRunner:
             adapter = adapter_cls(model_id=model_id, params=params)
             result = adapter.generate(prompt)
 
-            if result.error:
-                logger.error(f"Generation error on item {item.item_id}, model {model_id}: {result.error}")
-                raise RuntimeError(f"Generation failed for model {model_id} on item {item.item_id}: {result.error}")
-
-            if not result.text:
-                logger.error(f"Empty completion from model {model_id} on item {item.item_id}")
-                raise RuntimeError(f"Model {model_id} returned empty completion on item {item.item_id}")
+            if result.error or not result.text:
+                err_msg = result.error or "Empty completion from model"
+                logger.warning(f"Generation failure on item {item.item_id}, model {model_id}: {err_msg}")
+                resolved_model_version = result.model_version or model_version
+                timestamp = datetime.now(timezone.utc).isoformat()
+                generation = Generation(
+                    run_id=self.run_id,
+                    generation_id=generation_id,
+                    item_id=item.item_id,
+                    language=language,
+                    condition=condition,
+                    model_id=model_id,
+                    model_version=resolved_model_version,
+                    prompt=prompt,
+                    prompt_hash=hash_prompt(prompt),
+                    prompt_tokens=result.prompt_tokens or 0,
+                    response=result.text or f"[ত্রুটি: {err_msg}]",
+                    response_tokens=result.response_tokens or 0,
+                    evidence_ids_used=evidence_ids_used,
+                    temperature=params.get("temperature", 0.0),
+                    seed=params.get("seed", 42),
+                    max_tokens=params.get("max_tokens", 512),
+                    timestamp=timestamp,
+                    latency_ms=result.latency_ms,
+                    cost_usd=result.cost_usd,
+                    truncated_input=truncated_input,
+                    error=err_msg,
+                )
+                with self._generations_lock:
+                    write_jsonl_atomic(str(self.generations_path), generation.model_dump())
+                    flush_writer(self.generations_path)
+                    self.existing_generations[generation_id] = generation
+                return generation
 
             resolved_model_version = result.model_version or model_version
             timestamp = datetime.now(timezone.utc).isoformat()

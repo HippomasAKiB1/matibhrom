@@ -189,6 +189,25 @@ def run_prelabeling(
                 n_failed += 1
                 continue
 
+            if gen.get("error"):
+                annotation = Annotation(
+                    codebook_version=CODEBOOK_VERSION,
+                    generation_id=gen["generation_id"],
+                    annotator_id=f"llm:{prelabel_model}",
+                    labeler_type="llm",
+                    correctness="incorrect",
+                    hallucination="yes",
+                    error_type="extrinsic",
+                    abstention_status="unsupported_claim",
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    verified_by_human=False,
+                )
+                out_f.write(json.dumps(annotation.model_dump(), ensure_ascii=False) + "\n")
+                out_f.flush()
+                n_labeled += 1
+                verify_required.append(gen["generation_id"])
+                continue
+
             labels = prelabel_one(adapter, item, gen)
             if labels is None:
                 n_failed += 1

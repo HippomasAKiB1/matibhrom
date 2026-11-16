@@ -8,6 +8,7 @@ Applies the Matibhrom Codebook v1.0.0 definitions to ensure 100% internal consis
 - Outputs publication-grade LaTeX tables (Booktabs) and cross-model synthesis.
 """
 
+import argparse
 import json
 import re
 import sys
@@ -93,11 +94,17 @@ def format_ci(ci: dict) -> str:
     return f"[{ci['lower']:.2f}, {ci['upper']:.2f}]"
 
 
-def run_comprehensive_evaluation():
+def run_comprehensive_evaluation(
+    run_1_id: str = "dev_stratified_30_v1",
+    run_1_name: str = "Qwen 1.7B",
+    run_2_id: str = "dev_stratified_30_gemma4b_v1",
+    run_2_name: str = "Gemma 4B",
+    out_dirname: str = "publication_reports",
+):
     items = {it["item_id"]: it for it in load_jsonl(Path("data/benchmark/items.jsonl"))}
     runs = {
-        "Qwen 1.7B": "dev_stratified_30_v1",
-        "Gemma 4B": "dev_stratified_30_gemma4b_v1",
+        run_1_name: run_1_id,
+        run_2_name: run_2_id,
     }
     
     evaluated_runs = {}
@@ -141,7 +148,7 @@ def run_comprehensive_evaluation():
         evaluated_runs[display_name] = joined
         
     # Create publication tables output dir
-    pub_dir = Path("outputs/publication_reports")
+    pub_dir = Path("outputs") / out_dirname
     pub_dir.mkdir(parents=True, exist_ok=True)
     tables_dir = pub_dir / "tables"
     tables_dir.mkdir(parents=True, exist_ok=True)
@@ -296,4 +303,18 @@ def run_comprehensive_evaluation():
 
 
 if __name__ == "__main__":
-    run_comprehensive_evaluation()
+    parser = argparse.ArgumentParser(description="Authoritative Evaluation & LaTeX Table Synthesis")
+    parser.add_argument("--run-1", default="dev_stratified_30_v1", help="First run ID")
+    parser.add_argument("--name-1", default="Qwen 1.7B", help="First model display name")
+    parser.add_argument("--run-2", default="dev_stratified_30_gemma4b_v1", help="Second run ID")
+    parser.add_argument("--name-2", default="Gemma 4B", help="Second model display name")
+    parser.add_argument("--out-dir", default="publication_reports", help="Output directory name inside outputs/")
+    args = parser.parse_args()
+
+    run_comprehensive_evaluation(
+        run_1_id=args.run_1,
+        run_1_name=args.name_1,
+        run_2_id=args.run_2,
+        run_2_name=args.name_2,
+        out_dirname=args.out_dir,
+    )

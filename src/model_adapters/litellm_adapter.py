@@ -103,7 +103,8 @@ class LiteLLMAdapter(ModelAdapter):
                 last_error = e
                 if self.is_ollama:
                     self.unload()
-                wait_time = self.base_backoff * (2 ** attempt)
+                    time.sleep(3.0)
+                wait_time = max(4.0, self.base_backoff * (2 ** attempt))
                 logger.warning(f"Transient error ({type(e).__name__}), waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries}): {e}")
                 time.sleep(wait_time)
 

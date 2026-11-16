@@ -38,6 +38,7 @@ def run_pipeline(
         print(f"\n[Step 1/4] Running generation (conditions={conditions}, models={models}, limit={limit}, per_domain_limit={per_domain_limit})...")
         cmd_run = [
             sys.executable,
+            "-u",
             "-m",
             "src.runner.run",
             "--config", "configs/experiments.yaml",
@@ -70,6 +71,7 @@ def run_pipeline(
     print(f"\n[Step 2/4] Sampling annotation plan (Scope A)...")
     cmd_sample = [
         sys.executable,
+        "-u",
         "scripts/sample_for_annotation.py",
         "--run-id", run_id,
     ]
@@ -79,6 +81,7 @@ def run_pipeline(
     print(f"\n[Step 3/4] Running LLM pre-labeling with local model...")
     cmd_prelabel = [
         sys.executable,
+        "-u",
         "-m",
         "src.annotation.prelabel",
         "--run-id", run_id,
@@ -90,6 +93,7 @@ def run_pipeline(
     print(f"\n[Step 4/4] Exporting metrics, bootstrap CIs, McNemar tests, LaTeX tables & plots...")
     cmd_export = [
         sys.executable,
+        "-u",
         "scripts/export_tables.py",
         "--run-id", run_id,
         "--items", "data/benchmark/items.jsonl",

@@ -1,0 +1,42 @@
+\section{Evaluation Methodology and Inter-Annotator Reliability}
+\label{sec:evaluation_reliability}
+
+\subsection{The Failure of LLM-as-a-Judge in Low-Resource Bengali}
+A growing trend in NLP benchmarking is the reliance on automated zero-shot \emph{LLM-as-a-judge} pipelines to evaluate factuality and hallucination~\citep{li2023halueval}. To assess whether automated evaluation is viable for low-resource Bengali, we executed an empirical pilot evaluation over a stratified overlap sample of 60 generations ($25\%$ sampling fraction), comparing zero-shot prompting on a local model (\texttt{ollama/gemma3:4b}) against expert human annotations following Codebook v1.0.0.
+
+As reported in Table~\ref{tab:iaa_reliability}, raw zero-shot LLM evaluation exhibits near-zero inter-annotator agreement:
+\begin{equation}
+    \kappa_{\text{raw}} \in [0.0491, \; 0.0867], \quad P_o \approx 45.0\% \text{--} 48.3\%
+\end{equation}
+Even when applying post-hoc rule calibration to enforce structural codebook consistency (e.g., mapping any error categorized as H1--H5 strictly to \texttt{hallucination="yes"}), agreement reaches only $\kappa = 0.3372$ ($P_o = 68.33\%$).
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Evaluation Configuration & Agreement ($P_o$) & Cohen's Kappa ($\kappa$) \\
+\midrule
+Raw Zero-Shot LLM Judge (Qwen Run)  & 45.00\% & 0.0867 \\
+Raw Zero-Shot LLM Judge (Gemma Run) & 48.33\% & 0.0491 \\
+Calibrated LLM Judge (Qwen Run)     & 68.33\% & 0.3372 \\
+Calibrated LLM Judge (Gemma Run)    & 51.67\% & 0.0397 \\
+\midrule
+\textbf{Target Quality Gate Threshold} & --- & $\ge \mathbf{0.7000}$ \\
+\bottomrule
+\end{tabular}
+\caption{Inter-Annotator Agreement (Cohen's Kappa $\kappa$) between Automated LLM-as-a-Judge and Expert Ground Truth on the 60-Item Overlap Sample.}
+\label{tab:iaa_reliability}
+\end{table}
+
+\paragraph{Diagnostic Analysis of Judge Failure.} Error analysis reveals three fundamental failure modes of LLM judges in low-resource settings:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Negative-Constraint Misinterpretation:} When evaluated models correctly executed selective abstention under condition $C_3$ by stating \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}, the LLM judge frequently misclassified the refusal as an incorrect numerical error (H4) or unnecessary refusal (R), erroneously penalizing models for following negative instructions.
+    \item \textbf{Superficial Lexical Overlap:} In queries where models generated completely hallucinated clinical claims but mimicked formal syntactic sentence structures, the LLM judge assigned \texttt{correctness="correct"} simply because the output appeared grammatically fluent.
+    \item \textbf{Morphological Confusion:} The automated evaluator failed to resolve inflectional case endings (e.g., confusing \foreignlanguage{bengali}{"সংবিধানে"} [in the constitution] with \foreignlanguage{bengali}{"সংবিধানের"} [of the constitution]), incorrectly flagging valid answers as factual contradictions.
+\end{enumerate}
+
+\subsection{Deterministic Gold Ground-Truth Adjudication}
+Because the automated LLM judge failed the mandatory inter-annotator quality gate ($\kappa \ge 0.70$), relying on LLM-as-a-judge would introduce severe systematic bias into our benchmark results. 
+
+Consequently, in strict accordance with ACL empirical standards, all primary results presented in this paper (Tables~\ref{tab:model_scaling_comparison} and~\ref{tab:domain_disparity}) were established through \textbf{deterministic gold-evidence adjudication}. Every generated response was evaluated via normalized semantic substring and entity verification against the canonical gold answer $\mathcal{A}^*$, coupled with a comprehensive lexicon of standardized Bengali and English abstention cues. This protocol ensures $100\%$ bitwise determinism, complete reproducibility, and zero evaluation jitter.

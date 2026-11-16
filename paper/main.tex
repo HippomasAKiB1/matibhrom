@@ -1,0 +1,64 @@
+\documentclass[11pt,a4paper,twocolumn]{article}
+
+% --- Margins and Geometry (ACL Format Standard) ---
+\usepackage[margin=2cm,top=2.2cm,bottom=2.2cm]{geometry}
+\usepackage{times}
+\usepackage{microtype}
+
+% --- Math and Algorithms ---
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% --- Tables and Figures ---
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% --- Lists, Colors, and Typography ---
+\usepackage{enumitem}
+\usepackage{xcolor}
+\definecolor{darkblue}{rgb}{0, 0, 0.54}
+\usepackage[colorlinks=true, linkcolor=darkblue, citecolor=darkblue, urlcolor=darkblue]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+% --- Bengali Script Fallback for Engine Portability ---
+% Allows seamless compilation in pdfLaTeX, XeLaTeX, or LuaLaTeX
+\providecommand{\foreignlanguage}[2]{#2}
+
+% --- Bibliography ---
+\usepackage[numbers,sort&compress]{natbib}
+
+% --- Title and Metadata ---
+\title{\textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম}): A Fine-Grained Benchmark for Hallucination, Grounding, and Selective Abstention in Bengali LLMs}}
+
+\author{
+  \textbf{Team Turtlers} \quad \& \quad \textbf{ELITE Research Lab LLC} \\
+  \texttt{research@eliteresearchlab.org}
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+% --- Section Imports ---
+\input{sections/00_abstract.tex}
+\input{sections/01_introduction.tex}
+\input{sections/02_related_work.tex}
+\input{sections/03_matibhrom_benchmark.tex}
+\input{sections/04_methodology_and_framework.tex}
+\input{sections/05_empirical_results.tex}
+\input{sections/06_error_taxonomy.tex}
+\input{sections/07_evaluation_reliability.tex}
+\input{sections/08_discussion_limitations.tex}
+\input{sections/09_conclusion.tex}
+
+% --- Bibliography ---
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

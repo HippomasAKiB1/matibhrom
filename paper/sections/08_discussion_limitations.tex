@@ -1,0 +1,21 @@
+\section{Discussion, Limitations, and Broader Impact}
+\label{sec:discussion}
+
+\subsection{Implications for Multilingual AI Deployment}
+Our empirical findings carry significant architectural and societal implications for deploying generative AI in the Global South:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{The Inadequacy of Closed-Book Deployment:} With a closed-book hallucination rate of $98.3\%$, open-weight language models cannot be safely deployed for factual QA in Bengali without external grounding. Deploying LLMs as zero-shot factual conversational agents in South Asian public services presents extreme misinformation risks.
+    \item \textbf{The Imperative of Abstention Guardrails:} Our results demonstrate that unconstrained RAG ($C_2$) remains vulnerable to distractor noise ($58.3\%$--$73.3\%$ hallucination). However, combining RAG with explicit selective abstention ($C_3$) unlocks near-zero hallucination on models with sufficient parameter capacity ($\ge 4\text{B}$). In production systems, prompting models with negative constraints must be standard practice.
+    \item \textbf{Mitigating Transliteration Degradation:} Given that Latin transliteration degrades retrieval recall by half and escalates hallucinations, production multilingual systems must integrate native Bengali script-normalization and transliteration pre-processors prior to vector retrieval.
+\end{enumerate}
+
+\subsection{Limitations}
+While Matibhrom establishes the first fine-grained hallucination benchmark for Bengali, we acknowledge several limitations:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Model Parameter Range:} Our evaluation prioritized small, open-weight language models (1.7B and 4B parameters) that can be run deterministically on local, accessible GPU hardware. While this reflects realistic deployment constraints in developing economies, future work should evaluate larger open architectures (e.g., Llama-3-70B, Qwen-2.5-72B) and proprietary frontier models.
+    \item \textbf{Jurisdictional Focus:} Our statutory jurisprudence items are grounded on the laws of Bangladesh. While Bengali is also natively spoken in West Bengal and Tripura (India), our legal split evaluates sovereign Bangladeshi statutory law.
+    \item \textbf{Retriever Architecture:} We evaluated dense single-vector retrieval via \texttt{BAAI/bge-m3}. Future iterations could explore hybrid sparse-dense retrieval (e.g., BM25 + BGE-M3) and cross-encoder neural re-ranking.
+\end{enumerate}
+
+\subsection{Ethical Considerations and Broader Impact}
+In accordance with ACL Ethics Guidelines, we explicitly emphasize the ethical risks of deploying unverified generative models in healthcare and law. Falsified medical contraindications or hallucinated legal statutes can directly compromise personal health and legal protections. Matibhrom is constructed strictly as an evaluation benchmark and diagnostic platform; all data items are curated from public, authoritative statutory codes and public-health manuals. By open-sourcing our benchmark, we aim to equip researchers and developers with the diagnostic tools necessary to audit and eliminate hallucinations before models are deployed to real-world users.

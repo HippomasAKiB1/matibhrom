@@ -1,0 +1,41 @@
+\section{The Matibhrom Benchmark}
+\label{sec:benchmark}
+
+\subsection{Design Principles and Domain Stratification}
+Matibhrom is constructed to satisfy three foundational methodological requirements: (1) authentic cultural and institutional provenance, (2) linguistic dual-register symmetry, and (3) leakage-free grouping across retrieval splits. The benchmark comprises exactly 600 base items, partitioned equally across three distinct domains:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{General Knowledge (200 items):} Covers national history (e.g., the 1971 Liberation War, the Language Movement of 1952), administrative geography, governance institutions, and indigenous literary figures.
+    \item \textbf{Clinical and Public Health (200 items):} Encompasses infectious disease etiology (e.g., Dengue vector transmission, Nipah virus outbreaks), pharmacological contraindications, and clinical care guidelines promulgated by the Directorate General of Health Services (DGHS) Bangladesh and the World Health Organization (WHO).
+    \item \textbf{Statutory Jurisprudence (200 items):} Drawn directly from the \emph{Constitution of the People's Republic of Bangladesh}, the \emph{Penal Code 1860}, and the \emph{Bangladesh Labour Act 2006}, encompassing fundamental rights, judicial remedies, constitutional amendments, and statutory workplace regulations.
+\end{enumerate}
+
+Every item is represented as a structured data contract adhering to strict schema validation:
+\begin{equation}
+    \mathcal{I} = \langle \text{id}, \text{dom}, \mathcal{Q}_{\text{bn}}, \mathcal{Q}_{\text{banglish}}, \mathcal{A}^*, e^*, \tau, \rho, \mathcal{S} \rangle
+\end{equation}
+where $\text{dom} \in \{\text{General}, \text{Medical}, \text{Legal}\}$, $\mathcal{Q}_{\text{bn}}$ is the native Bengali prompt, $\mathcal{Q}_{\text{banglish}}$ is the matched Romanized prompt, $\mathcal{A}^*$ is the canonical gold answer, $e^*$ is the unique identifier for the gold evidence passage, $\tau$ denotes the answer type (entity, numeric, date, citation, short explanation, procedure), $\rho \in \{\text{normal}, \text{high-stakes}\}$ is the risk tier, and $\mathcal{S} \in \{\text{Dev}, \text{Test}\}$ designates the dataset split.
+
+\subsection{Cross-Register Prompt Pairs}
+To model authentic digital linguistic behavior, every Bengali query $\mathcal{Q}_{\text{bn}}$ is paired with an expertly authored Latin-transliterated counterpart $\mathcal{Q}_{\text{banglish}}$. Unlike mechanical phonetic mapping algorithms, transliterations were curated by native speakers to capture natural orthographic variations, colloquial phrasing, and vowel contractions:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Standard Bangla ($\mathcal{Q}_{\text{bn}}$):} \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান কবে কার্যকর হয়?"}
+    \item \textbf{Banglish ($\mathcal{Q}_{\text{banglish}}$):} \emph{"bangladesh er shongbidhan kobe karjokor hoy?"}
+    \item \textbf{Gold Answer ($\mathcal{A}^*$):} \foreignlanguage{bengali}{"১৬ ডিসেম্বর ১৯৭২"} (16 December 1972)
+\end{itemize}
+This dual-register design yields $1,200$ unique evaluated prompts across the $600$ base items, enabling direct, paired linguistic comparisons under identical factual semantics.
+
+\subsection{The 1,800-Passage Grounding Corpus}
+To support robust Retrieval-Augmented Generation evaluation, we construct an authoritative grounding corpus $\mathcal{D}$ consisting of $1,800$ verified textual passages:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Gold Evidence ($600$ passages):} Exactly one authoritative passage $e^*$ per base item containing the factual ground-truth required to answer the query.
+    \item \textbf{Topical Distractors ($1,200$ passages):} Two domain-matched distractor passages per base item ($400$ per domain). Distractors discuss semantically adjacent entities (e.g., Indian constitutional assembly debates, alternative public health advisories, or neighboring district administrative structures) without satisfying the target query.
+\end{itemize}
+Passages are chunked to fixed windows of $384$ tokens with a $64$-token stride. All passages are densely embedded using the state-of-the-art multilingual model \texttt{BAAI/bge-m3}~\citep{chen2024bge} ($d = 1024$) and indexed into a frozen cosine FAISS vector database.
+
+\subsection{Leakage-Free Document-Isolated Splitting}
+A frequent methodological defect in RAG benchmarking is retrieval leakage, where test queries retrieve documents overlapping with training or development splits. To guarantee complete experimental isolation, Matibhrom partitions the data via source-level group clustering:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Dev Split (20\% --- 120 items / 240 prompts):} 40 General, 40 Medical, 40 Legal items.
+    \item \textbf{Test Split (80\% --- 480 items / 960 prompts):} 160 General, 160 Medical, 160 Legal items.
+\end{itemize}
+No evidence document or statutory act spans across both splits. Furthermore, benchmark provenance is cryptographically locked: the retrieval corpus SHA-256 digest is \texttt{906f912f07690ba0}, and the compiled index digest is \texttt{idx\_1794819485\_906f912f07690ba0}. Any modification to the underlying text or embedding parameters immediately invalidates the execution harness.

@@ -1,0 +1,23 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Model & Cond. & Hallucination (95\% CI) & Coverage & Sel. Accuracy & Abstention \\
+\midrule
+\multirow{4}{*}{Qwen 1.7B}
+& C0 & 0.983 [0.95, 1.00] & 1.000 & 0.017 & 0.000 \\
+& C1 & 0.400 [0.28, 0.52] & 0.967 & 0.586 & 0.033 \\
+& C2 & 0.733 [0.62, 0.83] & 0.967 & 0.241 & 0.033 \\
+& C3 & 0.283 [0.17, 0.40] & 0.333 & 0.150 & 0.667 \\
+\midrule
+\multirow{4}{*}{Gemma 4B}
+& C0 & 0.983 [0.95, 1.00] & 1.000 & 0.017 & 0.000 \\
+& C1 & 0.467 [0.33, 0.58] & 0.983 & 0.525 & 0.017 \\
+& C2 & 0.583 [0.45, 0.70] & 0.917 & 0.364 & 0.083 \\
+& C3 & 0.017 [0.00, 0.05] & 0.167 & 0.900 & 0.833 \\
+\bottomrule
+\end{tabular}
+\caption{Cross-Model Comparison across Grounding Conditions on Matibhrom Benchmark.}
+\label{tab:model_scaling_comparison}
+\end{table*}

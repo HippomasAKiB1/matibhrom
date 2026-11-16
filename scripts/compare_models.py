@@ -15,6 +15,12 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.eval.stats import mcnemar_test, bootstrap_confidence_interval
+from src.eval.metrics import (
+    compute_hallucination_rate,
+    compute_coverage,
+    compute_selective_accuracy,
+    compute_abstention_rate,
+)
 from src.validate_data import load_jsonl
 
 
@@ -40,15 +46,10 @@ def compute_metrics(rows):
     if n == 0:
         return {"n": 0, "hallucination": 0.0, "coverage": 0.0, "selective_accuracy": 0.0, "abstention": 0.0}
     
-    n_abstain = sum(1 for r in rows if r.get("abstention_status") in ("explicit_refusal", "unsupported_claim", "abstain"))
-    n_answered = n - n_abstain
-    n_correct = sum(1 for r in rows if r.get("correctness") == "correct")
-    n_hal = sum(1 for r in rows if r.get("hallucination") == "yes")
-    
-    hal_rate = n_hal / n
-    coverage = n_answered / n
-    sel_acc = n_correct / n_answered if n_answered > 0 else 0.0
-    abstention_rate = n_abstain / n
+    hal_rate = compute_hallucination_rate(rows)
+    coverage = compute_coverage(rows)
+    sel_acc = compute_selective_accuracy(rows)
+    abstention_rate = compute_abstention_rate(rows)
     
     hal_vals = [1.0 if r.get("hallucination") == "yes" else 0.0 for r in rows]
     hal_ci = bootstrap_confidence_interval(hal_vals) if hal_vals else {"lower": 0.0, "upper": 0.0}

@@ -32,7 +32,10 @@ class Embedder:
         """Load the sentence transformer model."""
         if self._model is None:
             from sentence_transformers import SentenceTransformer
-            self._model = SentenceTransformer(self.model_name)
+            try:
+                self._model = SentenceTransformer(self.model_name, local_files_only=True)
+            except Exception:
+                self._model = SentenceTransformer(self.model_name)
         return self._model
 
     def encode(self, texts: list[str], normalize: bool = True) -> np.ndarray:

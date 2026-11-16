@@ -89,10 +89,18 @@ class LiteLLMAdapter(ModelAdapter):
                     cost_usd=cost_usd
                 )
 
-            except (litellm.RateLimitError, litellm.APITimeoutError, litellm.APIConnectionError, litellm.ServiceUnavailableError) as e:
+            except (
+                getattr(litellm, "RateLimitError", Exception),
+                getattr(litellm, "Timeout", Exception),
+                getattr(litellm, "APIConnectionError", Exception),
+                getattr(litellm, "ServiceUnavailableError", Exception),
+                getattr(litellm, "InternalServerError", Exception),
+            ) as e:
                 last_error = e
+                if self.is_ollama:
+                    self.unload()
                 wait_time = self.base_backoff * (2 ** attempt)
-                logger.warning(f"Transient error ({type(e).__name__}), waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries})")
+                logger.warning(f"Transient error ({type(e).__name__}), waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries}): {e}")
                 time.sleep(wait_time)
 
             except Exception as e:

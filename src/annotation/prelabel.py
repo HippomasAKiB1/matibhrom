@@ -158,15 +158,32 @@ def run_prelabeling(
     annotations_path = run_dir / "annotations" / "annotations.jsonl"
     annotations_path.parent.mkdir(parents=True, exist_ok=True)
 
+    existing_annotations: dict[str, dict] = {}
+    if annotations_path.exists():
+        for row in load_jsonl(annotations_path):
+            existing_annotations[row["generation_id"]] = row
+
     verify_fraction = ann_config.get("prelabel_verify_fraction", 0.20)
     rng = random.Random(seed)
 
-    n_labeled = 0
+    n_labeled = len(existing_annotations)
     n_failed = 0
     verify_required: list[str] = []
 
+    # Reconstruct verify_required for existing annotations
+    for gid, ann in existing_annotations.items():
+        gen_item_id = next((g["item_id"] for g in generations if g["generation_id"] == gid), None)
+        item = items_by_id.get(gen_item_id) if gen_item_id else None
+        if item and item.get("domain") in ("medical", "legal") and ann.get("hallucination") == "yes":
+            verify_required.append(gid)
+        elif rng.random() < verify_fraction:
+            verify_required.append(gid)
+
     with open(annotations_path, "a", encoding="utf-8") as out_f:
         for gen in generations:
+            if gen["generation_id"] in existing_annotations:
+                continue
+
             item = items_by_id.get(gen["item_id"])
             if item is None:
                 n_failed += 1
@@ -190,7 +207,12 @@ def run_prelabeling(
                 verified_by_human=False,
             )
             out_f.write(json.dumps(annotation.model_dump(), ensure_ascii=False) + "\n")
+            out_f.flush()
             n_labeled += 1
+
+            # Periodic memory refresh for local runner
+            if n_labeled % 25 == 0:
+                adapter.unload()
 
             # Mandatory verification: all medical/legal hallucination=yes,
             # plus a stratified random `verify_fraction` of everything else.

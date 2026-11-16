@@ -25,6 +25,7 @@ def run_pipeline(
     conditions: str = "C0,C1,C2,C3",
     models: str = "ollama/qwen3:1.7b,ollama/gemma3:4b",
     limit: int | None = None,
+    per_domain_limit: int | None = None,
     workers: int = 1,
     skip_generation: bool = False,
 ):
@@ -34,7 +35,7 @@ def run_pipeline(
 
     # 1. Generation Runner
     if not skip_generation:
-        print(f"\n[Step 1/4] Running generation (conditions={conditions}, models={models}, limit={limit})...")
+        print(f"\n[Step 1/4] Running generation (conditions={conditions}, models={models}, limit={limit}, per_domain_limit={per_domain_limit})...")
         cmd_run = [
             sys.executable,
             "-m",
@@ -53,7 +54,9 @@ def run_pipeline(
             "--workers", str(workers),
             "--resume",
         ]
-        if limit:
+        if per_domain_limit:
+            cmd_run.extend(["--per-domain-limit", str(per_domain_limit)])
+        elif limit:
             cmd_run.extend(["--limit", str(limit)])
         if split == "test":
             cmd_run.append("--unlock-test")
@@ -108,6 +111,7 @@ def main():
     parser.add_argument("--conditions", default="C0,C1,C2,C3", help="Comma-separated conditions")
     parser.add_argument("--models", default="ollama/qwen3:1.7b,ollama/gemma3:4b", help="Comma-separated model IDs")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of items for pilot/quick testing")
+    parser.add_argument("--per-domain-limit", type=int, default=None, help="Limit number of items per domain")
     parser.add_argument("--workers", type=int, default=1, help="Inference concurrency")
     parser.add_argument("--skip-generation", action="store_true", help="Skip generation if already complete")
     args = parser.parse_args()
@@ -118,6 +122,7 @@ def main():
         conditions=args.conditions,
         models=args.models,
         limit=args.limit,
+        per_domain_limit=args.per_domain_limit,
         workers=args.workers,
         skip_generation=args.skip_generation,
     )

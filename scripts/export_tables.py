@@ -148,11 +148,13 @@ def compute_paired_comparisons(joined_records: list[dict]) -> dict[str, Any]:
 
     mcnemar_c0_c1 = _paired_cond("C0", "C1")
     mcnemar_c0_c2 = _paired_cond("C0", "C2")
+    mcnemar_c2_c3 = _paired_cond("C2", "C3")
 
     return {
         "bn_vs_banglish": mcnemar_lang,
         "c0_vs_c1_hallucination": mcnemar_c0_c1,
         "c0_vs_c2_hallucination": mcnemar_c0_c2,
+        "c2_vs_c3_hallucination": mcnemar_c2_c3,
     }
 
 
@@ -268,6 +270,7 @@ def append_stats_to_summary(
         f"- **Standard Bangla vs Banglish**: chi2={paired['bn_vs_banglish']['statistic']:.3f}, p={paired['bn_vs_banglish']['p_value']:.4f} (significant={paired['bn_vs_banglish']['significant']})",
         f"- **C0 vs C1 (Oracle)**: chi2={paired['c0_vs_c1_hallucination']['statistic']:.3f}, p={paired['c0_vs_c1_hallucination']['p_value']:.4f} (significant={paired['c0_vs_c1_hallucination']['significant']})",
         f"- **C0 vs C2 (RAG)**: chi2={paired['c0_vs_c2_hallucination']['statistic']:.3f}, p={paired['c0_vs_c2_hallucination']['p_value']:.4f} (significant={paired['c0_vs_c2_hallucination']['significant']})",
+        f"- **C2 vs C3 (Abstention)**: chi2={paired.get('c2_vs_c3_hallucination', {}).get('statistic', 0.0):.3f}, p={paired.get('c2_vs_c3_hallucination', {}).get('p_value', 1.0):.4f} (significant={paired.get('c2_vs_c3_hallucination', {}).get('significant', False)})",
     ])
 
     if retrieval_diag and retrieval_diag.get("overall", {}).get("queries", 0) > 0:
@@ -362,6 +365,11 @@ def main() -> None:
         generate_metrics_csv(metrics_by_group, reports_dir / "metrics.csv")
         generate_summary_markdown(metrics_by_group, args.rq_findings, reports_dir / "summary.md")
         write_latex_table(metrics_by_group, cis_by_group, reports_dir / "tables" / "primary_metrics.tex")
+
+        # Also write domain metrics table if domain exists
+        metrics_by_domain = compute_metrics_by_group(joined, "domain", retrieval_logs)
+        cis_by_domain = compute_bootstrap_cis(joined, "domain")
+        write_latex_table(metrics_by_domain, cis_by_domain, reports_dir / "tables" / "domain_metrics.tex")
 
         # Save paired comparisons JSON
         with open(reports_dir / "paired_comparisons.json", "w", encoding="utf-8") as f:

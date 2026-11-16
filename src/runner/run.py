@@ -209,6 +209,7 @@ def main() -> None:
     parser.add_argument("--corpus", default="data/dummy/corpus.jsonl", help="Corpus jsonl path")
     parser.add_argument("--min-corpus-passages", type=int, default=None, help="Minimum corpus passages required")
     parser.add_argument("--limit", type=int, help="Run only first N items")
+    parser.add_argument("--per-domain-limit", type=int, default=None, help="Run first N items per domain")
     parser.add_argument("--resume", action="store_true", help="Resume from existing generations")
     parser.add_argument("--dry-run", action="store_true", help="Print planned calls without running")
     parser.add_argument("--unlock-test", action="store_true", help="Unlock frozen test split")
@@ -272,7 +273,16 @@ def main() -> None:
 
     # Filter by split
     items = [i for i in items if i.split == split]
-    if limit:
+    if args.per_domain_limit:
+        from collections import defaultdict
+        by_dom = defaultdict(list)
+        for itm in items:
+            by_dom[itm.domain].append(itm)
+        stratified = []
+        for dom in ["general", "medical", "legal"]:
+            stratified.extend(by_dom[dom][:args.per_domain_limit])
+        items = stratified
+    elif limit:
         items = items[:limit]
 
     # Build prompt builder

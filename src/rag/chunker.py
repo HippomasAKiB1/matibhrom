@@ -26,7 +26,10 @@ class Chunker:
         """Get or create the tokenizer for the embedding model."""
         if self._tokenizer is None:
             from transformers import AutoTokenizer
-            self._tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3")
+            try:
+                self._tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3", local_files_only=True)
+            except Exception:
+                self._tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3")
         return self._tokenizer
 
     def chunk_text(self, text: str, passage_id: str) -> list[Chunk]:

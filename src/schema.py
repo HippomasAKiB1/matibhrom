@@ -33,7 +33,7 @@ class Item(BaseModel):
     question_banglish: str
     gold_answer: str
     evidence_id: str
-    answer_type: Literal["entity", "numeric", "short explanation", "procedure", "citation"]
+    answer_type: Literal["entity", "numeric", "short explanation", "procedure", "citation", "date"]
     risk_tag: Literal["normal", "high-stakes"]
     split: Literal["dev", "test"]
     group_key: str | None = None

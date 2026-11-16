@@ -684,5 +684,32 @@ Continuing to complete and verify the RAG/retrieval pipeline and wire up real LL
   3. `pyproject.toml`: Added `matibhrom-compute-iaa` and `matibhrom-sample-annotation` console scripts, verified via `pip install -e .`.
   4. `Dockerfile.gpu`: Fixed requirements copy to include both `requirements-cpu.txt` and `requirements-gpu.txt`.
 
+---
+
+## Session 3: Local LLM Integration (Ollama) & Full Benchmark Compilation
+
+### 1. Ollama Local Model Architecture & LiteLLM Integration
+- **Context:** User requested a direction change away from OpenRouter / external cloud APIs towards reproducible, private, local model evaluation using Ollama on a GTX 1650 (4 GB VRAM) workstation.
+- **Implementation:**
+  1. Updated `src/model_adapters/litellm_adapter.py` to forward `api_base` and automatically set `http://localhost:11434` for models prefixed with `ollama/`.
+  2. Registered `"ollama"` as a first-class adapter alias in `src/model_adapters/__init__.py`.
+  3. Configured `ollama/qwen3:1.7b` and `ollama/gemma3:4b` in `configs/models.yaml` with $0.00 pricing in `configs/budget.yaml`.
+- **Verification:** Both models verified generating fluent Bangla and Banglish text through the pipeline without network egress.
+
+### 2. Compilation of Real 600-Item Benchmark (`scripts/compile_benchmark.py`)
+- **Discovery:** Audited `src/datasets/` and `Dataset/` and discovered 639 fully curated Bangla/Banglish items that were previously unincorporated into the benchmark JSONL files.
+- **Implementation:**
+  1. Extracted exactly 200 items per domain: 200 General (`src/datasets/itemsGeneral.csv`), 200 Medical (`src/datasets/itemsMedical.csv`), and 200 Legal with Bangla evidence (`Dataset/legal_items.csv`).
+  2. Derived a strictly grouped 20% dev (120 items; 40 per domain) and 80% test (480 items; 160 per domain) split respecting `group_key` and document source IDs with zero cross-split leakage.
+  3. Generated 1,200 domain-matched distractor passages (400 General, 400 Medical, 400 Legal) and assembled `data/benchmark/corpus.jsonl` (1,800 passages total: 600 gold + 1,200 distractors).
+  4. Derived `data/splits/dev.jsonl` and `data/splits/test.jsonl`.
+  5. Added `"date"` to `Item.answer_type` in `src/schema.py` and corrected `src/validate_data.py` total benchmark domain count check.
+- **Verification:** `validate_artifact` passes with 0 errors across all 600 items, 600 evidences, and 1,800 corpus passages.
+
+### 3. Local LLM Pre-labeling & End-to-End Run
+- **Implementation:** Evaluated local models on JSON codebook extraction. `ollama/gemma3:4b` achieved 100% parse success with strict adherence to Pydantic labels. Configured as `prelabel_model` in `configs/annotation.yaml`.
+- **Verification:** Ran test run `test_ollama_c0_v1` through generation, sampling, pre-labeling, and metrics/plots export. Observed authentic register degradation in Banglish (`qwen3:1.7b`), directly supporting RQ1.
+
+
 
 

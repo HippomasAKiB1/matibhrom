@@ -3,7 +3,7 @@ split: test
 languages: [bn, banglish]
 domains: [general, medical, legal]
 conditions: [C0, C1, C2, C3]
-models: [dummy, qwen2.5-7b-instruct]   # authoritative; see §7.1
+models: [ollama/qwen3:1.7b, ollama/gemma3:4b]   # local Ollama models
 rag_config: configs/rag.yaml
 budget_config: configs/budget.yaml
 prompt_dir: configs/prompts
@@ -15,4 +15,4 @@ generation:
 output_dir: outputs
 resume: true
 freeze_test: true
-workers: 8                              # concurrency (see §13.4)
+workers: 1                              # local inference concurrency

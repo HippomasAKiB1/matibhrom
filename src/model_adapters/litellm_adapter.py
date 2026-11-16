@@ -23,6 +23,7 @@ class LiteLLMAdapter(ModelAdapter):
         self.max_tokens = params.get("max_tokens", 512)
         self.seed = params.get("seed", 42)
         self.top_p = params.get("top_p", 1.0)
+        self.api_base = params.get("api_base")
 
         # Retry configuration
         self.max_retries = 3
@@ -37,6 +38,11 @@ class LiteLLMAdapter(ModelAdapter):
                 start_time = time.time()
 
                 extra_kwargs = {}
+                if self.api_base:
+                    extra_kwargs["api_base"] = self.api_base
+                elif self.model.startswith("ollama/"):
+                    extra_kwargs["api_base"] = os.environ.get("OLLAMA_API_BASE", "http://localhost:11434")
+
                 if self.model.startswith("openrouter/") and os.environ.get("OPENROUTER_API_KEY"):
                     extra_kwargs["api_key"] = os.environ.get("OPENROUTER_API_KEY")
 
@@ -120,3 +126,19 @@ class LiteLLMAdapter(ModelAdapter):
         # LiteLLM supports batch via completion with multiple messages
         # But for simplicity and to track individual costs, we do sequential
         return [self.generate(p) for p in prompts]
+
+    def unload(self) -> None:
+        """Unload model from Ollama / memory if applicable to reclaim RAM/VRAM."""
+        clean_model = self.model.replace("ollama/", "")
+        if self.model.startswith("ollama/") or "ollama" in self.model:
+            try:
+                import requests
+                api_base = self.api_base or os.environ.get("OLLAMA_API_BASE", "http://localhost:11434")
+                requests.post(
+                    f"{api_base}/api/generate",
+                    json={"model": clean_model, "keep_alive": 0},
+                    timeout=5,
+                )
+                logger.info(f"Unloaded {clean_model} from Ollama memory.")
+            except Exception as e:
+                logger.warning(f"Could not unload {clean_model}: {e}")

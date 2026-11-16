@@ -320,6 +320,17 @@ class GenerationRunner:
                 if g is not None:
                     generations.append(g)
 
+        # Unload adapters to reclaim memory
+        for model_config in self.models:
+            adapter_name = model_config.get("adapter")
+            if adapter_name:
+                try:
+                    adapter_cls = get_adapter_class(adapter_name)
+                    adapter = adapter_cls(model_id=model_config["id"], params=model_config.get("params", {}))
+                    adapter.unload()
+                except Exception:
+                    pass
+
         return generations
 
     def _get_evidence(self, item: Item) -> str:

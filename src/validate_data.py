@@ -167,14 +167,13 @@ def validate_artifact(
                 )
 
     # --- domain counts (200/200/200 for full benchmark; warn for dummy) ---
-    domain_counts = defaultdict(lambda: defaultdict(int))
+    total_domain_counts: dict[str, int] = defaultdict(int)
     for i in items:
-        domain_counts[i.split][i.domain] += 1
-    for split_name, counts in domain_counts.items():
-        if split_name == "test" and len(items) == 600:
-            for d in ("general", "medical", "legal"):
-                if counts[d] != 200:
-                    errors.append(f"Test split: expected 200 {d}, got {counts[d]}")
+        total_domain_counts[i.domain] += 1
+    if len(items) == 600:
+        for d in ("general", "medical", "legal"):
+            if total_domain_counts[d] != 200:
+                errors.append(f"Benchmark: expected 200 {d}, got {total_domain_counts[d]}")
 
     # --- dev/test ratio ---
     base_items = set(i.item_id for i in items)

@@ -11,9 +11,8 @@ dist/
 build/
 *.egg-info/
 outputs/
-data/benchmark/
-data/splits/
 locks/
 configs/annotation_tokens.json
+.vscode/
 .DS_Store
 Thumbs.db

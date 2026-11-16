@@ -206,6 +206,7 @@ def run_prelabeling(
         for gid in verify_required:
             f.write(json.dumps({"generation_id": gid}, ensure_ascii=False) + "\n")
 
+    adapter.unload()
     return n_labeled, n_failed
 
 

@@ -36,6 +36,28 @@ models:
       max_tokens: 512
     max_input_tokens: 128000
 
+  - id: ollama/qwen3:1.7b
+    adapter: litellm
+    enabled: true
+    model: "ollama/qwen3:1.7b"
+    params:
+      model: "ollama/qwen3:1.7b"
+      api_base: "http://localhost:11434"
+      temperature: 0.0
+      max_tokens: 512
+    max_input_tokens: 4096
+
+  - id: ollama/gemma3:4b
+    adapter: litellm
+    enabled: true
+    model: "ollama/gemma3:4b"
+    params:
+      model: "ollama/gemma3:4b"
+      api_base: "http://localhost:11434"
+      temperature: 0.0
+      max_tokens: 512
+    max_input_tokens: 4096
+
   - id: openrouter/nvidia/nemotron-3-super-120b-a12b:free
     adapter: litellm
     enabled: true

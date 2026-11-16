@@ -2,16 +2,28 @@
 Embedder for Matibhrom RAG using BAAI/bge-m3.
 """
 
+import gc
 import hashlib
+import os
 import numpy as np
 from pathlib import Path
 from typing import Any
+
+# Safeguard CPU and memory on developer workstations:
+# Restrict PyTorch CPU thread pool so indexing never freezes the OS
+try:
+    import torch
+    if not torch.cuda.is_available():
+        max_threads = int(os.environ.get("TORCH_NUM_THREADS", "2"))
+        torch.set_num_threads(max_threads)
+except Exception:
+    pass
 
 
 class Embedder:
     """Text embedder using sentence-transformers."""
 
-    def __init__(self, model_name: str = "BAAI/bge-m3", batch_size: int = 32):
+    def __init__(self, model_name: str = "BAAI/bge-m3", batch_size: int = 8):
         self.model_name = model_name
         self.batch_size = batch_size
         self._model = None
@@ -25,7 +37,7 @@ class Embedder:
 
     def encode(self, texts: list[str], normalize: bool = True) -> np.ndarray:
         """
-        Encode texts into embeddings.
+        Encode texts into embeddings with progressive memory management.
 
         Args:
             texts: List of texts to encode
@@ -35,13 +47,33 @@ class Embedder:
             numpy array of shape (n_texts, embedding_dim)
         """
         model = self._load_model()
-        embeddings = model.encode(
-            texts,
-            batch_size=self.batch_size,
-            normalize_embeddings=normalize,
-            show_progress_bar=False
-        )
-        return embeddings
+        
+        # If encoding a large corpus on CPU, batch progressively to avoid memory spikes
+        total = len(texts)
+        if total > 50:
+            embeddings_list = []
+            chunk_step = 50
+            for start_idx in range(0, total, chunk_step):
+                end_idx = min(start_idx + chunk_step, total)
+                sub_texts = texts[start_idx:end_idx]
+                sub_emb = model.encode(
+                    sub_texts,
+                    batch_size=self.batch_size,
+                    normalize_embeddings=normalize,
+                    show_progress_bar=False,
+                )
+                embeddings_list.append(sub_emb)
+                gc.collect()
+                print(f"  [Embedder] Encoded {end_idx}/{total} passages...")
+            return np.vstack(embeddings_list)
+        else:
+            embeddings = model.encode(
+                texts,
+                batch_size=self.batch_size,
+                normalize_embeddings=normalize,
+                show_progress_bar=False,
+            )
+            return embeddings
 
     def encode_single(self, text: str, normalize: bool = True) -> np.ndarray:
         """Encode a single text."""

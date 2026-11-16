@@ -281,13 +281,19 @@ def main() -> None:
     # Setup cache
     cache = GenerationCache(output_dir / "cache" / "cache.db")
 
-    # Setup retriever for C2/C3
+    # Setup retriever for C1/C2/C3
     retriever = None
-    if any(c in conditions for c in ["C2", "C3"]):
+    if any(c in conditions for c in ["C1", "C2", "C3"]):
         corpus_p = Path(args.corpus)
+        target_idx_dir = output_dir / args.run_id / "retrieval" / "index"
+        shared_idx_dir = output_dir / "benchmark_v1" / "retrieval" / "index"
+        if not target_idx_dir.exists() and shared_idx_dir.exists():
+            import shutil
+            shutil.copytree(shared_idx_dir, target_idx_dir)
+            logger.info(f"Reused pre-built benchmark index from {shared_idx_dir}")
         retriever = Retriever(
             corpus_path=corpus_p,
-            index_dir=output_dir / args.run_id / "retrieval" / "index",
+            index_dir=target_idx_dir,
             embedding_model=rag_config.get("embedding_model", "BAAI/bge-m3"),
             top_k=rag_config.get("top_k", 5),
             chunk_size=rag_config.get("chunk_size", 384),

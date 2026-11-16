@@ -27,6 +27,7 @@ __all__ = [
 _ADAPTER_MODULES = {
     "dummy": (None, None),  # already imported eagerly above
     "litellm": (".litellm_adapter", "LiteLLMAdapter"),
+    "ollama": (".litellm_adapter", "LiteLLMAdapter"),
     "vllm": (".vllm_adapter", "VLLMAdapter"),
     "hf": (".hf_adapter", "HFAdapter"),
 }

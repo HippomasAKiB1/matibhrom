@@ -24,6 +24,13 @@ However, direct cross-model paired testing reveals that parameter capacity funda
 \end{equation}
 While Qwen 1.7B continues to hallucinate on $28.3\%$ of queries due to its inability to reliably follow negative constraints, \textbf{Gemma 4B achieves near-total hallucination eradication}, dropping to a \textbf{1.7\% hallucination rate} [0.00, 0.05], an $83.3\%$ abstention rate, and a remarkable \textbf{90.0\% selective accuracy}. When evidence is insufficient or contradictory, Gemma 4B consistently suppresses generative confabulation and outputs the standardized refusal: \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.96\textwidth]{figures/figure2_scaling_abstention.png}
+\caption{Cross-Model Scaling and Selective Abstention Dynamics: (a) Hallucination rates across conditions with 1,000-sample bootstrap 95\% confidence intervals; (b) Emergence of high selective accuracy (90.0\%) under selective abstention guardrailing on Gemma 4B ($\chi^2 = 12.500, p = 0.0004$).}
+\label{fig:scaling_abstention}
+\end{figure*}
+
 \begin{table}[t]
 \centering
 \small
@@ -71,3 +78,10 @@ Table~\ref{tab:domain_disparity} delineates performance across the General, Medi
 
 \paragraph{Legal Domain Vulnerability.} Across both architectures, the Legal domain exhibits the highest hallucination rates ($78.7\%$ on Qwen, $61.3\%$ on Gemma), yielding low selective accuracy ($6.0\%$ and $21.0\%$). Legal statutory queries feature exact numerical clauses (e.g., Article numbers, statutory penalty periods, labor compensation formulas) where slight semantic drift results in severe factual hallucination.
 \paragraph{Medical Adherence.} In contrast, the Medical domain demonstrates the highest evidence adherence, with both models achieving identical, lower hallucination rates ($42.5\%$) and the highest selective accuracy ($47.7\%$ and $48.5\%$). Dense retriever recall reaches $85.00\%$ in Medical (with $55.0\%$ Rank-1 Precision), providing clean physiological and clinical context that small LLMs reliably extract.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.96\textwidth]{figures/figure3_domain_register.png}
+\caption{Domain and Register Disparity: (a) Domain-specific hallucination rates highlighting acute vulnerability in Legal statutory queries; (b) Asymmetry in dense vector retrieval (\texttt{BAAI/bge-m3}) between native Standard Bangla ($\mathcal{Q}_{\text{bn}}$) and Romanized Banglish ($\mathcal{Q}_{\text{banglish}}$).}
+\label{fig:domain_register}
+\end{figure*}

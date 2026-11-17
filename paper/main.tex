@@ -1,9 +1,105 @@
 \documentclass[11pt,a4paper,twocolumn]{article}
 
-% --- Margins and Geometry (ACL Format Standard) ---
+% --- Margins and Geometry (ACL / TACL Standard) ---
 \usepackage[margin=2cm,top=2.2cm,bottom=2.2cm]{geometry}
-\usepackage{times}
-\usepackage{microtype}
+
+% --- Engine Autodetection: Dual Support for XeLaTeX / LuaLaTeX & pdfLaTeX ---
+\usepackage{iftex}
+
+\ifpdftex
+  % --- Fallback Engine: pdfLaTeX ---
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{times}
+  \usepackage{microtype}
+  
+  % Override foreignlanguage stub to avoid "No multilingual package has been loaded"
+  \DeclareRobustCommand{\foreignlanguage}[2]{#2}
+  
+  % Safe Unicode declarations for all 49 Bengali characters so pdfLaTeX never crashes
+  \DeclareUnicodeCharacter{0982}{ng}
+  \DeclareUnicodeCharacter{0985}{O}
+  \DeclareUnicodeCharacter{0986}{A}
+  \DeclareUnicodeCharacter{0987}{I}
+  \DeclareUnicodeCharacter{0989}{U}
+  \DeclareUnicodeCharacter{098F}{E}
+  \DeclareUnicodeCharacter{0993}{O}
+  \DeclareUnicodeCharacter{0995}{k}
+  \DeclareUnicodeCharacter{0997}{g}
+  \DeclareUnicodeCharacter{0999}{ng}
+  \DeclareUnicodeCharacter{099B}{ch}
+  \DeclareUnicodeCharacter{099C}{j}
+  \DeclareUnicodeCharacter{099F}{t}
+  \DeclareUnicodeCharacter{09A1}{d}
+  \DeclareUnicodeCharacter{09A3}{n}
+  \DeclareUnicodeCharacter{09A4}{t}
+  \DeclareUnicodeCharacter{09A5}{th}
+  \DeclareUnicodeCharacter{09A6}{d}
+  \DeclareUnicodeCharacter{09A7}{dh}
+  \DeclareUnicodeCharacter{09A8}{n}
+  \DeclareUnicodeCharacter{09AA}{p}
+  \DeclareUnicodeCharacter{09AC}{b}
+  \DeclareUnicodeCharacter{09AD}{bh}
+  \DeclareUnicodeCharacter{09AE}{m}
+  \DeclareUnicodeCharacter{09AF}{y}
+  \DeclareUnicodeCharacter{09B0}{r}
+  \DeclareUnicodeCharacter{09B2}{l}
+  \DeclareUnicodeCharacter{09B6}{sh}
+  \DeclareUnicodeCharacter{09B7}{sh}
+  \DeclareUnicodeCharacter{09B8}{s}
+  \DeclareUnicodeCharacter{09B9}{h}
+  \DeclareUnicodeCharacter{09BC}{}
+  \DeclareUnicodeCharacter{09BE}{a}
+  \DeclareUnicodeCharacter{09BF}{i}
+  \DeclareUnicodeCharacter{09C0}{ee}
+  \DeclareUnicodeCharacter{09C1}{u}
+  \DeclareUnicodeCharacter{09C2}{oo}
+  \DeclareUnicodeCharacter{09C3}{ri}
+  \DeclareUnicodeCharacter{09C7}{e}
+  \DeclareUnicodeCharacter{09C8}{oi}
+  \DeclareUnicodeCharacter{09CD}{}
+  \DeclareUnicodeCharacter{09E6}{0}
+  \DeclareUnicodeCharacter{09E7}{1}
+  \DeclareUnicodeCharacter{09E8}{2}
+  \DeclareUnicodeCharacter{09EA}{4}
+  \DeclareUnicodeCharacter{09EB}{5}
+  \DeclareUnicodeCharacter{09EC}{6}
+  \DeclareUnicodeCharacter{09ED}{7}
+  \DeclareUnicodeCharacter{09EF}{9}
+\else
+  % --- Preferred Engine: XeLaTeX / LuaLaTeX (Native Bengali Complex Script Support) ---
+  \usepackage{fontspec}
+  \defaultfontfeatures{Ligatures=TeX}
+  
+  \IfFontExistsTF{TeX Gyre Termes}{
+    \setmainfont{TeX Gyre Termes}
+  }{
+    \IfFontExistsTF{Times New Roman}{
+      \setmainfont{Times New Roman}
+    }{}
+  }
+  
+  % Load bundled Noto Serif Bengali or system FreeSerif font
+  \IfFileExists{fonts/NotoSerifBengali.ttf}{
+    \newfontfamily\bengalifont{NotoSerifBengali.ttf}[Path=fonts/,Script=Bengali]
+  }{
+    \IfFontExistsTF{FreeSerif}{
+      \newfontfamily\bengalifont{FreeSerif}[Script=Bengali]
+    }{
+      \IfFontExistsTF{Noto Serif Bengali}{
+        \newfontfamily\bengalifont{Noto Serif Bengali}[Script=Bengali]
+      }{
+        \let\bengalifont\relax
+      }
+    }
+  }
+  
+  \ifdefined\bengalifont
+    \DeclareRobustCommand{\foreignlanguage}[2]{{\bengalifont #2}}
+  \else
+    \DeclareRobustCommand{\foreignlanguage}[2]{#2}
+  \fi
+\fi
 
 % --- Math and Algorithms ---
 \usepackage{amsmath,amssymb,amsfonts,mathtools}
@@ -23,10 +119,6 @@
 \definecolor{darkblue}{rgb}{0, 0, 0.54}
 \usepackage[colorlinks=true, linkcolor=darkblue, citecolor=darkblue, urlcolor=darkblue]{hyperref}
 \usepackage[nameinlink,capitalize]{cleveref}
-
-% --- Bengali Script Fallback for Engine Portability ---
-% Allows seamless compilation in pdfLaTeX, XeLaTeX, or LuaLaTeX
-\providecommand{\foreignlanguage}[2]{#2}
 
 % --- Bibliography ---
 \usepackage[numbers,sort&compress]{natbib}

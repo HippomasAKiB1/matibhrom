@@ -53,11 +53,11 @@ The prompt explicitly mandates: \foreignlanguage{bengali}{\emph{"যদি প�
     \node[box] (c3) at (7, -3) {\textbf{$C_3$: Abstention}\\Top-$k$ Context +\\Negative Constraint};
     
     % Model Generation
-    \node[box] (model) at (11, 0) {\textbf{Model Inference}\\Qwen 1.7B / Gemma 4B\\($N=480$ Generations)};
+    \node[box] (model) at (11, 0) {\textbf{Model Inference}\\Qwen 1.7B / Gemma 4B\\($N=4{,}560$ Generations)};
     
     % Evaluation
     \node[evalbox] (adjudication) at (14.5, 0) {\textbf{Gold Adjudication}\\Exact Matching \&\\Abstention Cues\\(Codebook v1.0.0)};
-    \node[evalbox] (stats) at (14.5, -2.5) {\textbf{Statistical Rigor}\\Paired McNemar ($\chi^2$)\\1,000-Bootstrap 95\% CI};
+    \node[evalbox] (stats) at (14.5, -2.5) {\textbf{Statistical Rigor}\\Paired McNemar ($\chi^2$)\\95\% Wilson CI};
 
     % Arrows
     \draw[arrow] (corpus) -- (retriever);

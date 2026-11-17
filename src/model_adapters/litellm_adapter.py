@@ -2,9 +2,11 @@
 LiteLLM model adapter for Matibhrom - supports OpenAI, Anthropic, Google, and other APIs.
 """
 
+import json
 import logging
 import os
 import time
+import urllib.request
 from typing import Any
 
 from dotenv import load_dotenv
@@ -31,8 +33,64 @@ class LiteLLMAdapter(ModelAdapter):
         self.base_backoff = 2.0
 
     def generate(self, prompt: str) -> GenerationResult:
-        """Generate a single response using LiteLLM."""
+        """Generate a single response using native Ollama API or LiteLLM."""
         last_error = None
+
+        if self.is_ollama:
+            clean_model = self.model.replace("ollama/", "")
+            api_base = self.api_base or os.environ.get("OLLAMA_API_BASE", "http://localhost:11434")
+            for attempt in range(self.max_retries):
+                try:
+                    start_time = time.time()
+                    temp = self.temperature if attempt == 0 else min(0.3, self.temperature + 0.1 * attempt)
+                    payload = json.dumps({
+                        "model": clean_model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {
+                            "num_ctx": 2048,
+                            "temperature": temp,
+                            "num_predict": self.max_tokens,
+                            "seed": self.seed if self.seed is not None else 42,
+                            "top_p": self.top_p if self.top_p is not None else 1.0,
+                        }
+                    }).encode("utf-8")
+                    req = urllib.request.Request(
+                        f"{api_base}/api/generate",
+                        data=payload,
+                        headers={"Content-Type": "application/json"}
+                    )
+                    with urllib.request.urlopen(req, timeout=180) as resp:
+                        res = json.loads(resp.read().decode("utf-8"))
+                    text = res.get("response", "")
+                    latency_ms = int((time.time() - start_time) * 1000)
+                    prompt_tokens = res.get("prompt_eval_count", 0)
+                    response_tokens = res.get("eval_count", 0)
+                    logger.info(f"Ollama call to {clean_model} - {latency_ms}ms, {prompt_tokens}+{response_tokens} tokens")
+                    return GenerationResult(
+                        text=text,
+                        model_version=f"ollama/{clean_model}",
+                        prompt_tokens=prompt_tokens,
+                        response_tokens=response_tokens,
+                        latency_ms=latency_ms,
+                        cost_usd=0.0
+                    )
+                except Exception as e:
+                    last_error = e
+                    wait_time = max(3.0, self.base_backoff * (2 ** attempt))
+                    logger.warning(f"Ollama transient error, waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries}): {e}")
+                    time.sleep(wait_time)
+            error_msg = str(last_error) if last_error else "Unknown Ollama error"
+            logger.error(f"All retries failed for {self.model}: {error_msg}")
+            return GenerationResult(
+                text="",
+                model_version=self.model,
+                prompt_tokens=0,
+                response_tokens=0,
+                latency_ms=0,
+                cost_usd=0.0,
+                error=error_msg
+            )
 
         for attempt in range(self.max_retries):
             try:

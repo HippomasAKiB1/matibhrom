@@ -335,16 +335,19 @@ class GenerationRunner:
                         tasks.append((item, language, condition, model_config))
 
         generations = []
+        total_tasks = len(tasks)
         if self.workers > 1:
             from concurrent.futures import ThreadPoolExecutor
             with ThreadPoolExecutor(max_workers=self.workers) as executor:
                 results = list(executor.map(self._process_task, tasks))
                 generations = [g for g in results if g is not None]
         else:
-            for task in tasks:
+            for idx, task in enumerate(tasks):
                 g = self._process_task(task)
                 if g is not None:
                     generations.append(g)
+                if (idx + 1) % 10 == 0 or (idx + 1) == total_tasks:
+                    logger.info(f"Progress: [{idx + 1}/{total_tasks}] ({(idx + 1) / total_tasks * 100:.1f}%) generations completed")
 
         # Unload adapters to reclaim memory
         for model_config in self.models:

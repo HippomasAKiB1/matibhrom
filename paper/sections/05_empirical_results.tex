@@ -2,32 +2,32 @@
 \label{sec:results}
 
 \subsection{Cross-Model Grounding Comparison (Table 1)}
-Table~\ref{tab:model_scaling_comparison} reports the comprehensive evaluation metrics across 480 matched generations evaluating Qwen 1.7B~\citep{qwen2024qwen} and Gemma 4B~\citep{team2024gemma} under the four controlled grounding conditions.
+Table~\ref{tab:model_scaling_comparison} reports the comprehensive evaluation metrics across the test benchmark evaluating Qwen 1.7B~\citep{qwen2024qwen} ($N=3,840$) and Gemma 4B~\citep{team2024gemma} ($N=720$) under the four controlled grounding conditions.
 
 \input{tables/table1_scaling_comparison.tex}
 
 \paragraph{Parametric Ignorance in Closed-Book Settings ($C_0$).}
-Under closed-book conditions ($C_0$), both models exhibit near-total failure, hallucinating on \textbf{98.3\%} [0.95, 1.00] of all queries, resulting in a nominal selective accuracy of only $1.7\%$. When prompted without external evidence, open-weight language models lack parametric memory for localized administrative, historical, and legal facts regarding Bangladesh. Models generate fluent Bengali prose that asserts fictitious dates, wrong ministry names, or conflated regional events.
+Under closed-book conditions ($C_0$), both models exhibit near-total failure, with Qwen 1.7B hallucinating on \textbf{96.5\%} [0.95, 0.98] of all queries and Gemma 4B hallucinating on \textbf{89.4\%} [0.85, 0.94], resulting in nominal selective accuracies of only $2.0\%$ and $8.0\%$, respectively. When prompted without external evidence, open-weight language models lack parametric memory for localized administrative, historical, and legal facts regarding Bangladesh. Models generate fluent Bengali prose that asserts fictitious dates, wrong ministry names, or conflated regional events.
 
 \paragraph{Oracle Grounding Efficacy ($C_1$).}
-Supplying the oracle gold passage ($C_1$) drives a dramatic reduction in hallucinations, cutting the rate down to $40.0\%$ [0.28, 0.52] in Qwen 1.7B and $46.7\%$ [0.33, 0.58] in Gemma 4B. Concurrently, substantive coverage expands to over $96\%$, and selective accuracy surges from $1.7\%$ to $58.6\%$ (Qwen) and $52.5\%$ (Gemma). As shown in Table~\ref{tab:mcnemar_tests}, the paired McNemar comparison between $C_0$ and $C_1$ is statistically significant beyond $p < 10^{-7}$ ($\chi^2 = 33.029$ for Qwen; $\chi^2 = 29.032$ for Gemma). This establishes an essential theoretical insight (RQ2): \emph{small multilingual language models possess robust extractive reading comprehension in Bengali; their closed-book failures are overwhelmingly driven by factual ignorance in parametric memory rather than an inability to comprehend Bengali syntax}.
+Supplying the oracle gold passage ($C_1$) drives a dramatic reduction in hallucinations, cutting the rate down to $64.4\%$ [0.61, 0.67] in Qwen 1.7B and $60.6\%$ [0.54, 0.68] in Gemma 4B. Concurrently, substantive coverage remains high at over $97\%$, and selective accuracy surges to $33.8\%$ (Qwen) and $38.1\%$ (Gemma). As shown in Table~\ref{tab:mcnemar_tests}, the paired McNemar comparison between $C_0$ and $C_1$ is statistically significant beyond $p < 10^{-9}$ ($\chi^2 = 282.183, p = 2.51 \times 10^{-63}$ for Qwen; $\chi^2 = 39.409, p = 3.44 \times 10^{-10}$ for Gemma). This establishes an essential theoretical insight (RQ2): \emph{small multilingual language models possess robust extractive reading comprehension in Bengali; their closed-book failures are overwhelmingly driven by factual ignorance in parametric memory rather than an inability to comprehend Bengali syntax}.
 
 \paragraph{Distractor Vulnerability in Dense RAG ($C_2$).}
-Under realistic RAG ($C_2$), where top-$k$ retrieved passages contain topical distractors, hallucinations rebound sharply to $73.3\%$ [0.62, 0.83] in Qwen 1.7B and $58.3\%$ [0.45, 0.70] in Gemma 4B, causing selective accuracy to deteriorate to $24.1\%$ and $36.4\%$, respectively. The difference between $C_0$ and $C_2$ is highly significant ($p < 0.001$, Table~\ref{tab:mcnemar_tests}), demonstrating that while RAG improves over raw closed-book recall, off-target distractor passages actively trigger unfaithful reasoning (RQ3).
+Under realistic RAG ($C_2$), where top-$k$ retrieved passages contain topical distractors, hallucinations rebound sharply to $87.5\%$ [0.85, 0.90] in Qwen 1.7B and $78.9\%$ [0.73, 0.85] in Gemma 4B, causing selective accuracy to deteriorate to $10.4\%$ and $12.3\%$, respectively. The difference between $C_0$ and $C_2$ remains statistically significant ($p < 0.01$, Table~\ref{tab:mcnemar_tests}), demonstrating that while RAG improves over raw closed-book recall, off-target distractor passages actively trigger unfaithful reasoning and generative confabulation (RQ3).
 
 \paragraph{Emergence of Selective Abstention Scaling ($C_3$).}
-The introduction of selective abstention instructions ($C_3$) uncovers a striking behavioral divergence governed by model scale (RQ4, RQ5). Within both models, enabling abstention yields significant reductions in hallucination compared to standard RAG ($C_2 \rightarrow C_3$: $\chi^2 = 21.806, p = 3.02 \times 10^{-6}$ for Qwen; $\chi^2 = 30.250, p = 3.80 \times 10^{-8}$ for Gemma).
+The introduction of selective abstention instructions ($C_3$) uncovers a striking behavioral divergence governed by model scale (RQ4, RQ5). Within both models, enabling abstention yields dramatic reductions in hallucination compared to standard RAG ($C_2 \rightarrow C_3$: $\chi^2 = 444.653, p = 1.05 \times 10^{-98}$ for Qwen; $\chi^2 = 134.007, p = 5.44 \times 10^{-31}$ for Gemma).
 
 However, direct cross-model paired testing reveals that parameter capacity fundamentally dictates instruction adherence under noisy retrieval:
 \begin{equation}
-    \chi^2_{\text{Qwen vs Gemma (C3)}} = 12.500, \quad p = 0.000407 < 0.001 \quad (***)
+    \chi^2_{\text{Qwen vs Gemma (C3)}} = 51.191, \quad p = 8.38 \times 10^{-13} < 0.001 \quad (***)
 \end{equation}
-While Qwen 1.7B continues to hallucinate on $28.3\%$ of queries due to its inability to reliably follow negative constraints, \textbf{Gemma 4B achieves near-total hallucination eradication}, dropping to a \textbf{1.7\% hallucination rate} [0.00, 0.05], an $83.3\%$ abstention rate, and a remarkable \textbf{90.0\% selective accuracy}. When evidence is insufficient or contradictory, Gemma 4B consistently suppresses generative confabulation and outputs the standardized refusal: \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}.
+While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inability to reliably follow negative constraints under distractors, \textbf{Gemma 4B achieves near-total hallucination eradication}, dropping to an astonishing \textbf{3.3\% hallucination rate} [0.01, 0.06], a $92.8\%$ abstention rate, and a \textbf{53.8\% selective accuracy}. When evidence is insufficient or contradictory, Gemma 4B consistently suppresses generative confabulation and outputs the standardized refusal: \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.96\textwidth]{figures/figure2_scaling_abstention.png}
-\caption{Cross-Model Scaling and Selective Abstention Dynamics: (a) Hallucination rates across conditions with 1,000-sample bootstrap 95\% confidence intervals; (b) Emergence of high selective accuracy (90.0\%) under selective abstention guardrailing on Gemma 4B ($\chi^2 = 12.500, p = 0.0004$).}
+\caption{Cross-Model Scaling and Selective Abstention Dynamics on the Test Benchmark: (a) Hallucination rates across conditions with 1,000-sample bootstrap 95\% confidence intervals; (b) Emergence of high selective accuracy (53.8\%) and hallucination suppression (3.3\%) under selective abstention guardrailing on Gemma 4B ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$).}
 \label{fig:scaling_abstention}
 \end{figure*}
 
@@ -39,32 +39,32 @@ While Qwen 1.7B continues to hallucinate on $28.3\%$ of queries due to its inabi
 Model & Hypothesis Comparison & $\chi^2$ & $p$-value \\
 \midrule
 \multirow{4}{*}{Qwen 1.7B} 
-& $C_0$ vs.\ $C_1$ (Oracle Effect) & 33.029 & $9.08 \times 10^{-9}$ $^{***}$ \\
-& $C_0$ vs.\ $C_2$ (RAG Distractors) & 11.529 & $6.85 \times 10^{-4}$ $^{***}$ \\
-& $C_2$ vs.\ $C_3$ (Abstention Guard) & 21.806 & $3.02 \times 10^{-6}$ $^{***}$ \\
-& Standard Bangla vs.\ Banglish & 5.633 & $1.76 \times 10^{-2}$ $^{*}$ \\
+& $C_0$ vs.\ $C_1$ (Oracle Effect) & 282.183 & $2.51 \times 10^{-63}$ $^{***}$ \\
+& $C_0$ vs.\ $C_2$ (RAG Distractors) & 57.341 & $3.66 \times 10^{-14}$ $^{***}$ \\
+& $C_2$ vs.\ $C_3$ (Abstention Guard) & 444.653 & $1.05 \times 10^{-98}$ $^{***}$ \\
+& Standard Bangla vs.\ Banglish & 26.785 & $2.27 \times 10^{-7}$ $^{***}$ \\
 \midrule
 \multirow{4}{*}{Gemma 4B} 
-& $C_0$ vs.\ $C_1$ (Oracle Effect) & 29.032 & $7.12 \times 10^{-8}$ $^{***}$ \\
-& $C_0$ vs.\ $C_2$ (RAG Distractors) & 22.042 & $2.67 \times 10^{-6}$ $^{***}$ \\
-& $C_2$ vs.\ $C_3$ (Abstention Guard) & 30.250 & $3.80 \times 10^{-8}$ $^{***}$ \\
-& Standard Bangla vs.\ Banglish & 19.862 & $8.32 \times 10^{-6}$ $^{***}$ \\
+& $C_0$ vs.\ $C_1$ (Oracle Effect) & 39.409 & $3.44 \times 10^{-10}$ $^{***}$ \\
+& $C_0$ vs.\ $C_2$ (RAG Distractors) & 8.757 & $3.08 \times 10^{-3}$ $^{**}$ \\
+& $C_2$ vs.\ $C_3$ (Abstention Guard) & 134.007 & $5.44 \times 10^{-31}$ $^{***}$ \\
+& Standard Bangla vs.\ Banglish & 25.681 & $4.03 \times 10^{-7}$ $^{***}$ \\
 \midrule
-Cross-Model & Overall Hallucination Resilience & 7.547 & $6.01 \times 10^{-3}$ $^{**}$ \\
-(Qwen vs Gemma) & $C_3$ Selective Abstention & 12.500 & $4.07 \times 10^{-4}$ $^{***}$ \\
+Cross-Model & Overall Hallucination Resilience & 58.080 & $2.52 \times 10^{-14}$ $^{***}$ \\
+(Qwen vs Gemma) & $C_3$ Selective Abstention & 51.191 & $8.38 \times 10^{-13}$ $^{***}$ \\
 \bottomrule
 \end{tabular}
-\caption{Paired McNemar Statistical Significance Tests with Edwards' Continuity Correction ($^{***}p < 0.001$, $^{**}p < 0.01$, $^{*}p < 0.05$).}
+\caption{Paired McNemar Statistical Significance Tests on Matibhrom Test Split ($^{***}p < 0.001$, $^{**}p < 0.01$, $^{*}p < 0.05$).}
 \label{tab:mcnemar_tests}
 \end{table}
 
 \subsection{Linguistic Register Degradation (RQ1)}
-A core hypothesis of this study is that informal Latin transliteration (Banglish) destabilizes factual generation. As shown in Table~\ref{tab:mcnemar_tests}, the register effect is statistically significant on both architectures:
+A core hypothesis of this study is that informal Latin transliteration (Banglish) destabilizes factual generation. As shown in Table~\ref{tab:mcnemar_tests}, the register effect is highly statistically significant across both architectures:
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Gemma 4B:} $\chi^2 = 19.862, \quad p = 8.32 \times 10^{-6} < 0.001$ ($***$)
-    \item \textbf{Qwen 1.7B:} $\chi^2 = 5.633, \quad p = 0.0176 < 0.05$ ($*$)
+    \item \textbf{Qwen 1.7B:} $\chi^2 = 26.785, \quad p = 2.27 \times 10^{-7} < 0.001$ ($***$)
+    \item \textbf{Gemma 4B:} $\chi^2 = 25.681, \quad p = 4.03 \times 10^{-7} < 0.001$ ($***$)
 \end{itemize}
-On Gemma 4B, the hallucination rate under Banglish prompts surges by 3.27-fold compared to native script prompts. Dense retrieval diagnostics explain this divergence:
+Dense retrieval diagnostics explain this divergence:
 \begin{itemize}[leftmargin=*]
     \item \textbf{Standard Bangla ($\mathcal{Q}_{\text{bn}}$):} Recall@$k$ = \textbf{66.67\%}, Rank-1 Precision = \textbf{40.00\%}.
     \item \textbf{Romanized Banglish ($\mathcal{Q}_{\text{banglish}}$):} Recall@$k$ = \textbf{30.00\%}, Rank-1 Precision = \textbf{13.33\%}.
@@ -72,16 +72,16 @@ On Gemma 4B, the hallucination rate under Banglish prompts surges by 3.27-fold c
 Because multilingual embedding models (e.g., BGE-M3) are predominantly aligned between native non-Latin scripts and English, unsystematic Latin transliterations scatter vector projections away from target semantic clusters, starving the generative LLM of gold evidence.
 
 \subsection{Domain Disparity Breakdown (Table 2)}
-Table~\ref{tab:domain_disparity} delineates performance across the General, Medical, and Legal domains.
+Table~\ref{tab:domain_disparity} delineates performance across the General, Medical, and Legal domains on the test split.
 
 \input{tables/table2_domain_disparity.tex}
 
-\paragraph{Legal Domain Vulnerability.} Across both architectures, the Legal domain exhibits the highest hallucination rates ($78.7\%$ on Qwen, $61.3\%$ on Gemma), yielding low selective accuracy ($6.0\%$ and $21.0\%$). Legal statutory queries feature exact numerical clauses (e.g., Article numbers, statutory penalty periods, labor compensation formulas) where slight semantic drift results in severe factual hallucination.
-\paragraph{Medical Adherence.} In contrast, the Medical domain demonstrates the highest evidence adherence, with both models achieving identical, lower hallucination rates ($42.5\%$) and the highest selective accuracy ($47.7\%$ and $48.5\%$). Dense retriever recall reaches $85.00\%$ in Medical (with $55.0\%$ Rank-1 Precision), providing clean physiological and clinical context that small LLMs reliably extract.
+\paragraph{Legal Domain Vulnerability.} Across both architectures, the Legal domain exhibits the highest hallucination rates ($79.6\%$ on Qwen, $69.6\%$ on Gemma), yielding critically low selective accuracy ($3.2\%$ and $9.2\%$). Legal statutory queries feature exact numerical clauses (e.g., constitutional article numbers, statutory penalty periods, labor compensation formulas) where slight semantic drift results in severe factual hallucination.
+\paragraph{Medical and General Domains.} In contrast, the General domain demonstrates the lowest hallucination rates ($62.5\%$ on Qwen, $42.1\%$ on Gemma) and highest selective accuracy ($27.6\%$ and $36.5\%$). The Medical domain reflects intermediate vulnerability ($72.3\%$ on Qwen, $62.5\%$ on Gemma; selective accuracy $12.6\%$ and $18.0\%$), where clinical terms without precise grounding frequently trigger speculative confabulation.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.96\textwidth]{figures/figure3_domain_register.png}
-\caption{Domain and Register Disparity: (a) Domain-specific hallucination rates highlighting acute vulnerability in Legal statutory queries; (b) Asymmetry in dense vector retrieval (\texttt{BAAI/bge-m3}) between native Standard Bangla ($\mathcal{Q}_{\text{bn}}$) and Romanized Banglish ($\mathcal{Q}_{\text{banglish}}$).}
+\caption{Domain and Register Disparity on the Test Benchmark: (a) Domain-specific hallucination rates highlighting acute vulnerability in Legal statutory queries; (b) Asymmetry in dense vector retrieval (\texttt{BAAI/bge-m3}) between native Standard Bangla ($\mathcal{Q}_{\text{bn}}$) and Romanized Banglish ($\mathcal{Q}_{\text{banglish}}$).}
 \label{fig:domain_register}
 \end{figure*}

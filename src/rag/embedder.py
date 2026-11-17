@@ -16,23 +16,35 @@ try:
     if not torch.cuda.is_available():
         max_threads = int(os.environ.get("TORCH_NUM_THREADS", "2"))
         torch.set_num_threads(max_threads)
+    max_threads = int(os.environ.get("TORCH_NUM_THREADS", "2"))
+    torch.set_num_threads(max_threads)
 except Exception:
     pass
 
 
 class Embedder:
-    """Text embedder using sentence-transformers."""
+    """Text embedder using sentence-transformers with pure PyTorch fallback."""
 
-    def __init__(self, model_name: str = "BAAI/bge-m3", batch_size: int = 8):
+    def __init__(self, model_name: str = "BAAI/bge-m3", batch_size: int = 8, device: str = "cpu"):
         self.model_name = model_name
         self.batch_size = batch_size
+        self.device = device
         self._model = None
 
     def _load_model(self):
-        """Load the sentence transformer model."""
+        """Load the sentence transformer model with resilient pure-Python fallback."""
         if self._model is None:
-            from sentence_transformers import SentenceTransformer
-            self._model = SentenceTransformer(self.model_name)
+            try:
+                from sentence_transformers import SentenceTransformer
+                self._model = SentenceTransformer(self.model_name)
+            except Exception:
+                import torch
+                from transformers import AutoTokenizer, AutoModel
+                self._tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=False)
+                self._hf_model = AutoModel.from_pretrained(self.model_name)
+                self._hf_model.eval()
+                self._model = "hf_fallback"
+            self._model = SentenceTransformer(self.model_name, device=self.device)
         return self._model
 
     def encode(self, texts: list[str], normalize: bool = True) -> np.ndarray:
@@ -48,6 +60,17 @@ class Embedder:
         """
         model = self._load_model()
         
+        if model == "hf_fallback":
+            import torch
+            import torch.nn.functional as F
+            inputs = self._tokenizer(texts, padding=True, truncation=True, max_length=512, return_tensors="pt")
+            with torch.no_grad():
+                out = self._hf_model(**inputs)
+                emb = out[0][:, 0]
+                if normalize:
+                    emb = F.normalize(emb, p=2, dim=1)
+            return emb.cpu().numpy().astype("float32")
+
         # If encoding a large corpus on CPU, batch progressively to avoid memory spikes
         total = len(texts)
         if total > 50:

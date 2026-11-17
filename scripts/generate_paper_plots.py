@@ -34,14 +34,14 @@ conditions = ["C0\n(Closed)", "C1\n(Oracle)", "C2\n(RAG)", "C3\n(Abstain)"]
 x = np.arange(len(conditions))
 width = 0.35
 
-# Data from Table 1
-qwen_hal = [0.983, 0.400, 0.733, 0.283]
-qwen_hal_ci = [[0.983 - 0.95, 0.400 - 0.28, 0.733 - 0.62, 0.283 - 0.17],
-               [1.00 - 0.983, 0.52 - 0.400, 0.83 - 0.733, 0.40 - 0.283]]
+# Data from Table 1 (Authoritative Test Split)
+qwen_hal = [0.965, 0.644, 0.875, 0.375]
+qwen_hal_ci = [[0.965 - 0.95, 0.644 - 0.61, 0.875 - 0.85, 0.375 - 0.34],
+               [0.98 - 0.965, 0.67 - 0.644, 0.90 - 0.875, 0.40 - 0.375]]
 
-gemma_hal = [0.983, 0.467, 0.583, 0.017]
-gemma_hal_ci = [[0.983 - 0.95, 0.467 - 0.33, 0.583 - 0.45, 0.017 - 0.00],
-                [1.00 - 0.983, 0.58 - 0.467, 0.70 - 0.583, 0.05 - 0.017]]
+gemma_hal = [0.894, 0.606, 0.789, 0.033]
+gemma_hal_ci = [[0.894 - 0.85, 0.606 - 0.54, 0.789 - 0.73, 0.033 - 0.01],
+                [0.94 - 0.894, 0.68 - 0.606, 0.85 - 0.789, 0.06 - 0.033]]
 
 qwen_color = "#386cb0"
 gemma_color = "#f0027f"
@@ -61,8 +61,8 @@ ax1.grid(axis="y", linestyle="--", alpha=0.5)
 ax1.legend(frameon=True, facecolor="white", framealpha=0.9)
 
 # Subplot 2: Selective Accuracy & Abstention Rate
-qwen_acc = [0.017, 0.586, 0.241, 0.150]
-gemma_acc = [0.017, 0.525, 0.364, 0.900]
+qwen_acc = [0.020, 0.338, 0.104, 0.098]
+gemma_acc = [0.080, 0.381, 0.123, 0.538]
 
 bars3 = ax2.bar(x - width/2, qwen_acc, width, label="Qwen 1.7B",
                 color=qwen_color, alpha=0.9, edgecolor="black", linewidth=0.8)
@@ -70,8 +70,8 @@ bars4 = ax2.bar(x + width/2, gemma_acc, width, label="Gemma 4B",
                 color=gemma_color, alpha=0.9, edgecolor="black", linewidth=0.8)
 
 # Highlight Gemma 4B C3 breakthrough
-ax2.annotate("90.0% Sel. Acc.\n(p = 0.0004)",
-             xy=(3 + width/2, 0.900), xytext=(2.2, 0.92),
+ax2.annotate("53.8% Sel. Acc. (3.3% Hal.)\n(p = 8.38e-13)",
+             xy=(3 + width/2, 0.538), xytext=(1.8, 0.75),
              arrowprops=dict(arrowstyle="->", color="black", lw=1.2),
              fontsize=9, fontweight="bold", backgroundcolor="#ffffcc")
 
@@ -96,8 +96,8 @@ fig, (ax3, ax4) = plt.subplots(1, 2, figsize=(10, 4.2))
 domains = ["General", "Medical", "Legal"]
 x_dom = np.arange(len(domains))
 
-qwen_dom = [0.588, 0.425, 0.787]
-gemma_dom = [0.500, 0.425, 0.613]
+qwen_dom = [0.625, 0.723, 0.796]
+gemma_dom = [0.421, 0.625, 0.696]
 
 ax3.bar(x_dom - width/2, qwen_dom, width, label="Qwen 1.7B",
         color=qwen_color, alpha=0.9, edgecolor="black", linewidth=0.8)

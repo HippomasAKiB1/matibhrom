@@ -3,12 +3,12 @@
 
 In this paper, we introduced \textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম})}, the first fine-grained, multi-condition hallucination benchmark constructed specifically for the Bengali language. Spanning 600 human-verified base items (1,200 matched prompts in native Standard Bangla and Romanized Banglish) across General, Medical, and Legal domains, Matibhrom rigorously evaluates hallucination dynamics across four controlled grounding conditions: Closed-book ($C_0$), Oracle Grounding ($C_1$), Dense RAG with Distractors ($C_2$), and Selective Abstention Guardrailing ($C_3$).
 
-Across 480 matched generations evaluating Qwen 1.7B and Gemma 4B with paired McNemar significance tests and bootstrap 95\% confidence intervals, our empirical findings demonstrate that:
+Across 4,560 evaluated test generations evaluating Qwen 1.7B and Gemma 4B with paired McNemar significance tests and bootstrap 95\% confidence intervals, our empirical findings demonstrate that:
 \begin{enumerate}[leftmargin=*]
-    \item Closed-book models suffer from near-total parametric ignorance in low-resource settings ($98.3\%$ hallucination), but exhibit robust extractive reading comprehension when provided gold evidence ($C_1$, $p < 10^{-7}$).
-    \item RAG without guardrails ($C_2$) remains acutely vulnerable to semantic distractor noise, inducing hallucinations in up to $73.3\%$ of queries.
-    \item Model scaling unlocks an emergent capability for selective abstention ($C_3$, $p = 0.0004$): while a 1.7B model struggles with negative instruction adherence, a 4B model successfully detects evidence shortfalls, slashing hallucinations to \textbf{1.7\%} with \textbf{90.0\% selective accuracy}.
-    \item Latin-transliterated Banglish severely disperses dense retrieval representations, degrading retriever recall by half and driving a statistically significant 3.27-fold surge in generative hallucination ($p < 0.001$).
+    \item Closed-book models suffer from near-total parametric ignorance in low-resource settings (89.4\%--$96.5\%$ hallucination), but exhibit robust extractive reading comprehension when provided gold evidence ($C_1$, $p < 10^{-9}$).
+    \item RAG without guardrails ($C_2$) remains acutely vulnerable to semantic distractor noise, inducing hallucinations in up to $87.5\%$ of queries.
+    \item Model scaling unlocks an emergent capability for selective abstention ($C_3$, $p < 10^{-12}$): while a 1.7B model struggles with negative instruction adherence (37.5\% hallucination), a 4B model successfully detects evidence shortfalls, slashing hallucinations to \textbf{3.3\%} with \textbf{53.8\% selective accuracy} and 92.8\% abstention ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$).
+    \item Latin-transliterated Banglish severely disperses dense retrieval representations, degrading retriever recall by half and driving a statistically significant surge in generative hallucination ($p < 0.001$).
     \item Automated zero-shot LLM judges fail to achieve acceptable agreement on low-resource Bengali ($\kappa \le 0.34$), establishing the critical necessity of deterministic gold-evidence adjudication.
 \end{enumerate}
 

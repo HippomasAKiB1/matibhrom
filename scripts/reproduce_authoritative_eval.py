@@ -134,6 +134,7 @@ def run_comprehensive_evaluation(
             gold_annotations.append(ann.model_dump())
             
         gold_ann_path = run_dir / "annotations" / "annotations_gold.jsonl"
+        gold_ann_path.parent.mkdir(parents=True, exist_ok=True)
         with open(gold_ann_path, "w", encoding="utf-8") as f:
             for a in gold_annotations:
                 f.write(json.dumps(a, ensure_ascii=False) + "\n")

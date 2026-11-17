@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 from src.rag.embedder import Embedder
-from src.rag.index import Index
 from src.rag.chunker import Chunker
 
 logger = logging.getLogger(__name__)
@@ -72,10 +71,16 @@ class Retriever:
     def _load_embedder(self) -> Embedder:
         if self._embedder is None:
             self._embedder = Embedder(self.embedding_model)
+            # Warm up tokenizer on clean heap before any FAISS/OpenMP modules load:
+            try:
+                self._embedder.encode_single("warmup")
+            except Exception:
+                pass
         return self._embedder
 
-    def _load_index(self) -> Index:
+    def _load_index(self):
         if self._index is None:
+            from src.rag.index import Index
             self._index = Index()
             self._index.load(self.index_dir)
         return self._index

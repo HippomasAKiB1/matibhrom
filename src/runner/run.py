@@ -18,6 +18,9 @@ import json
 import logging
 import os
 import sys
+
+# Prevent Windows OpenMP CRT allocator collision between PyTorch and FAISS:
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import time
 from pathlib import Path
 from typing import Any

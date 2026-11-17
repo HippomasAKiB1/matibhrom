@@ -8,7 +8,6 @@ import time
 from pathlib import Path
 from typing import Any
 
-import faiss
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -33,12 +32,13 @@ class CorpusMetadata:
 
 
 class Index:
-    """FAISS vector index for RAG retrieval."""
+    """Vector index for RAG retrieval supporting native NumPy and FAISS."""
 
     def __init__(self, embedding_dim: int = 768, index_type: str = "IndexFlatIP"):
         self.embedding_dim = embedding_dim
         self.index_type = index_type
         self._index = None
+        self._vectors = None
         self._metadata = CorpusMetadata()
         self._passage_ids = []
         self._file_paths = []
@@ -46,6 +46,7 @@ class Index:
     @property
     def index(self):
         if self._index is None:
+            import faiss
             self._index = faiss.IndexFlatIP(self.embedding_dim)
         return self._index
 
@@ -55,7 +56,7 @@ class Index:
 
     def build(self, embeddings: np.ndarray, passage_ids: list[str]) -> None:
         """
-        Build the FAISS index from embeddings.
+        Build the index from embeddings.
 
         Args:
             embeddings: numpy array of shape (n, embedding_dim)
@@ -66,7 +67,9 @@ class Index:
                 f"Embedding dimension {embeddings.shape[1]} != expected {self.embedding_dim}"
             )
 
+        import faiss
         self.index.add(embeddings.astype("float32"))
+        self._vectors = embeddings.astype("float32")
         self._passage_ids = passage_ids
         self._metadata = CorpusMetadata(
             corpus_version="",
@@ -74,7 +77,7 @@ class Index:
             n_passages=len(passage_ids),
             embedding_dim=self.embedding_dim
         )
-        logger.info(f"Built FAISS index with {len(passage_ids)} passages")
+        logger.info(f"Built index with {len(passage_ids)} passages")
 
     def search(self, query_embedding: np.ndarray, k: int = 5) -> tuple[list[float], list[int]]:
         """
@@ -87,14 +90,22 @@ class Index:
         Returns:
             (scores, indices) where scores are cosine similarity and indices are into the index
         """
+        # Exact fast NumPy cosine inner-product when vectors are loaded (safe against OpenMP DLL collisions)
+        if self._vectors is not None:
+            if len(self._vectors) == 0:
+                raise RuntimeError("Index is empty. Build the index first.")
+            q = query_embedding.flatten().astype("float32")
+            scores = np.dot(self._vectors, q)
+            top_k_indices = np.argsort(-scores)[:k].tolist()
+            top_k_scores = [float(scores[i]) for i in top_k_indices]
+            return top_k_scores, top_k_indices
+
         if self.index.ntotal == 0:
             raise RuntimeError("Index is empty. Build the index first.")
 
         # Ensure float32
         query = query_embedding.reshape(1, -1).astype("float32")
-
         distances, indices = self.index.search(query, k)
-
         return distances.tolist()[0], indices.tolist()[0]
 
     def save(self, index_dir: str | Path, index_version: str | None = None) -> None:
@@ -108,9 +119,15 @@ class Index:
         index_dir = Path(index_dir)
         index_dir.mkdir(parents=True, exist_ok=True)
 
-        # Save the index
-        index_path = index_dir / "index.faiss"
-        faiss.write_index(self.index, str(index_path))
+        # Save numpy vectors for safe collision-free loading
+        if self._vectors is not None:
+            np.save(str(index_dir / "embeddings.npy"), self._vectors)
+
+        # Save the FAISS index if available
+        if self._index is not None:
+            import faiss
+            index_path = index_dir / "index.faiss"
+            faiss.write_index(self.index, str(index_path))
 
         # Save metadata
         import json
@@ -127,11 +144,11 @@ class Index:
         ids_path = index_dir / "passage_ids.json"
         ids_path.write_text(json.dumps(self._passage_ids), encoding="utf-8")
 
-        logger.info(f"Saved FAISS index to {index_dir}")
+        logger.info(f"Saved index to {index_dir}")
 
     def load(self, index_dir: str | Path) -> None:
         """
-        Load the FAISS index and metadata from disk.
+        Load the index and metadata from disk.
 
         Args:
             index_dir: Directory to load from
@@ -151,13 +168,26 @@ class Index:
         if ids_path.exists():
             self._passage_ids = json.loads(ids_path.read_text(encoding="utf-8"))
 
-        # Load the index
+        # Prefer pre-computed numpy vectors (bypasses FAISS OpenMP runtime collisions entirely)
+        emb_path = index_dir / "embeddings.npy"
+        if emb_path.exists():
+            self._vectors = np.load(str(emb_path))
+            self.embedding_dim = self._vectors.shape[1]
+            logger.info(f"Loaded NumPy vector index from {index_dir} ({len(self._vectors)} passages, dim={self.embedding_dim})")
+            return
+
+        # Fallback to FAISS binary
         index_path = index_dir / "index.faiss"
         if index_path.exists():
+            import faiss
             self._index = faiss.read_index(str(index_path))
             self.embedding_dim = self._index.d
-
-        logger.info(f"Loaded FAISS index from {index_dir} (dim={self.embedding_dim})")
+            try:
+                self._vectors = self._index.reconstruct_n(0, self._index.ntotal)
+                np.save(str(emb_path), self._vectors)
+            except Exception:
+                pass
+            logger.info(f"Loaded FAISS index from {index_dir} (dim={self.embedding_dim})")
 
     def get_retrieved_passages(
         self,

@@ -1,0 +1,98 @@
+\appendix
+\section{Verbatim Benchmark Prompt Templates}
+\label{sec:appendix_prompts}
+
+Table~\ref{tab:appendix_prompts} specifies the exact, standardized prompt templates utilized across all four experimental conditions ($C_0\text{--}C_3$) for both Standard Bangla and Romanized Banglish registers. Prompts enforce strict structural formatting to ensure that differences in generative output stem entirely from grounding evidence and negative constraints rather than surface instruction variance.
+
+\begin{table*}[h!]
+\centering
+\small
+\begin{tabular}{lp{6.2cm}p{6.2cm}}
+\toprule
+\textbf{Condition} & \textbf{Standard Bangla Template ($\mathcal{Q}_{\text{bn}}$)} & \textbf{Romanized Banglish Template ($\mathcal{Q}_{\text{bg}}$)} \\
+\midrule
+\textbf{$C_0$: Closed-Book} & 
+\foreignlanguage{bengali}{নিচের প্রশ্নটির সংক্ষিপ্ত ও নির্ভুল উত্তর দাও।} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Nicher proshnotir shongkhipto o nirbhul uttor dao. \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\midrule
+\textbf{$C_1$: Oracle Grounding} & 
+\foreignlanguage{bengali}{নিচে প্রদত্ত প্রমাণ অনুচ্ছেদটি পড়ে প্রশ্নটির নির্ভুল উত্তর দাও।} \newline
+\foreignlanguage{bengali}{প্রমাণ:} \{evidence\} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Niche produtto proman onucchedti pore proshnotir nirbhul uttor dao. \newline
+Proman: \{evidence\} \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\midrule
+\textbf{$C_2$: Unconstrained RAG} & 
+\foreignlanguage{bengali}{নিচে সংগৃহীত প্রাসঙ্গিক অনুচ্ছেদগুলো পড়ে প্রশ্নটির উত্তর দাও।} \newline
+\foreignlanguage{bengali}{প্রাসঙ্গিক অনুচ্ছেদসমূহ:} \newline
+\{retrieved\_passages\} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Niche shongrihito prashongik onucchedgulo pore proshnotir uttor dao. \newline
+Prashongik onucchedshomuho: \newline
+\{retrieved\_passages\} \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\midrule
+\textbf{$C_3$: Selective Abstention} & 
+\foreignlanguage{bengali}{নিচে সংগৃহীত অনুচ্ছেদগুলো পড়ে প্রশ্নটির উত্তর দাও। যদি প্রদত্ত অনুচ্ছেদে উত্তর না থাকে, তবে উত্তর অনুমান করবে না; স্পষ্ট করে বলবে "প্রমাণ অপর্যাপ্ত"।} \newline
+\foreignlanguage{bengali}{প্রাসঙ্গিক অনুচ্ছেদসমূহ:} \newline
+\{retrieved\_passages\} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Niche shongrihito onucchedgulo pore proshnotir uttor dao. Jodi produtto onucchede uttor na thake, tobe uttor onuman korbe na; sproshto kore bolbe "proman oporjapto". \newline
+Prashongik onucchedshomuho: \newline
+\{retrieved\_passages\} \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\bottomrule
+\end{tabular}
+\caption{Verbatim Prompt Templates across Grounding Conditions and Linguistic Registers.}
+\label{tab:appendix_prompts}
+\end{table*}
+
+\section{Benchmark Data Sheet and Corpus Provenance}
+\label{sec:appendix_datasheet}
+
+Following recommended documentation frameworks for multilingual NLP datasets, we provide the formal data statement for Matibhrom:
+
+\paragraph{Dataset Motivation and Domain Curation.} Matibhrom was constructed to diagnose factual confabulation, grounding adherence, and selective abstention in Bengali language technologies. All items were curated by bilingual NLP researchers and verified against authoritative institutional corpora:
+\begin{itemize}[leftmargin=*]
+    \item \emph{Statutory Jurisprudence (200 items, 600 passages):} Curated from the Legislative and Parliamentary Affairs Division of Bangladesh, spanning the \emph{Constitution of the People's Republic of Bangladesh} (Articles 1--153), the \emph{Penal Code 1860} (Acts XLV of 1860), and the \emph{Bangladesh Labour Act 2006} (Act XLII of 2006).
+    \item \emph{Clinical and Public Health (200 items, 600 passages):} Drawn from clinical management protocols of the Directorate General of Health Services (DGHS) Bangladesh, national disease control guidelines (Dengue, Nipah, Malaria), and the World Health Organization South-East Asia regional publications.
+    \item \emph{General Knowledge (200 items, 600 passages):} Verified historical, geographic, and institutional articles from \emph{Banglapedia} (the National Encyclopedia of Bangladesh) and sovereign administrative records.
+\end{itemize}
+
+\paragraph{Corpus Partitioning and Isolation.} The 1,800 passages are strictly segregated into document-level clusters. No source statute or clinical circular is split across the 120-item development set and the 480-item test set. Cryptographic SHA-256 hashes guarantee immutable reproducibility across evaluation executions.
+
+\section{Inference Infrastructure and Hyperparameters}
+\label{sec:appendix_compute}
+
+\paragraph{Hardware and Execution Environment.} All generations and vector retrieval operations were conducted on a dedicated workstation equipped with an NVIDIA GeForce GPU (Turing architecture, compute capability 7.5), an Intel 8-core CPU, and 16\,GB system RAM running Windows 11 and Linux containerized environments. 
+
+\paragraph{Model Decoding Parameters.} To eliminate sampling noise and ensure bitwise determinism, all evaluations were executed with greedy decoding:
+\begin{itemize}[leftmargin=*]
+    \item Temperature: $\tau = 0.0$
+    \item Top-$p$ sampling: $p = 1.0$
+    \item Maximum generated tokens: $M = 512$
+    \item Context window limit: $W = 2048$ tokens
+    \item Quantization: FP16 / 4-bit standard weight formats via Ollama and LiteLLM runtime adapters.
+\end{itemize}
+
+\paragraph{Embedding Index Hyperparameters.} Passage embeddings were generated using \texttt{BAAI/bge-m3} (1024-dimensional dense vectors) with passage chunks of 384 tokens and a 64-token stride. Nearest-neighbor vector retrieval was executed using exact inner product search ($\ell_2$-normalized cosine similarity), returning top-$k$ passages with $k = 3$.
+
+\section{Annotation Codebook and Edge-Case Rubric}
+\label{sec:appendix_codebook}
+
+Table~\ref{tab:codebook_taxonomy} in the main text outlines the primary eight categories of Codebook v1.0.0. Below, we formalize the decision boundaries for complex edge cases:
+\begin{itemize}[leftmargin=*]
+    \item \emph{Distinction between H1 (Contradiction) and H2 (Unsupported Addition):} If an asserted claim explicitly contradicts a stated factual attribute of the gold answer (e.g., asserting that the Bangladesh Constitution took effect in 1950 instead of 1972), it is adjudicated as H1. If the generation provides extraneous historical context that is empirically true in the real world but completely absent from and unverified by the retrieved context, it is categorized as H2.
+    \item \emph{Distinction between Category A (Appropriate Abstention) and Category R (Unwarranted Refusal):} Under Condition $C_3$, if the retrieved context $\mathcal{R}_k$ does not contain the complete factual proposition necessary to answer the query, stating \foreignlanguage{bengali}{"প্রমাণ অপর্যাপ্ত"} is adjudicated as Category A. Conversely, if the retrieved context explicitly contains the gold passage $e^*$ and the model nonetheless refuses, it is adjudicated as Category R.
+\end{itemize}

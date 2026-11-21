@@ -13,28 +13,29 @@ Even when applying post-hoc rule calibration to enforce structural codebook cons
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{lrr}
+\begin{tabular}{lcc}
 \toprule
-Evaluation Configuration & Agreement ($P_o$) & Cohen's Kappa ($\kappa$) \\
+\textbf{Evaluation Configuration} & \textbf{Agreement ($P_o$)} & \textbf{Cohen's Kappa ($\kappa$)} \\
 \midrule
-Raw Zero-Shot LLM Judge (Qwen Run)  & 45.00\% & 0.0867 \\
-Raw Zero-Shot LLM Judge (Gemma Run) & 48.33\% & 0.0491 \\
-Calibrated LLM Judge (Qwen Run)     & 68.33\% & 0.3372 \\
-Calibrated LLM Judge (Gemma Run)    & 51.67\% & 0.0397 \\
+Raw LLM Judge (Qwen Run)     & 45.00\% & 0.0867 \\
+Raw LLM Judge (Gemma Run)    & 48.33\% & 0.0491 \\
+Calibrated Judge (Qwen Run)  & 68.33\% & 0.3372 \\
+Calibrated Judge (Gemma Run) & 51.67\% & 0.0397 \\
 \midrule
-\textbf{Target Quality Gate Threshold} & --- & $\ge \mathbf{0.7000}$ \\
+\textbf{Target Quality Gate} & --- & $\ge \mathbf{0.7000}$ \\
 \bottomrule
 \end{tabular}
-\caption{Inter-Annotator Agreement (Cohen's Kappa $\kappa$) between Automated LLM-as-a-Judge and Expert Ground Truth on the 60-Item Overlap Sample.}
+\caption{Inter-Annotator Agreement (Cohen's Kappa $\kappa$) between Automated LLM-as-a-Judge and Expert Human Ground Truth on the 60-Item Overlap Sample.}
 \label{tab:iaa_reliability}
 \end{table}
 
-\paragraph{Diagnostic Analysis of Judge Failure.} Error analysis reveals three fundamental failure modes of LLM judges in low-resource settings:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Negative-Constraint Misinterpretation:} When evaluated models correctly executed selective abstention under condition $C_3$ by stating \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}, the LLM judge frequently misclassified the refusal as an incorrect numerical error (H4) or unnecessary refusal (R), erroneously penalizing models for following negative instructions.
-    \item \textbf{Superficial Lexical Overlap:} In queries where models generated completely hallucinated clinical claims but mimicked formal syntactic sentence structures, the LLM judge assigned \texttt{correctness="correct"} simply because the output appeared grammatically fluent.
-    \item \textbf{Morphological Confusion:} The automated evaluator failed to resolve inflectional case endings (e.g., confusing \foreignlanguage{bengali}{"সংবিধানে"} [in the constitution] with \foreignlanguage{bengali}{"সংবিধানের"} [of the constitution]), incorrectly flagging valid answers as factual contradictions.
-\end{enumerate}
+\paragraph{Diagnostic Analysis of Judge Failure.} Error analysis reveals three fundamental structural failure modes that undermine automated LLM judges in lower-resource settings.
+
+First, automated judges suffer from severe \emph{negative-constraint misinterpretation}. When evaluated models correctly executed selective abstention under condition $C_3$ by issuing the standardized refusal \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}, the zero-shot judge frequently misclassified the refusal as a numerical contradiction (Category H4) or unwarranted refusal (Category R), effectively penalizing the model for adhering to explicit instructions.
+
+Second, judges exhibit susceptibility to \emph{superficial lexical overlap}. In queries where evaluated models generated clinically hazardous, fabricated medical advice while maintaining fluent grammatical syntax, the judge routinely assigned high correctness scores simply because the surface structure mimicked legitimate medical literature.
+
+Third, the automated evaluator exhibited acute \emph{morphological confusion}. Bengali features complex agglutinative case endings, and the evaluator repeatedly failed to resolve inflectional inflections (for example, treating \foreignlanguage{bengali}{"সংবিধানে"} [\emph{in the constitution}] and \foreignlanguage{bengali}{"সংবিধানের"} [\emph{of the constitution}] as mutually contradictory claims), erroneously flagging valid morphological variants as empirical hallucinations.
 
 \subsection{Deterministic Gold Ground-Truth Adjudication}
 Because the automated LLM judge failed the mandatory inter-annotator quality gate ($\kappa \ge 0.70$), relying on LLM-as-a-judge would introduce severe systematic bias into our benchmark results. 

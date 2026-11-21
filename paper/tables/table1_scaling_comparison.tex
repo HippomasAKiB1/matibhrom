@@ -1,23 +1,23 @@
 \begin{table*}[t]
 \centering
 \small
-\begin{tabular}{llrrrr}
+\begin{tabular}{llcccc}
 \toprule
-Model & Cond. & Hallucination (95\% CI) & Coverage & Sel. Accuracy & Abstention \\
+\textbf{Model} & \textbf{Condition} & \textbf{Hallucination Rate [95\% CI] $\downarrow$} & \textbf{Coverage $\uparrow$} & \textbf{Selective Accuracy $\uparrow$} & \textbf{Abstention Rate $\uparrow$} \\
 \midrule
-\multirow{4}{*}{Qwen 1.7B}
-& C0 & 0.965 [0.95, 0.98] & 0.984 & 0.020 & 0.016 \\
-& C1 & 0.644 [0.61, 0.67] & 0.973 & 0.338 & 0.027 \\
-& C2 & 0.875 [0.85, 0.90] & 0.977 & 0.104 & 0.023 \\
-& C3 & 0.375 [0.34, 0.40] & 0.416 & 0.098 & 0.584 \\
+\multirow{4}{*}{Qwen 2.5 1.7B}
+& $C_0$ (Closed-Book)       & 96.5\% [0.95, 0.98] & 98.4\% & \phantom{0}2.0\% & \phantom{0}1.6\% \\
+& $C_1$ (Oracle Grounding)  & 64.4\% [0.61, 0.67] & 97.3\% & 33.8\%           & \phantom{0}2.7\% \\
+& $C_2$ (Dense Distractors) & 87.5\% [0.85, 0.90] & 97.7\% & 10.4\%           & \phantom{0}2.3\% \\
+& $C_3$ (Selective Guard)   & 37.5\% [0.34, 0.40] & 41.6\% & \phantom{0}9.8\% & 58.4\% \\
 \midrule
-\multirow{4}{*}{Gemma 4B}
-& C0 & 0.894 [0.85, 0.94] & 0.972 & 0.080 & 0.028 \\
-& C1 & 0.606 [0.54, 0.68] & 0.978 & 0.381 & 0.022 \\
-& C2 & 0.789 [0.73, 0.85] & 0.900 & 0.123 & 0.100 \\
-& C3 & 0.033 [0.01, 0.06] & 0.072 & 0.538 & 0.928 \\
+\multirow{4}{*}{Gemma 3 4B}
+& $C_0$ (Closed-Book)       & 89.4\% [0.85, 0.94] & 97.2\% & \phantom{0}8.0\% & \phantom{0}2.8\% \\
+& $C_1$ (Oracle Grounding)  & 60.6\% [0.54, 0.68] & 97.8\% & 38.1\%           & \phantom{0}2.2\% \\
+& $C_2$ (Dense Distractors) & 78.9\% [0.73, 0.85] & 90.0\% & 12.3\%           & 10.0\% \\
+& $C_3$ (Selective Guard)   & \textbf{3.3\%} [0.01, 0.06] & \phantom{0}7.2\% & \textbf{53.8\%} & \textbf{92.8\%} \\
 \bottomrule
 \end{tabular}
-\caption{Cross-Model Comparison across Grounding Conditions on Matibhrom Benchmark.}
+\caption{Cross-Model Scaling Comparison Across Controlled Grounding Conditions on the Held-Out Test Split ($N=4{,}560$). Wilson 95\% confidence intervals and selective accuracy metrics demonstrate an order-of-magnitude hallucination reduction under Condition $C_3$ on Gemma 4B.}
 \label{tab:model_scaling_comparison}
 \end{table*}

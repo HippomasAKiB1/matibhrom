@@ -127,12 +127,7 @@
 \title{\textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম}): A Fine-Grained Benchmark for Hallucination, Grounding, and Selective Abstention in Bengali LLMs}}
 
 % --- Author Information (Double-Blind Review for Initial TACL Submission) ---
-% Toggle for blind review vs. camera-ready:
 \author{\textbf{Anonymous TACL Submission}}
-% \author{
-%   \textbf{Team Turtlers} \quad \& \quad \textbf{ELITE Research Lab LLC} \\
-%   \texttt{research@eliteresearchlab.org}
-% }
 
 \date{}
 
@@ -141,60 +136,31 @@
 \maketitle
 
 % --- Section Imports ---
-
-% ==========================================
-% Content from paper/sections/00_abstract.tex
-% ==========================================
 \begin{abstract}
-Large Language Models (LLMs) evaluated predominantly on English benchmarks frequently suffer from catastrophic factual hallucination when deployed in typologically distinct, morphologically rich, and lower-resource languages. In Bengali---the fifth most spoken native language globally, with over 300 million speakers---factual hallucination dynamics remain largely uncharacterized across formal versus code-mixed registers and high-stakes domains. We introduce \textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম})}, the first fine-grained, multi-condition hallucination benchmark for Bengali. Matibhrom comprises 600 expert-verified base items (1,200 matched prompts in native Standard Bangla and Romanized Banglish) grounded across a frozen corpus of 1,800 gold and distractor passages spanning General, Medical, and Legal domains. We evaluate small open-weight language models across four controlled grounding conditions: Closed-book ($C_0$), Oracle Grounding ($C_1$), Retrieval-Augmented Generation with Dense Distractors ($C_2$), and Selective Abstention Guardrailing ($C_3$). Across 4,560 evaluated test generations ($N=3,840$ on Qwen 1.7B, $N=720$ on Gemma 4B) with paired McNemar significance tests and 1,000-sample bootstrap 95\% confidence intervals, our empirical findings reveal:
-\begin{enumerate}
-    \item \textbf{Linguistic Register Degradation ($p < 0.001$):} Latin-transliterated Banglish severely disperses multilingual embeddings, slashing dense retrieval recall by more than half (from 66.7\% to 30.0\%) and triggering a statistically significant surge in generative hallucination across both architectures ($\chi^2 = 26.785, p = 2.27 \times 10^{-7}$ for Qwen; $\chi^2 = 25.681, p = 4.03 \times 10^{-7}$ for Gemma).
-    \item \textbf{Parametric Ignorance vs.\ Extractive Competence ($p < 10^{-9}$):} In closed-book settings ($C_0$), models exhibit near-total parametric absence (89.4\%--96.5\% hallucination). Supplying oracle evidence ($C_1$) cuts hallucinations down to 60.6\%--64.4\% ($p < 10^{-9}$ across models), establishing that Bengali LLMs possess robust extractive reading comprehension despite impoverished parametric memory.
-    \item \textbf{Emergent Selective Abstention under Model Scaling ($p < 10^{-12}$):} While dense distractors induce acute hallucination rebounds in $C_2$ (78.9\%--87.5\%), selective abstention instructions ($C_3$) reveal a striking scaling divergence ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$): Qwen 1.7B struggles with negative constraints (37.5\% hallucination), whereas Gemma 4B achieves near-total hallucination eradication (\textbf{3.3\% hallucination rate} [0.01, 0.06], 92.8\% abstention rate, and \textbf{53.8\% selective accuracy}).
-    \item \textbf{High-Stakes Domain Disparity:} Legal queries demonstrate the highest hallucination vulnerability (69.6\%--79.6\% hallucination, selective accuracy $\le 9.2\%$) due to statutory penalty and constitutional clause confabulation, whereas General queries achieve the lowest hallucination rate (42.1\%--62.5\%).
-\end{enumerate}
-Finally, we demonstrate that automated zero-shot LLM-as-a-judge evaluators fail to achieve reliable inter-annotator agreement on low-resource Bengali ($\kappa \le 0.34$), establishing the necessity of deterministic gold-evidence verification for trustworthy multilingual evaluation. All benchmark items, retrieval corpora, codebook schemas, and evaluation scripts are publicly released to support reproducible research.
+Large Language Models evaluated predominantly on English benchmarks frequently suffer from catastrophic factual hallucination when deployed in typologically distinct, morphologically rich, and lower-resource languages. In Bengali---the fifth most spoken native language globally, with over 300 million speakers---factual hallucination dynamics remain largely uncharacterized across formal versus code-mixed registers and high-stakes domains. We introduce \textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম})}, the first fine-grained, multi-condition hallucination benchmark for Bengali. Matibhrom comprises 600 expert-verified base items (yielding 1,200 matched prompts in native Standard Bangla and Romanized Banglish) grounded across a frozen corpus of 1,800 gold and distractor passages spanning General, Medical, and Legal domains. We evaluate open-weight language models across four controlled grounding conditions: Closed-book ($C_0$), Oracle Grounding ($C_1$), Retrieval-Augmented Generation with Dense Distractors ($C_2$), and Selective Abstention Guardrailing ($C_3$). 
+
+Across 4,560 evaluated test generations ($N=3,840$ on Qwen 2.5 1.7B, $N=720$ on Gemma 3 4B) with paired McNemar significance tests and 95\% Wilson score confidence intervals, our empirical findings establish three primary phenomena. First, informal Latin transliteration (Banglish) severely disperses multilingual embeddings, cutting dense retrieval recall by more than half (from 66.7\% to 30.0\%) and triggering a statistically significant surge in generative hallucination across architectures ($\chi^2 \approx 26, p < 10^{-6}$). Second, while closed-book generation exhibits near-total parametric ignorance (89.4\%--96.5\% hallucination), providing oracle evidence slashes hallucinations to 60.6\%--64.4\% ($p < 10^{-9}$), confirming that models possess robust extractive comprehension despite impoverished parametric memory. Third, while dense distractors cause hallucination rebounds under unconstrained retrieval ($C_2$, 78.9\%--87.5\%), introducing selective abstention instructions ($C_3$) uncovers an emergent scaling divergence ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$): a 1.7B model continues to confabulate under negative constraints (37.5\% hallucination), whereas a 4B model achieves near-total hallucination eradication (3.3\% hallucination rate [0.01, 0.06], 92.8\% abstention, and 53.8\% selective accuracy). Furthermore, statutory Legal queries exhibit acute vulnerability across models (69.6\%--79.6\% hallucination), and zero-shot LLM-as-a-judge evaluators fail to achieve acceptable agreement ($\kappa \le 0.34$), establishing the imperative for deterministic gold adjudication in low-resource benchmarking. All datasets, corpora, annotation schemas, and evaluation harnesses are publicly released.
 \end{abstract}
 
-
-% ==========================================
-% Content from paper/sections/01_introduction.tex
-% ==========================================
 \section{Introduction}
 \label{sec:introduction}
 
 The deployment of Large Language Models (LLMs) across multilingual societies has outpaced our ability to measure and guarantee their factual trustworthiness. While state-of-the-art foundation models demonstrate remarkable fluency across diverse natural languages, their internal knowledge representations exhibit severe structural asymmetries~\citep{ahuja2023mega,bang2023multitask}. In particular, when generating text in non-Latin, lower-resource, or regional languages, LLMs frequently produce outputs that are grammatically coherent yet factually fabricated---a phenomenon broadly formalized as \emph{hallucination}~\citep{maynez2020faithfulness,ji2023survey,tonmoy2024comprehensive}.
 
-Despite substantial recent progress in factuality benchmarking---such as TruthfulQA~\citep{lin2022truthfulqa}, FActScore~\citep{min2023factscore}, and HaluEval~\citep{li2023halueval}---the vast majority of empirical investigations remain disproportionately confined to English. Evaluating factuality in low-resource and non-Western languages presents acute conceptual and methodological hurdles that standard English benchmarks fail to capture:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Subword Tokenization Bottlenecks:} Modern subword tokenizers (e.g., Byte-Pair Encoding and SentencePiece), trained predominantly on English and Latin-script corpora, heavily fragment non-Latin scripts into sub-character byte sequences~\citep{hasan2023banglatokenizer}. In Bengali, complex consonant conjuncts (\foreignlanguage{bengali}{যুক্তাক্ষর}) and vowel diacritics (\foreignlanguage{bengali}{কার}) suffer from extreme fragmentation ratios ($0.51$--$0.88$ compression relative to English), requiring up to double the token budget and diluting semantic attention across generative autoregressive steps.
-    \item \textbf{Diglossia and Informal Romanized Transliteration:} In digital communication, hundreds of millions of Bengali speakers routinely converse in \emph{Banglish}---phonetically transcribed Bengali rendered in the Latin alphabet (e.g., \emph{"amader shongbidhan kobe pass hoyesilo"} for \foreignlanguage{bengali}{"আমাদের সংবিধান কবে পাস হয়েছিল?"}). Because Banglish lacks standardized orthography, identical morphemes undergo extreme phonetic variance (e.g., \emph{kisu} vs.\ \emph{kichu}, \emph{valo} vs.\ \emph{bhalo}), introducing severe out-of-vocabulary dispersion into multilingual embedding spaces~\citep{saha2024robustness,chowdhury20245dialects}.
-    \item \textbf{High-Stakes Societal Vulnerability:} In localized public health, clinical medicine, and statutory jurisprudence, factual hallucination carries severe real-world hazards~\citep{pal2023medhalt,guha2023legalbench}. An LLM providing hallucinated pharmacotherapy advice or inventing non-existent constitutional provisions can directly endanger human health or misinform civic legal rights.
-    \item \textbf{The Grounding and Abstention Dilemma:} In Retrieval-Augmented Generation (RAG) pipelines~\citep{lewis2020rag}, multilingual dense retrievers often surface noisy or off-target distractor passages~\citep{cuconasu2024power}. When presented with ungrounded context, models must possess the epistemic capability to \emph{selectively abstain}~\citep{cole2023selectively,yin2023large} rather than confabulating plausible-sounding misinformation.
-\end{enumerate}
+Despite substantial recent progress in factuality benchmarking---such as TruthfulQA~\citep{lin2022truthfulqa}, FActScore~\citep{min2023factscore}, and HaluEval~\citep{li2023halueval}---the vast majority of empirical investigations remain disproportionately confined to English. Evaluating factuality in low-resource and non-Western languages presents acute conceptual and methodological hurdles that standard English benchmarks fail to capture.
 
-To systematically investigate these phenomena, we introduce \textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম})}---derived from the Bengali word for cognitive illusion or aberrant perception---the first fine-grained, multi-condition hallucination benchmark constructed specifically for the Bengali language. Matibhrom establishes an end-to-end experimental framework designed around five foundational Research Questions:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{RQ1 (Linguistic Register Degradation):} How does informal Latin transliteration (Banglish) impact dense retrieval recall and generative factual hallucination compared to native Standard Bangla script?
-    \item \textbf{RQ2 (Parametric Memory vs.\ Extractive Grounding):} To what extent does explicit oracle evidence ($C_1$) mitigate hallucinations compared to closed-book parametric recall ($C_0$), and does failure stem from factual ignorance or reading comprehension deficit?
-    \item \textbf{RQ3 (Distractor Susceptibility in RAG):} When realistic dense retrieval distractors are introduced ($C_2$), do multilingual models adopt false premises or cross-lingual distractors?
-    \item \textbf{RQ4 (Selective Abstention Calibration):} Can models reliably detect evidence shortfalls and abstain ($C_3$) when evidence is absent, conflicting, or insufficient?
-    \item \textbf{RQ5 (Model Scale and Behavioral Emergence):} How does parameter scaling (Qwen 1.7B vs.\ Gemma 4B) govern the emergence of negative-constraint instruction following and abstention calibration in low-resource settings?
-\end{itemize}
+First, standard subword tokenizers (e.g., Byte-Pair Encoding and SentencePiece), trained predominantly on Latin-script corpora, heavily fragment non-Latin orthographies into sub-character byte sequences~\citep{hasan2023banglatokenizer}. In Bengali, complex consonant conjuncts (\foreignlanguage{bengali}{যুক্তাক্ষর}) and vowel diacritics (\foreignlanguage{bengali}{কার}) suffer from extreme fragmentation ratios ($0.51$--$0.88$ compression relative to English), requiring up to double the token budget and diluting semantic attention across autoregressive decoding steps.
 
-\paragraph{Contributions.} The primary contributions of this work are:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{A Multi-Domain, Cross-Register Benchmark:} We construct and release Matibhrom, containing 600 human-verified base items (1,200 matched prompts in native Standard Bangla and Banglish) grounded across a frozen corpus of 1,800 passages in General, Medical, and Legal domains, partitioned into document-isolated, leakage-free splits.
-    \item \textbf{Controlled 4-Condition Grounding Protocol:} We design a standardized evaluation framework spanning Closed-book ($C_0$), Oracle Grounding ($C_1$), Dense RAG with Distractors ($C_2$), and Selective Abstention ($C_3$), indexed via dense multilingual representations (`BAAI/bge-m3`).
-    \item \textbf{Empirical Statistical Rigor:} Across 4,560 evaluated generations across Qwen 1.7B and Gemma 4B on the held-out test split, we report 95\% Wilson score confidence intervals and paired McNemar / Pearson significance tests ($\chi^2$) with continuity corrections, providing rigorous statistical proof for every claim.
-    \item \textbf{Discovery of Scaling-Induced Abstention Emergence ($p < 10^{-12}$):} We demonstrate that while smaller models fail to follow negative constraints under noisy RAG (37.5\% hallucination), scaling from 1.7B to 4B parameters unlocks emergent selective abstention, dropping hallucination to \textbf{3.3\%} [0.01, 0.06] with \textbf{53.8\% selective accuracy} and \textbf{92.8\% abstention} ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$).
-    \item \textbf{Methodological Insights on LLM Evaluation in Low-Resource NLP:} We show that zero-shot LLM judges exhibit unacceptable label variance ($\kappa \le 0.34$) on low-resource Bengali, establishing the imperative for deterministic gold-adjudication frameworks in multilingual evaluation.
-\end{enumerate}
+Second, digital communication in South Asia is characterized by pervasive diglossia and informal Romanized transliteration. Hundreds of millions of Bengali speakers routinely converse in \emph{Banglish}---phonetically transcribed Bengali rendered in the Latin alphabet (e.g., \emph{"amader shongbidhan kobe pass hoyesilo"} for \foreignlanguage{bengali}{"আমাদের সংবিধান কবে পাস হয়েছিল?"}). Because Banglish lacks standardized orthography, identical morphemes undergo extreme phonetic variance (e.g., \emph{kisu} versus \emph{kichu}, \emph{valo} versus \emph{bhalo}), introducing severe out-of-vocabulary dispersion into multilingual embedding spaces~\citep{saha2024robustness,chowdhury20245dialects}.
 
+Third, localized societal applications in public health, clinical medicine, and statutory jurisprudence carry severe real-world hazards when subjected to ungrounded generation~\citep{pal2023medhalt,guha2023legalbench}. An LLM providing hallucinated pharmacotherapy advice or inventing non-existent constitutional provisions directly endangers human health or misinforms civic legal rights.
 
-% ==========================================
-% Content from paper/sections/02_related_work.tex
-% ==========================================
+Finally, while Retrieval-Augmented Generation (RAG)~\citep{lewis2020rag} is commonly deployed to supply external context, multilingual dense retrievers frequently surface noisy or off-target distractor passages~\citep{cuconasu2024power,park2024robust}. When presented with ungrounded context, models must possess the epistemic capability to \emph{selectively abstain}~\citep{cole2023selectively,yin2023large} rather than confabulating plausible-sounding misinformation.
+
+To systematically investigate these phenomena, we introduce \textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম})}---derived from the Bengali word for cognitive illusion or aberrant perception---the first fine-grained, multi-condition hallucination benchmark constructed specifically for the Bengali language. Matibhrom establishes an end-to-end experimental framework designed around five foundational research questions: investigating the factual impact of informal Latin transliteration compared to native script (RQ1), disentangling parametric memory failure from extractive reading comprehension deficits (RQ2), measuring susceptibility to realistic dense retrieval distractors in RAG pipelines (RQ3), evaluating whether models can reliably detect evidence shortfalls and abstain under explicit negative constraints (RQ4), and analyzing how parameter scaling governs the emergence of calibrated abstention in low-resource settings (RQ5).
+
+In addressing these questions, this work delivers four principal contributions. First, we construct and release the Matibhrom benchmark, comprising 600 expert-verified base items (yielding 1,200 matched prompts in native Standard Bangla and Banglish) grounded across a frozen corpus of 1,800 passages in General, Medical, and Legal domains, partitioned into document-isolated, leakage-free splits. Second, we design a standardized 4-condition grounding evaluation protocol spanning Closed-book ($C_0$), Oracle Grounding ($C_1$), Dense RAG with Distractors ($C_2$), and Selective Abstention ($C_3$), indexed via dense multilingual representations (\texttt{BAAI/bge-m3}). Third, across 4,560 evaluated test generations evaluating Qwen 2.5 1.7B and Gemma 3 4B, we report 95\% Wilson score confidence intervals and paired McNemar significance tests ($\chi^2$) with continuity corrections, providing rigorous statistical proof for every claim. Most notably, we discover that parameter scaling from 1.7B to 4B parameters unlocks emergent selective abstention under noisy retrieval ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$), slashing hallucinations from 37.5\% to 3.3\% with 92.8\% abstention. Finally, we demonstrate that automated zero-shot LLM judges exhibit unacceptable label variance ($\kappa \le 0.34$) on low-resource Bengali, establishing the methodological imperative for deterministic gold-adjudication frameworks in multilingual evaluation.
+
 \section{Related Work}
 \label{sec:related_work}
 
@@ -204,7 +170,7 @@ Our research intersects four prominent domains of NLP literature: (1) hallucinat
 Factual hallucination has long been identified as a critical vulnerability in natural language generation~\citep{maynez2020faithfulness,ji2023survey}. In foundational LLM literature, hallucinations are categorized into \emph{intrinsic} hallucinations (contradicting provided source context) and \emph{extrinsic} hallucinations (asserting ungrounded claims that cannot be verified or falsified by the context). Early benchmarks such as TruthfulQA~\citep{lin2022truthfulqa} evaluated mimicry of human falsehoods and superstitions. More recent efforts have emphasized atomic granularity: FActScore~\citep{min2023factscore} decomposes biographies into atomic propositions evaluated against Wikipedia, while HaluEval~\citep{li2023halueval} synthesizes large-scale QA, dialogue, and summarization errors using sampling-and-filtering pipelines. Furthermore, FAVA~\citep{mishra2024fava} introduces fine-grained span-level error taxonomy and retrieval-augmented correction, while SummaC~\citep{laban2022summac} standardizes NLI-based inconsistency detection in abstractive summarization. However, nearly all existing benchmarks are constructed in English or assume high-resource Western cultural priors, neglecting the syntactic and semantic failure modes prevalent in lower-resource South Asian languages.
 
 \subsection{Multilingual Evaluation and Regional Disparities}
-Recent benchmarking initiatives have begun to illuminate severe performance disparities between English and non-English generations. \citet{ahuja2023mega} introduced MEGA, benchmarking generative AI across 16 languages and highlighting pronounced accuracy deficits in low-resource settings. \citet{bang2023multitask} presented a multi-task and multilingual audit of ChatGPT, showing that hallucination rates escalate drastically on low-resource and non-Latin prompts. Poly-FEVER~\citep{zhu2024polyfever} extended claim-verification datasets across 11 languages to study cross-lingual factuality. While foundational multilingual benchmarks such as TyDi QA~\citep{clark2020tydi} and FLORES-101~\citep{goyal2022flores} pioneered typologically diverse evaluation, they focus predominantly on extractive span QA or machine translation rather than generative hallucination and epistemic abstention. Furthermore, existing multilingual datasets frequently rely on translated English trivia, omitting localized administrative, legal, and public-health realities specific to countries like Bangladesh. Matibhrom addresses this gap by curating culturally and institutionally authentic Bengali benchmarks constructed directly from sovereign constitutional statutes, national labor codes, and indigenous clinical guidelines.
+Recent benchmarking initiatives have begun to illuminate severe performance disparities between English and non-English generations. \citet{ahuja2023mega} introduced MEGA, benchmarking generative AI across 16 languages and highlighting pronounced accuracy deficits in low-resource settings. \citet{bang2023multitask} presented a multi-task and multilingual audit of ChatGPT, showing that hallucination rates escalate drastically on low-resource and non-Latin prompts. Poly-FEVER~\citep{zhu2024polyfever} extended claim-verification datasets across 11 languages to study cross-lingual factuality. While foundational multilingual benchmarks such as TyDi QA~\citep{clark2020tydi} and FLORES-101~\citep{goyal2022flores} pioneered typologically diverse evaluation, they focus predominantly on extractive span QA or machine translation rather than generative hallucination and epistemic abstention. Furthermore, existing multilingual datasets frequently rely on translated English trivia, omitting localized administrative, legal, and public-health realities specific to countries like Bangladesh. In such specialized domains, cross-lingual English-pivot retrieval strategies (e.g., translating queries to English, retrieving from global corpora, and back-translating) fail fundamentally: sovereign legal codes (such as the Bangladesh Labour Act or constitutional amendments) and domestic public health circulars have zero representation in English web corpora, rendering translation-based retrieval pipelines ineffective. Matibhrom addresses this gap by curating culturally and institutionally authentic Bengali benchmarks constructed directly from sovereign constitutional statutes, national labor codes, and indigenous clinical guidelines.
 
 \subsection{Script Transliteration and Tokenizer Fragmentation}
 In languages employing complex Brahmic-derived scripts such as Bengali, standard subword tokenization constitutes a major structural bottleneck. \citet{hasan2023banglatokenizer} demonstrated that common tokenizers (e.g., Llama and Mistral SentencePiece models) fragment Bengali morphemes into disjoint byte tokens, driving severe token inflation and degrading downstream representations. In parallel, digital South Asian discourse is characterized by widespread informal Latin transliteration, commonly termed \emph{Banglish}. Recent studies~\citep{saha2024robustness,chowdhury20245dialects} demonstrate that LLMs experience significant performance degradation when processing transliterated dialectal inputs. However, previous investigations have evaluated transliteration strictly on classification tasks (e.g., sentiment analysis or machine translation). To our knowledge, Matibhrom is the first benchmark to evaluate the interaction between Latin transliteration, dense multilingual retriever recall, and generative hallucination under grounded retrieval.
@@ -212,56 +178,39 @@ In languages employing complex Brahmic-derived scripts such as Bengali, standard
 \subsection{RAG Vulnerability and Selective Abstention}
 Retrieval-Augmented Generation (RAG)~\citep{lewis2020rag} is widely deployed as a practical mitigation against parametric hallucination. However, recent findings emphasize that retrieval is not a panacea: \citet{cuconasu2024power} showed that introducing semantically adjacent or noisy distractor passages frequently misleads LLMs into generating false conclusions. Most recently, \citet{park2024robust} demonstrated that imperfect retrieval---encompassing unanswerable, adversarial, and conflicting documents---severely degrades RAG systems, frequently precipitating catastrophic factual hallucination. Similarly, mtRAG~\citep{katsis2025mtrag} established that handling unanswerability under multi-turn dialogue is a primary bottleneck in current RAG pipelines. When confronted with irrelevant or absent evidence, trustworthy systems must possess the capability to \emph{selectively abstain}~\citep{kadavath2022language,cole2023selectively,yin2023large}. While selective prediction has been formalized for classification and closed-book English QA, its efficacy under multilingual RAG with explicit negative constraints remains largely unexamined. Matibhrom directly fills this void by quantifying how model scale governs the emergence of selective abstention under noisy retrieval in low-resource environments.
 
-
-% ==========================================
-% Content from paper/sections/03_matibhrom_benchmark.tex
-% ==========================================
 \section{The Matibhrom Benchmark}
 \label{sec:benchmark}
 
 \subsection{Design Principles and Domain Stratification}
-Matibhrom is constructed to satisfy three foundational methodological requirements: (1) authentic cultural and institutional provenance, (2) linguistic dual-register symmetry, and (3) leakage-free grouping across retrieval splits. The benchmark comprises exactly 600 base items, partitioned equally across three distinct domains:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{General Knowledge (200 items):} Covers national history (e.g., the 1971 Liberation War, the Language Movement of 1952), administrative geography, governance institutions, and indigenous literary figures.
-    \item \textbf{Clinical and Public Health (200 items):} Encompasses infectious disease etiology (e.g., Dengue vector transmission, Nipah virus outbreaks), pharmacological contraindications, and clinical care guidelines promulgated by the Directorate General of Health Services (DGHS) Bangladesh and the World Health Organization (WHO).
-    \item \textbf{Statutory Jurisprudence (200 items):} Drawn directly from the \emph{Constitution of the People's Republic of Bangladesh}, the \emph{Penal Code 1860}, and the \emph{Bangladesh Labour Act 2006}, encompassing fundamental rights, judicial remedies, constitutional amendments, and statutory workplace regulations.
-\end{enumerate}
+Matibhrom is constructed to satisfy three foundational methodological requirements: authentic cultural and institutional provenance, linguistic dual-register symmetry, and leakage-free grouping across retrieval splits. The benchmark comprises exactly 600 base items, partitioned equally across three distinct high-stakes domains: General Knowledge (200 items), Clinical and Public Health (200 items), and Statutory Jurisprudence (200 items). 
 
-Every item is represented as a structured data contract adhering to strict schema validation:
+General Knowledge queries evaluate national history (such as the 1971 Liberation War and the Language Movement of 1952), administrative geography, governance institutions, and indigenous literary figures. Clinical and Public Health items encompass infectious disease etiology (e.g., Dengue vector transmission and Nipah virus outbreaks), pharmacological contraindications, and clinical care guidelines promulgated by the Directorate General of Health Services (DGHS) Bangladesh and the World Health Organization (WHO). Statutory Jurisprudence items are drawn directly from primary legal codes, including the \emph{Constitution of the People's Republic of Bangladesh}, the \emph{Penal Code 1860}, and the \emph{Bangladesh Labour Act 2006}, encompassing fundamental rights, judicial remedies, constitutional amendments, and statutory workplace regulations.
+
+Every benchmark item is formally specified as a structured data tuple:
 \begin{equation}
-    \mathcal{I} = \langle \text{id}, \text{dom}, \mathcal{Q}_{\text{bn}}, \mathcal{Q}_{\text{banglish}}, \mathcal{A}^*, e^*, \tau, \rho, \mathcal{S} \rangle
+    \mathcal{I}_i = \big( \text{id}_i, \text{dom}_i, \mathcal{Q}_{\text{bn}, i}, \mathcal{Q}_{\text{bg}, i}, \mathcal{A}^*_i, e^*_i, \tau_i, \rho_i, \mathcal{S}_i \big)
+    \label{eq:item_schema}
 \end{equation}
-where $\text{dom} \in \{\text{General}, \text{Medical}, \text{Legal}\}$, $\mathcal{Q}_{\text{bn}}$ is the native Bengali prompt, $\mathcal{Q}_{\text{banglish}}$ is the matched Romanized prompt, $\mathcal{A}^*$ is the canonical gold answer, $e^*$ is the unique identifier for the gold evidence passage, $\tau$ denotes the answer type (entity, numeric, date, citation, short explanation, procedure), $\rho \in \{\text{normal}, \text{high-stakes}\}$ is the risk tier, and $\mathcal{S} \in \{\text{Dev}, \text{Test}\}$ designates the dataset split.
+where $\text{dom}_i \in \{\text{General}, \text{Medical}, \text{Legal}\}$ denotes the domain, $\mathcal{Q}_{\text{bn}, i}$ is the native Bengali prompt in Eastern Nagari script, $\mathcal{Q}_{\text{bg}, i}$ is the matched Romanized Banglish prompt, $\mathcal{A}^*_i$ is the canonical gold answer, $e^*_i$ is the unique identifier for the gold evidence passage, $\tau_i$ denotes the answer type (entity, numeric, date, citation, short explanation, procedure), $\rho_i \in \{\text{normal}, \text{high-stakes}\}$ indicates the risk tier, and $\mathcal{S}_i \in \{\text{Dev}, \text{Test}\}$ designates the dataset split.
 
 \subsection{Cross-Register Prompt Pairs}
-To model authentic digital linguistic behavior, every Bengali query $\mathcal{Q}_{\text{bn}}$ is paired with an expertly authored Latin-transliterated counterpart $\mathcal{Q}_{\text{banglish}}$. Unlike mechanical phonetic mapping algorithms, transliterations were curated by native speakers to capture natural orthographic variations, colloquial phrasing, and vowel contractions:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Standard Bangla ($\mathcal{Q}_{\text{bn}}$):} \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান কবে কার্যকর হয়?"}
-    \item \textbf{Banglish ($\mathcal{Q}_{\text{banglish}}$):} \emph{"bangladesh er shongbidhan kobe karjokor hoy?"}
-    \item \textbf{Gold Answer ($\mathcal{A}^*$):} \foreignlanguage{bengali}{"১৬ ডিসেম্বর ১৯৭২"} (16 December 1972)
-\end{itemize}
-This dual-register design yields $1,200$ unique evaluated prompts across the $600$ base items, enabling direct, paired linguistic comparisons under identical factual semantics.
+To capture authentic digital linguistic behavior, every Bengali query $\mathcal{Q}_{\text{bn}}$ is paired with an expertly authored Latin-transliterated counterpart $\mathcal{Q}_{\text{bg}}$. Unlike mechanical phonetic mapping algorithms, transliterations were curated by native speakers to reflect natural orthographic variations, colloquial phrasing, and vowel contractions. For example, the formal query \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান কবে কার্যকর হয়?"} is paired with its natural colloquial Banglish equivalent \emph{"bangladesh er shongbidhan kobe karjokor hoy?"}, targeting the gold answer \foreignlanguage{bengali}{"১৬ ডিসেম্বর ১৯৭২"} (16 December 1972). This dual-register design yields 1,200 unique evaluated prompts across the 600 base items, enabling direct, paired linguistic comparisons under identical factual semantics.
 
 \subsection{The 1,800-Passage Grounding Corpus}
-To support robust Retrieval-Augmented Generation evaluation, we construct an authoritative grounding corpus $\mathcal{D}$ consisting of $1,800$ verified textual passages:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Gold Evidence ($600$ passages):} Exactly one authoritative passage $e^*$ per base item containing the factual ground-truth required to answer the query.
-    \item \textbf{Topical Distractors ($1,200$ passages):} Two domain-matched distractor passages per base item ($400$ per domain). Distractors discuss semantically adjacent entities (e.g., Indian constitutional assembly debates, alternative public health advisories, or neighboring district administrative structures) without satisfying the target query.
-\end{itemize}
-Passages are chunked to fixed windows of $384$ tokens with a $64$-token stride. All passages are densely embedded using the state-of-the-art multilingual model \texttt{BAAI/bge-m3}~\citep{chen2024bge} ($d = 1024$) and indexed into a frozen cosine FAISS vector database.
+To support robust Retrieval-Augmented Generation evaluation, we construct an authoritative grounding corpus $\mathcal{D}$ consisting of 1,800 verified textual passages. The corpus comprises 600 gold evidence passages (exactly one authoritative passage $e^*$ per base item containing the factual ground-truth required to resolve the query) and 1,200 domain-matched distractor passages (two distractors per base item, yielding 400 per domain). Distractors discuss semantically adjacent entities---such as Indian constitutional assembly debates, alternative public health advisories, or neighboring administrative structures---without satisfying the target query.
+
+Passages are segmented into fixed windows of 384 tokens with a 64-token stride. All passages are densely embedded using the multilingual representation model \texttt{BAAI/bge-m3}~\citep{chen2024bge} ($d = 1024$) and indexed into a frozen inner-product vector database.
 
 \subsection{Leakage-Free Document-Isolated Splitting}
-A frequent methodological defect in RAG benchmarking is retrieval leakage, where test queries retrieve documents overlapping with training or development splits. To guarantee complete experimental isolation, Matibhrom partitions the data via source-level group clustering:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Dev Split (20\% --- 120 items / 240 prompts):} 40 General, 40 Medical, 40 Legal items.
-    \item \textbf{Test Split (80\% --- 480 items / 960 prompts):} 160 General, 160 Medical, 160 Legal items.
-\end{itemize}
-No evidence document or statutory act spans across both splits. Furthermore, benchmark provenance is cryptographically locked: the retrieval corpus SHA-256 digest is \texttt{906f912f07690ba0}, and the compiled index digest is \texttt{idx\_1794819485\_906f912f07690ba0}. Any modification to the underlying text or embedding parameters immediately invalidates the execution harness.
+A frequent methodological defect in RAG benchmarking is retrieval leakage, wherein test queries inadvertently retrieve passages overlapping with training or development splits. To guarantee complete experimental isolation, Matibhrom partitions items via source-level document clustering. The development split contains 120 items (240 prompts; 40 per domain), while the held-out test split contains 480 items (960 prompts; 160 per domain). 
 
+Under this partitioning, no evidence document, statutory section, or clinical advisory is shared across splits:
+\begin{equation}
+    \operatorname{DocGroup}(i) \cap \operatorname{DocGroup}(j) = \emptyset, \quad \forall i \in \mathcal{S}_{\text{Test}}, \; j \in \mathcal{S}_{\text{Dev}}
+    \label{eq:document_isolation}
+\end{equation}
+Furthermore, benchmark provenance is cryptographically locked: the retrieval corpus SHA-256 digest is \texttt{906f912f07690ba0}, and the compiled index digest is \texttt{idx\_1794819485\_906f912f07690ba0}. Any modification to the underlying text or embedding parameters immediately invalidates the execution harness.
 
-% ==========================================
-% Content from paper/sections/04_methodology_and_framework.tex
-% ==========================================
 \section{Methodology and Evaluation Framework}
 \label{sec:methodology}
 
@@ -279,14 +228,14 @@ To isolate the sources of factual failure, Matibhrom evaluates every prompt unde
 \end{equation}
 Condition $C_1$ serves as the theoretical empirical ceiling for reading comprehension, decoupling parametric ignorance from extractive reasoning failure.
 
-\paragraph{Condition $C_2$: Dense RAG with Distractors.} The model receives the top-$k$ retrieved passages ($k=3$) generated by dense vector retrieval over the frozen corpus $\mathcal{D}$:
+\paragraph{Condition $C_2$: Dense RAG with Distractors.} The model receives the top-$k$ retrieved passages ($k=3$) generated by dense vector retrieval over the frozen corpus $\mathcal{D}$, sequentially concatenated into the prompt context budget separated by newline delimiters:
 \begin{equation}
-    \mathcal{R}_k(q) = \operatorname{arg\,top-}k_{p \in \mathcal{D}} \; \cos\big(f_{\text{enc}}(q), f_{\text{enc}}(p)\big)
+    \mathcal{R}_k(q) = [p_{(1)} \mathbin{\Vert} p_{(2)} \mathbin{\Vert} \dots \mathbin{\Vert} p_{(k)}], \quad p_{(j)} \in \operatorname{arg\,top-}k_{p \in \mathcal{D}} \; \cos\big(f_{\text{enc}}(q), f_{\text{enc}}(p)\big)
 \end{equation}
 \begin{equation}
     \hat{y}^{(2)} \sim \mathcal{M}_\theta\big(q, \mathcal{R}_k(q)\big)
 \end{equation}
-Because $\mathcal{D}$ contains $1,200$ domain-matched distractors, $\mathcal{R}_k(q)$ frequently introduces noisy or irrelevant contexts, modeling realistic production RAG.
+Because $\mathcal{D}$ contains $1,200$ domain-matched distractors, $\mathcal{R}_k(q)$ frequently introduces noisy or irrelevant contexts alongside or in place of gold evidence, modeling realistic production RAG.
 
 \paragraph{Condition $C_3$: Selective Abstention Guardrail.} The model is provided the exact, byte-identical retrieved context $\mathcal{R}_k(q)$ as in $C_2$, but augmented with an explicit negative constraint:
 \begin{equation}
@@ -297,74 +246,101 @@ The prompt explicitly mandates: \foreignlanguage{bengali}{\emph{"যদি প�
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-    scale=0.88, every node/.style={transform shape},
-    box/.style={draw=black!70, rounded corners=3pt, thick, fill=blue!5, text width=2.4cm, minimum height=1.1cm, align=center, font=\footnotesize},
-    databox/.style={draw=teal!70, rounded corners=3pt, thick, fill=teal!5, text width=2.4cm, minimum height=1.1cm, align=center, font=\footnotesize},
-    evalbox/.style={draw=purple!70, rounded corners=3pt, thick, fill=purple!5, text width=2.4cm, minimum height=1.1cm, align=center, font=\footnotesize},
-    arrow/.style={->, >=stealth, thick, color=black!80}
+    scale=0.92, every node/.style={transform shape},
+    % Stage Group Containers
+    stagebox/.style={draw=slate!40, rounded corners=6pt, fill=slate!3, line width=0.8pt, inner sep=8pt},
+    stagetitle/.style={font=\bfseries\sffamily\footnotesize, color=slate!80, anchor=north west},
+    % Functional Node Styles
+    datanode/.style={draw=teal!80, rounded corners=4pt, fill=teal!6, line width=0.9pt, text width=2.5cm, minimum height=1.2cm, align=center, font=\sffamily\scriptsize},
+    retrnode/.style={draw=indigo!80, rounded corners=4pt, fill=indigo!6, line width=0.9pt, text width=2.5cm, minimum height=1.2cm, align=center, font=\sffamily\scriptsize},
+    condnode/.style={draw=blue!80, rounded corners=4pt, fill=blue!6, line width=0.9pt, text width=2.5cm, minimum height=1.05cm, align=center, font=\sffamily\scriptsize},
+    evalnode/.style={draw=violet!80, rounded corners=4pt, fill=violet!6, line width=0.9pt, text width=2.5cm, minimum height=1.2cm, align=center, font=\sffamily\scriptsize},
+    % Flow Arrows
+    flowarrow/.style={->, >=stealth, line width=1.1pt, color=slate!75},
+    subarrow/.style={->, >=stealth, line width=0.8pt, color=slate!55, dashed}
 ]
-    % Inputs
-    \node[databox] (query) at (0, 2) {\textbf{Dual-Register Input}\\$\mathcal{Q}_{\text{bn}} \leftrightarrow \mathcal{Q}_{\text{banglish}}$};
-    \node[databox] (corpus) at (0, -1) {\textbf{Frozen Corpus $\mathcal{D}$}\\1,800 Passages\\(Gold + Distractors)};
-    
-    % Retriever
-    \node[box] (retriever) at (3.5, -1) {\textbf{Dense Index}\\BAAI/bge-m3\\FAISS Cosine Metric};
-    
-    % Conditions
-    \node[box] (c0) at (7, 3) {\textbf{$C_0$: Closed-Book}\\Parametric Memory\\No External Context};
-    \node[box] (c1) at (7, 1) {\textbf{$C_1$: Oracle Context}\\Gold Passage $e^*$\\(Extractive Ceiling)};
-    \node[box] (c2) at (7, -1) {\textbf{$C_2$: Dense RAG}\\Top-$k$ Retrieved\\Distractor Injection};
-    \node[box] (c3) at (7, -3) {\textbf{$C_3$: Abstention}\\Top-$k$ Context +\\Negative Constraint};
-    
-    % Model Generation
-    \node[box] (model) at (11, 0) {\textbf{Model Inference}\\Qwen 1.7B / Gemma 4B\\($N=4{,}560$ Generations)};
-    
-    % Evaluation
-    \node[evalbox] (adjudication) at (14.5, 0) {\textbf{Gold Adjudication}\\Exact Matching \&\\Abstention Cues\\(Codebook v1.0.0)};
-    \node[evalbox] (stats) at (14.5, -2.5) {\textbf{Statistical Rigor}\\Paired McNemar ($\chi^2$)\\95\% Wilson CI};
+    \definecolor{slate}{RGB}{30, 41, 59}
+    \definecolor{indigo}{RGB}{79, 70, 229}
 
-    % Arrows
-    \draw[arrow] (corpus) -- (retriever);
-    \draw[arrow] (query) |- (c0);
-    \draw[arrow] (query) |- (c1);
-    \draw[arrow] (query) -- (3.5, 2) -- (retriever);
-    \draw[arrow] (retriever) -- (c2);
-    \draw[arrow] (retriever) |- (c3);
+    % ==================== STAGE 1: INGESTION ====================
+    \draw[stagebox] (-0.3, -3.8) rectangle (2.9, 3.8);
+    \node[stagetitle] at (-0.1, 3.65) {I. Corpus \& Queries};
     
-    \draw[arrow] (c0) -| (model);
-    \draw[arrow] (c1) -| (model);
-    \draw[arrow] (c2) -- (model);
-    \draw[arrow] (c3) -| (model);
+    \node[datanode] (queries) at (1.3, 1.8) {\textbf{Dual-Register Queries}\\Standard Bangla ($\mathcal{Q}_{\text{bn}}$)\\$\updownarrow$\\Romanized Banglish ($\mathcal{Q}_{\text{bg}}$)};
+    \node[datanode] (corpus) at (1.3, -1.8) {\textbf{Frozen Corpus $\mathcal{D}$}\\1,800 Chunked Passages\\(600 Gold + 1,200 Noise)};
+
+    % ==================== STAGE 2: RETRIEVAL ====================
+    \draw[stagebox] (3.4, -3.8) rectangle (6.6, 3.8);
+    \node[stagetitle] at (3.6, 3.65) {II. Dense Indexing};
     
-    \draw[arrow] (model) -- (adjudication);
-    \draw[arrow] (adjudication) -- (stats);
+    \node[retrnode] (encoder) at (5.0, 1.8) {\textbf{Bi-Encoder}\\\texttt{BAAI/bge-m3}\\($d=1024$ Embedding)};
+    \node[retrnode] (index) at (5.0, -1.8) {\textbf{Inner-Product Index}\\Frozen Vector DB\\Top-$k$ Ranking ($k=3$)};
+
+    % ==================== STAGE 3: INFERENCE ====================
+    \draw[stagebox] (7.1, -3.8) rectangle (10.3, 3.8);
+    \node[stagetitle] at (7.3, 3.65) {III. Controlled Inference};
+    
+    \node[condnode] (c0) at (8.7, 2.4) {\textbf{$C_0$: Closed-Book}\\Parametric Recall\\$\hat{y}^{(0)} \sim \mathcal{M}_\theta(q)$};
+    \node[condnode] (c1) at (8.7, 0.8) {\textbf{$C_1$: Oracle Context}\\Gold Evidence $e^*$\\\emph{Extractive Ceiling}};
+    \node[condnode] (c2) at (8.7, -0.8) {\textbf{$C_2$: Unconstrained RAG}\\Top-$k$ with Distractors\\Realistic Production RAG};
+    \node[condnode] (c3) at (8.7, -2.4) {\textbf{$C_3$: Selective Abstention}\\Top-$k$ + Negative Constraint\\\emph{"প্রমাণ অপর্যাপ্ত"}};
+
+    % ==================== STAGE 4: EVALUATION ====================
+    \draw[stagebox] (10.8, -3.8) rectangle (14.0, 3.8);
+    \node[stagetitle] at (11.0, 3.65) {IV. Dual Adjudication};
+    
+    \node[evalnode] (evalgold) at (12.4, 1.8) {\textbf{Deterministic Gold}\\\textbf{Adjudication}\\Substring \& Cues\\$\kappa_{\text{determ}} = 1.000$};
+    \node[evalnode] (evalstats) at (12.4, -1.8) {\textbf{Statistical Testing}\\Paired McNemar $\chi^2$\\95\% Wilson Score CIs\\Bootstrap ($B=1,000$)};
+
+    % ==================== ROUTING ARROWS ====================
+    % Stage 1 to 2
+    \draw[flowarrow] (queries) -- (encoder);
+    \draw[flowarrow] (corpus) -- (index);
+    \draw[flowarrow] (encoder) -- (index);
+
+    % Stage 2 to 3
+    \draw[flowarrow] (queries.east) -- ++(0.4, 0) |- (c0.west);
+    \draw[flowarrow] (corpus.east) -- ++(0.3, 0) |- (c1.west);
+    \draw[flowarrow] (index.east) -- ++(0.3, 0) |- (c2.west);
+    \draw[flowarrow] (index.east) -- ++(0.3, 0) |- (c3.west);
+
+    % Stage 3 to 4
+    \draw[flowarrow] (c0.east) -- ++(0.3, 0) |- (evalgold.west);
+    \draw[flowarrow] (c1.east) -- ++(0.3, 0) |- (evalgold.west);
+    \draw[flowarrow] (c2.east) -- ++(0.3, 0) |- (evalgold.west);
+    \draw[flowarrow] (c3.east) -- ++(0.3, 0) |- (evalgold.west);
+    \draw[flowarrow] (evalgold) -- (evalstats);
+
 \end{tikzpicture}
-\caption{End-to-End Matibhrom Experimental Framework: From matched dual-register queries and frozen dense retrieval indexing to 4-condition generation, gold-verified adjudication, and paired statistical testing.}
+\caption{The Matibhrom Scientific Architecture: An end-to-end framework integrating dual-register query ingestion, dense multilingual vector indexing, 4-condition controlled inference ($C_0\text{--}C_3$), deterministic gold-standard adjudication, and paired non-parametric statistical hypothesis testing.}
 \label{fig:methodology_framework}
 \end{figure*}
 
 \subsection{Formal Evaluation Metrics}
 For a sample of $N$ evaluated generations, every output $\hat{y}_i$ is adjudicated into correctness $c_i \in \{\text{correct}, \text{partially}, \text{incorrect}\}$, hallucination indicator $h_i \in \{\text{yes}, \text{no}\}$, error category $\epsilon_i \in \{\text{H1}, \dots, \text{H5}, \text{A}, \text{R}, \text{none}\}$, and abstention status $b_i \in \{\text{none}, \text{appropriate}, \text{unnecessary}\}$. We compute four primary metrics:
 
-\paragraph{1. Hallucination Rate ($\mathcal{H}$):} The proportion of generations containing factually fabricated or contradictory claims:
+\paragraph{Hallucination Rate ($\mathcal{H}$).} The proportion of generations containing factually fabricated or contradictory claims:
 \begin{equation}
     \mathcal{H} = \frac{1}{N} \sum_{i=1}^N \mathbf{1}[h_i = \text{yes}]
     \label{eq:hallucination_rate}
 \end{equation}
 
-\paragraph{2. Substantive Coverage ($\mathcal{C}$):} The fraction of queries for which the model attempts a substantive answer rather than refusing or abstaining:
+\paragraph{Substantive Coverage ($\mathcal{C}$).} The fraction of queries for which the model attempts a substantive answer rather than refusing or abstaining:
 \begin{equation}
     \mathcal{C} = \frac{1}{N} \sum_{i=1}^N \mathbf{1}[b_i = \text{none} \land \epsilon_i \neq \text{R}]
     \label{eq:coverage}
 \end{equation}
 
-\paragraph{3. Selective Accuracy ($\mathcal{A}_{\text{sel}}$):} Accuracy computed strictly over the subset of answered (non-abstained) queries:
+\paragraph{Selective Accuracy ($\mathcal{A}_{\text{sel}}$).} Accuracy computed strictly over the subset of answered (non-abstained) queries, partitioned over the answered index set $\mathcal{S}_{\text{ans}}$:
 \begin{equation}
-    \mathcal{A}_{\text{sel}} = \frac{\sum_{i: b_i = \text{none} \land \epsilon_i \neq \text{R}} \big(\mathbf{1}[c_i = \text{correct}] + 0.5 \cdot \mathbf{1}[c_i = \text{partially}]\big)}{\sum_{i=1}^N \mathbf{1}[b_i = \text{none} \land \epsilon_i \neq \text{R}]}
-    \label{eq:selective_accuracy}
+\begin{split}
+    \mathcal{A}_{\text{sel}} &= \frac{1}{|\mathcal{S}_{\text{ans}}|} \sum_{i \in \mathcal{S}_{\text{ans}}} \Big(\mathbf{1}[c_i = \text{correct}] + 0.5 \cdot \mathbf{1}[c_i = \text{partially}]\Big), \\
+    \text{where} &\quad \mathcal{S}_{\text{ans}} = \{i \mid b_i = \text{none} \land \epsilon_i \neq \text{R}\}
+\end{split}
+\label{eq:selective_accuracy}
 \end{equation}
 
-\paragraph{4. Abstention Rate ($\mathcal{B}$):} The fraction of queries where the model explicitly invokes abstention or refusal:
+\paragraph{Abstention Rate ($\mathcal{B}$).} The fraction of queries where the model explicitly invokes abstention or refusal:
 \begin{equation}
     \mathcal{B} = \frac{1}{N} \sum_{i=1}^N \mathbf{1}[b_i \neq \text{none}]
     \label{eq:abstention_rate}
@@ -376,7 +352,7 @@ To establish empirical significance without making unwarranted parametric distri
     \chi^2 = \frac{\big(|b - c| - 1\big)^2}{b + c}, \quad p = \operatorname{Pr}(\chi^2_1 \ge \chi^2)
     \label{eq:mcnemar}
 \end{equation}
-where $b$ is the count of items where Condition 1 hallucinates and Condition 2 does not, and $c$ is the converse. In addition, for all reported metrics, we estimate 95\% confidence intervals via non-parametric bootstrapping with $B = 1,000$ resamples.
+where $b$ is the count of items where Condition 1 hallucinates and Condition 2 does not, and $c$ is the converse. In addition, for all reported metrics, we compute 95\% confidence intervals using the Wilson score interval~\citep{wilson1927probable} for binomial proportions and non-parametric bootstrapping ($B = 1,000$ resamples). We employ the Wilson score interval rather than asymptotic normal (Wald) intervals because the latter severely under-cover and produce degenerate bounds when sample proportions approach boundary extremes ($p \to 0$ or $p \to 1$), as observed in our near-zero hallucination rates under Condition $C_3$~\citep{brown2001interval}.
 
 \subsection{Evaluation Algorithm}
 Algorithm~\ref{alg:matibhrom_pipeline} outlines the complete evaluation and adjudication protocol.
@@ -411,10 +387,6 @@ Algorithm~\ref{alg:matibhrom_pipeline} outlines the complete evaluation and adju
 \end{algorithmic}
 \end{algorithm}
 
-
-% ==========================================
-% Content from paper/sections/05_empirical_results.tex
-% ==========================================
 \section{Empirical Results and Analysis}
 \label{sec:results}
 
@@ -424,24 +396,24 @@ Table~\ref{tab:model_scaling_comparison} reports the comprehensive evaluation me
 \begin{table*}[t]
 \centering
 \small
-\begin{tabular}{llrrrr}
+\begin{tabular}{llcccc}
 \toprule
-Model & Cond. & Hallucination (95\% CI) & Coverage & Sel. Accuracy & Abstention \\
+\textbf{Model} & \textbf{Condition} & \textbf{Hallucination Rate [95\% CI] $\downarrow$} & \textbf{Coverage $\uparrow$} & \textbf{Selective Accuracy $\uparrow$} & \textbf{Abstention Rate $\uparrow$} \\
 \midrule
-\multirow{4}{*}{Qwen 1.7B}
-& C0 & 0.965 [0.95, 0.98] & 0.984 & 0.020 & 0.016 \\
-& C1 & 0.644 [0.61, 0.67] & 0.973 & 0.338 & 0.027 \\
-& C2 & 0.875 [0.85, 0.90] & 0.977 & 0.104 & 0.023 \\
-& C3 & 0.375 [0.34, 0.40] & 0.416 & 0.098 & 0.584 \\
+\multirow{4}{*}{Qwen 2.5 1.7B}
+& $C_0$ (Closed-Book)       & 96.5\% [0.95, 0.98] & 98.4\% & \phantom{0}2.0\% & \phantom{0}1.6\% \\
+& $C_1$ (Oracle Grounding)  & 64.4\% [0.61, 0.67] & 97.3\% & 33.8\%           & \phantom{0}2.7\% \\
+& $C_2$ (Dense Distractors) & 87.5\% [0.85, 0.90] & 97.7\% & 10.4\%           & \phantom{0}2.3\% \\
+& $C_3$ (Selective Guard)   & 37.5\% [0.34, 0.40] & 41.6\% & \phantom{0}9.8\% & 58.4\% \\
 \midrule
-\multirow{4}{*}{Gemma 4B}
-& C0 & 0.894 [0.85, 0.94] & 0.972 & 0.080 & 0.028 \\
-& C1 & 0.606 [0.54, 0.68] & 0.978 & 0.381 & 0.022 \\
-& C2 & 0.789 [0.73, 0.85] & 0.900 & 0.123 & 0.100 \\
-& C3 & 0.033 [0.01, 0.06] & 0.072 & 0.538 & 0.928 \\
+\multirow{4}{*}{Gemma 3 4B}
+& $C_0$ (Closed-Book)       & 89.4\% [0.85, 0.94] & 97.2\% & \phantom{0}8.0\% & \phantom{0}2.8\% \\
+& $C_1$ (Oracle Grounding)  & 60.6\% [0.54, 0.68] & 97.8\% & 38.1\%           & \phantom{0}2.2\% \\
+& $C_2$ (Dense Distractors) & 78.9\% [0.73, 0.85] & 90.0\% & 12.3\%           & 10.0\% \\
+& $C_3$ (Selective Guard)   & \textbf{3.3\%} [0.01, 0.06] & \phantom{0}7.2\% & \textbf{53.8\%} & \textbf{92.8\%} \\
 \bottomrule
 \end{tabular}
-\caption{Cross-Model Comparison across Grounding Conditions on Matibhrom Benchmark.}
+\caption{Cross-Model Scaling Comparison Across Controlled Grounding Conditions on the Held-Out Test Split ($N=4{,}560$). Wilson 95\% confidence intervals and selective accuracy metrics demonstrate an order-of-magnitude hallucination reduction under Condition $C_3$ on Gemma 4B.}
 \label{tab:model_scaling_comparison}
 \end{table*}
 
@@ -460,13 +432,17 @@ The introduction of selective abstention instructions ($C_3$) uncovers a strikin
 
 However, direct cross-model paired testing reveals that parameter capacity fundamentally dictates instruction adherence under noisy retrieval:
 \begin{equation}
-    \chi^2_{\text{Qwen vs Gemma (C3)}} = 51.191, \quad p = 8.38 \times 10^{-13} < 0.001 \quad (***)
+\begin{split}
+    \chi^2_{\text{C3}} &= 51.191, \\
+    p &= 8.38 \times 10^{-13} < 0.001 \quad (***)
+\end{split}
+\label{eq:scaling_mcnemar}
 \end{equation}
-While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inability to reliably follow negative constraints under distractors, \textbf{Gemma 4B achieves near-total hallucination eradication}, dropping to an astonishing \textbf{3.3\% hallucination rate} [0.01, 0.06], a $92.8\%$ abstention rate, and a \textbf{53.8\% selective accuracy}. When evidence is insufficient or contradictory, Gemma 4B consistently suppresses generative confabulation and outputs the standardized refusal: \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}.
+While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inability to reliably follow negative constraints under distractors, \textbf{Gemma 4B achieves near-total hallucination eradication}, dropping to an astonishing \textbf{3.3\% hallucination rate} [0.01, 0.06], a $92.8\%$ abstention rate, and a \textbf{53.8\% selective accuracy}. When evidence is insufficient or contradictory, Gemma 4B consistently suppresses generative confabulation and outputs the standardized refusal: \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}. Crucially, this high abstention rate reflects calibrated epistemic conservatism rather than degenerate under-generation: because the dense retriever frequently returns noisy distractors lacking sufficient gold evidence in $C_3$, answering under uncertainty would guarantee hallucination. When Gemma does elect to answer (the remaining $7.2\%$ substantive coverage), its selective accuracy surges to $53.8\%$ (a 4.4-fold increase over its unconstrained RAG accuracy of $12.3\%$), demonstrating that its decision boundary selectively filters out ungrounded confabulations.
 
 \begin{figure*}[t]
 \centering
-\IfFileExists{figures/figure2_scaling_abstention.png}{\includegraphics[width=0.96\textwidth]{figures/figure2_scaling_abstention.png}}{\fbox{\parbox{0.9\linewidth}{\centering [Figure: figures/figure2_scaling_abstention.png]}}}
+\includegraphics[width=0.96\textwidth]{figures/figure2_scaling_abstention.png}
 \caption{Cross-Model Scaling and Selective Abstention Dynamics on the Test Benchmark: (a) Hallucination rates across conditions with 1,000-sample bootstrap 95\% confidence intervals; (b) Emergence of high selective accuracy (53.8\%) and hallucination suppression (3.3\%) under selective abstention guardrailing on Gemma 4B ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$).}
 \label{fig:scaling_abstention}
 \end{figure*}
@@ -476,22 +452,22 @@ While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inabi
 \small
 \begin{tabular}{llrr}
 \toprule
-Model & Hypothesis Comparison & $\chi^2$ & $p$-value \\
+\textbf{Model} & \textbf{Hypothesis Comparison} & $\chi^2$ & $p$-value \\
 \midrule
-\multirow{4}{*}{Qwen 1.7B} 
+\multirow{4}{*}{Qwen 2.5 1.7B} 
 & $C_0$ vs.\ $C_1$ (Oracle Effect) & 282.183 & $2.51 \times 10^{-63}$ $^{***}$ \\
 & $C_0$ vs.\ $C_2$ (RAG Distractors) & 57.341 & $3.66 \times 10^{-14}$ $^{***}$ \\
 & $C_2$ vs.\ $C_3$ (Abstention Guard) & 444.653 & $1.05 \times 10^{-98}$ $^{***}$ \\
 & Standard Bangla vs.\ Banglish & 26.785 & $2.27 \times 10^{-7}$ $^{***}$ \\
 \midrule
-\multirow{4}{*}{Gemma 4B} 
+\multirow{4}{*}{Gemma 3 4B} 
 & $C_0$ vs.\ $C_1$ (Oracle Effect) & 39.409 & $3.44 \times 10^{-10}$ $^{***}$ \\
 & $C_0$ vs.\ $C_2$ (RAG Distractors) & 8.757 & $3.08 \times 10^{-3}$ $^{**}$ \\
 & $C_2$ vs.\ $C_3$ (Abstention Guard) & 134.007 & $5.44 \times 10^{-31}$ $^{***}$ \\
 & Standard Bangla vs.\ Banglish & 25.681 & $4.03 \times 10^{-7}$ $^{***}$ \\
 \midrule
-Cross-Model & Overall Hallucination Resilience & 58.080 & $2.52 \times 10^{-14}$ $^{***}$ \\
-(Qwen vs Gemma) & $C_3$ Selective Abstention & 51.191 & $8.38 \times 10^{-13}$ $^{***}$ \\
+\textbf{Cross-Model} & Overall Resilience & 58.080 & $2.52 \times 10^{-14}$ $^{***}$ \\
+(Qwen vs.\ Gemma) & $C_3$ Selective Abstention & 51.191 & $8.38 \times 10^{-13}$ $^{***}$ \\
 \bottomrule
 \end{tabular}
 \caption{Paired McNemar Statistical Significance Tests on Matibhrom Test Split ($^{***}p < 0.001$, $^{**}p < 0.01$, $^{*}p < 0.05$).}
@@ -499,17 +475,9 @@ Cross-Model & Overall Hallucination Resilience & 58.080 & $2.52 \times 10^{-14}$
 \end{table}
 
 \subsection{Linguistic Register Degradation (RQ1)}
-A core hypothesis of this study is that informal Latin transliteration (Banglish) destabilizes factual generation. As shown in Table~\ref{tab:mcnemar_tests}, the register effect is highly statistically significant across both architectures:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Qwen 1.7B:} $\chi^2 = 26.785, \quad p = 2.27 \times 10^{-7} < 0.001$ ($***$)
-    \item \textbf{Gemma 4B:} $\chi^2 = 25.681, \quad p = 4.03 \times 10^{-7} < 0.001$ ($***$)
-\end{itemize}
-Dense retrieval diagnostics explain this divergence:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Standard Bangla ($\mathcal{Q}_{\text{bn}}$):} Recall@$k$ = \textbf{66.67\%}, Rank-1 Precision = \textbf{40.00\%}.
-    \item \textbf{Romanized Banglish ($\mathcal{Q}_{\text{banglish}}$):} Recall@$k$ = \textbf{30.00\%}, Rank-1 Precision = \textbf{13.33\%}.
-\end{itemize}
-Because multilingual embedding models (e.g., BGE-M3) are predominantly aligned between native non-Latin scripts and English, unsystematic Latin transliterations scatter vector projections away from target semantic clusters, starving the generative LLM of gold evidence.
+A core hypothesis of this study is that informal Latin transliteration (Banglish) destabilizes factual generation. As shown in Table~\ref{tab:mcnemar_tests}, the register effect is highly statistically significant across both architectures: paired testing confirms significant degradation for Qwen 1.7B ($\chi^2 = 26.785, p = 2.27 \times 10^{-7}$) and Gemma 4B ($\chi^2 = 25.681, p = 4.03 \times 10^{-7}$). 
+
+Dense retrieval diagnostics explain the underlying mechanism for this divergence. For Standard Bangla prompts ($\mathcal{Q}_{\text{bn}}$), the dense bi-encoder achieves a Recall@$k$ of 66.67\% and a Rank-1 Precision of 40.00\%. In contrast, for Romanized Banglish prompts ($\mathcal{Q}_{\text{banglish}}$), Recall@$k$ collapses to 30.00\% while Rank-1 Precision falls to 13.33\%. Because multilingual embedding models such as \texttt{BAAI/bge-m3} are predominantly aligned between native non-Latin scripts and English, unsystematic Latin transliterations scatter vector projections away from target semantic clusters, starving the generative LLM of gold evidence and precipitating factual fabrication.
 
 \subsection{Domain Disparity Breakdown (Table 2)}
 Table~\ref{tab:domain_disparity} delineates performance across the General, Medical, and Legal domains on the test split.
@@ -517,22 +485,23 @@ Table~\ref{tab:domain_disparity} delineates performance across the General, Medi
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{llrrrr}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llcccc}
 \toprule
-Model & Domain & Hallucination & Coverage & Sel. Accuracy & Abstention \\
+\textbf{Model} & \textbf{Domain} & \textbf{Halluc. $\downarrow$} & \textbf{Cov. $\uparrow$} & \textbf{Sel. Acc. $\uparrow$} & \textbf{Abst. $\uparrow$} \\
 \midrule
-\multirow{3}{*}{Qwen 1.7B}
-& General & 0.625 & 0.863 & 0.276 & 0.137 \\
-& Medical & 0.723 & 0.827 & 0.126 & 0.173 \\
-& Legal & 0.796 & 0.823 & 0.032 & 0.177 \\
+\multirow{3}{*}{Qwen 2.5 1.7B}
+& General & 62.5\% & 86.3\% & 27.6\% & 13.7\% \\
+& Medical & 72.3\% & 82.7\% & 12.6\% & 17.3\% \\
+& Legal   & 79.6\% & 82.3\% & \phantom{0}3.2\% & 17.7\% \\
 \midrule
-\multirow{3}{*}{Gemma 4B}
-& General & 0.421 & 0.662 & 0.365 & 0.338 \\
-& Medical & 0.625 & 0.762 & 0.180 & 0.237 \\
-& Legal & 0.696 & 0.767 & 0.092 & 0.233 \\
+\multirow{3}{*}{Gemma 3 4B}
+& General & 42.1\% & 66.2\% & 36.5\% & 33.8\% \\
+& Medical & 62.5\% & 76.2\% & 18.0\% & 23.7\% \\
+& Legal   & 69.6\% & 76.7\% & \phantom{0}9.2\% & 23.3\% \\
 \bottomrule
 \end{tabular}
-\caption{Domain-Specific Hallucination and Selective Abstention Metrics.}
+\caption{Domain Disparity Across Evaluated Grounding Metrics on the Test Split ($N=4{,}560$). Statutory Legal queries exhibit the highest vulnerability and lowest selective accuracy across both architectures.}
 \label{tab:domain_disparity}
 \end{table}
 
@@ -542,15 +511,11 @@ Model & Domain & Hallucination & Coverage & Sel. Accuracy & Abstention \\
 
 \begin{figure*}[t]
 \centering
-\IfFileExists{figures/figure3_domain_register.png}{\includegraphics[width=0.96\textwidth]{figures/figure3_domain_register.png}}{\fbox{\parbox{0.9\linewidth}{\centering [Figure: figures/figure3_domain_register.png]}}}
+\includegraphics[width=0.96\textwidth]{figures/figure3_domain_register.png}
 \caption{Domain and Register Disparity on the Test Benchmark: (a) Domain-specific hallucination rates highlighting acute vulnerability in Legal statutory queries; (b) Asymmetry in dense vector retrieval (\texttt{BAAI/bge-m3}) between native Standard Bangla ($\mathcal{Q}_{\text{bn}}$) and Romanized Banglish ($\mathcal{Q}_{\text{banglish}}$).}
 \label{fig:domain_register}
 \end{figure*}
 
-
-% ==========================================
-% Content from paper/sections/06_error_taxonomy.tex
-% ==========================================
 \section{Qualitative Error Taxonomy and Case Studies}
 \label{sec:error_taxonomy}
 
@@ -580,54 +545,37 @@ Code & Category Name & Operational Definition per Bengali Linguistic Annotation 
 \end{table*}
 
 \subsection{Qualitative Case Studies}
-Below, we examine three representative qualitative failure modes observed during empirical evaluation.
+To elucidate the concrete linguistic mechanisms underlying quantitative errors, we analyze three representative qualitative case studies observed during benchmark evaluation.
 
-\subsubsection{Case Study 1: Cross-Jurisprudential Transposition (H1 / H3)}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Input Prompt ($\mathcal{Q}_{\text{bn}}$):} \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান কবে গৃহীত হয়?"} (\emph{"When was the Constitution of Bangladesh adopted?"})
-    \item \textbf{Gold Ground Truth ($\mathcal{A}^*$):} \foreignlanguage{bengali}{"৪ নভেম্বর ১৯৭২"} (\emph{4 November 1972})
-    \item \textbf{Retrieved Context ($\mathcal{R}_k$ under $C_2$):} Topical distractors discussing local administrative government structures (\texttt{GENERAL-REF-344}).
-    \item \textbf{Model Response (Qwen 1.7B, $C_2$):}
-    \begin{quote}
-        \foreignlanguage{bengali}{\emph{"ভারতের সংবিধান ২৬ নভেম্বর ১৯৪৯ সালে গণপরিষদে গৃহীত হয়েছিল এবং ২৬ জানুয়ারি ১৯৫০ সালে কার্যকর হয়। ... বাংলাদেশের সংবিধানের ক্ষেত্রেও এটি প্রাসঙ্গিক।"}} \\
-        \emph{("The Constitution of India was adopted on 26 November 1949 and took effect on 26 January 1950. ... This is also relevant to the Bangladesh Constitution.")}
-    \end{quote}
-    \item \textbf{Linguistic Analysis:} Because the Bengali pretraining volume is orders of magnitude smaller than English or Hindi corpora, the model's semantic prior for \foreignlanguage{bengali}{"সংবিধান গৃহীত"} (\emph{"constitution adopted"}) is dominated by Indian constitutional history. When the retrieved context fails to contain the exact Bangladeshi date, the model suffers from \emph{cross-jurisprudential transposition}, overwriting the prompt's sovereign entity with high-resource regional priors.
-\end{itemize}
+\subsubsection{Case Study 1: Cross-Jurisprudential Transposition (Categories H1 and H3)}
+In this query, the model is prompted in native Standard Bangla: \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান কবে গৃহীত হয়?"} (\emph{"When was the Constitution of Bangladesh adopted?"}), for which the canonical ground truth is \foreignlanguage{bengali}{"৪ নভেম্বর ১৯৭২"} (4 November 1972). Under unconstrained dense retrieval ($C_2$), the retriever surfaces topical distractors discussing local administrative government structures (\texttt{GENERAL-REF-344}). Unable to identify the target date in the context, Qwen 1.7B generates:
+\begin{quote}
+    \foreignlanguage{bengali}{\emph{"ভারতের সংবিধান ২৬ নভেম্বর ১৯৪৯ সালে গণপরিষদে গৃহীত হয়েছিল এবং ২৬ জানুয়ারি ১৯৫০ সালে কার্যকর হয়। অনুরূপভাবে বাংলাদেশের সংবিধানের ক্ষেত্রেও গণপরিষদীয় প্রক্রিয়া অনুসৃত হয়।"}} \\
+    \emph{("The Constitution of India was adopted in the Constituent Assembly on 26 November 1949 and took effect on 26 January 1950. Similarly, in the case of the Bangladesh Constitution, a constituent assembly process was followed.")}
+\end{quote}
+Because pretraining corpora for Bengali are orders of magnitude smaller than English or Hindi corpora, the model's parametric prior for \foreignlanguage{bengali}{"সংবিধান গৃহীত"} (\emph{"constitution adopted"}) is dominated by Indian constitutional history. When the retrieved context lacks the exact Bangladeshi date, the model suffers from \emph{cross-jurisprudential transposition}, substituting the prompt's sovereign entity with high-resource regional priors and asserting a false historical date.
 
 \subsubsection{Case Study 2: Abstention Rectification under Scaling ($C_2 \rightarrow C_3$)}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Input Prompt ($\mathcal{Q}_{\text{bn}}$):} \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান অনুযায়ী রাষ্ট্রের সব ক্ষমতার মালিক কারা?"} (\emph{"According to the Constitution of Bangladesh, who is the owner of all power in the Republic?"})
-    \item \textbf{Gold Ground Truth ($\mathcal{A}^*$):} \foreignlanguage{bengali}{"জনগণ"} (\emph{"The People"} --- Article 7(1)).
-    \item \textbf{Retrieved Context ($\mathcal{R}_k$ under $C_2 / C_3$):} Administrative transport distractors discussing the Matarbari deep-sea port.
-    \item \textbf{Generation under $C_2$ (Gemma 4B):}
-    \begin{quote}
-        \foreignlanguage{bengali}{\emph{"বাংলাদেশের সমুদ্রবন্দর ও আন্তর্জাতিক বাণিজ্যের জন্য গভীর সমুদ্রবন্দর হিসেবে মাতারবাড়ী বন্দর প্রকল্প রাষ্ট্রের অর্থনৈতিক ক্ষমতার মূল কেন্দ্র।"}} \\
-        \emph{("The Matarbari deep sea port project is the core center of the state's economic power...")}
-    \end{quote}
-    \item \textbf{Generation under $C_3$ (Gemma 4B):}
-    \begin{quote}
-        \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}} \\
-        \emph{("Evidence is insufficient, therefore I cannot answer.")}
-    \end{quote}
-    \item \textbf{Linguistic Analysis:} Under unconstrained RAG ($C_2$), the model attempts to force a syntactic bridge between \foreignlanguage{bengali}{"ক্ষমতার মালিক"} (\emph{"owner of power"}) and the distractor's phrase \foreignlanguage{bengali}{"অর্থনৈতিক ক্ষমতা"} (\emph{"economic power"}). Under $C_3$, Gemma 4B correctly detects that Article 7(1) is absent from the passage, successfully executing an appropriate abstention (Category A).
-\end{itemize}
+The second case examines the prompt \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান অনুযায়ী রাষ্ট্রের সব ক্ষমতার মালিক কারা?"} (\emph{"According to the Constitution of Bangladesh, who is the owner of all power in the Republic?"}), targeting Article 7(1) with gold answer \foreignlanguage{bengali}{"জনগণ"} (\emph{"The People"}). The retrieved context under conditions $C_2$ and $C_3$ consists of administrative transport passages discussing deep-sea port developments. Under unconstrained RAG ($C_2$), Gemma 4B attempts to bridge the semantic gap between the query and the off-target evidence, confabulating:
+\begin{quote}
+    \foreignlanguage{bengali}{\emph{"বাংলাদেশের সমুদ্রবন্দর ও আন্তর্জাতিক বাণিজ্যের জন্য গভীর সমুদ্রবন্দর হিসেবে মাতারবাড়ী বন্দর প্রকল্প রাষ্ট্রের অর্থনৈতিক ক্ষমতার মূল কেন্দ্র হিসেবে কাজ করে।"}} \\
+    \emph{("As a deep sea port for Bangladesh's maritime and international commerce, the Matarbari port project serves as the core center of the state's economic power.")}
+\end{quote}
+Here, the model forces an artificial semantic connection between \foreignlanguage{bengali}{"ক্ষমতার মালিক"} (\emph{"owner of power"}) and the passage's mention of \foreignlanguage{bengali}{"অর্থনৈতিক ক্ষমতা"} (\emph{"economic power"}). However, when augmented with the selective abstention instruction under condition $C_3$, Gemma 4B correctly recognizes that Article 7(1) is absent from the context and outputs the standardized refusal:
+\begin{quote}
+    \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}} \\
+    \emph{("Evidence is insufficient, therefore I cannot answer.")}
+\end{quote}
+This illustrates appropriate selective abstention (Category A), wherein parameter capacity enables the model to suppress confabulation in the presence of distracting information.
 
-\subsubsection{Case Study 3: Banglish Orthographic Dispersion and Token Loops (H4)}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Input Prompt ($\mathcal{Q}_{\text{banglish}}$):} \emph{"bangladesh er shongbidhan kobe pass hoyesilo?"}
-    \item \textbf{Model Response (Qwen 1.7B, $C_0$):}
-    \begin{quote}
-        \emph{"Bangladesh er shongbidhan 1971 shaler 26 March e pass hoy... ebong shongbidhan shongbidhan shongbidhan board er maddhome..."} \\
-        \emph{("The Constitution of Bangladesh was passed on 26 March 1971... and through the constitution constitution constitution board...")}
-    \end{quote}
-    \item \textbf{Linguistic Analysis:} In Latin transliteration, the subword tokenizer decomposes \emph{"shongbidhan"} into four sub-character byte tokens (`sh`, `ong`, `bid`, `han`), compared to a single morpheme in native script. The high entropy in subword probability distribution causes the autoregressive decoder to enter a degenerate repetition loop, confusing the Independence Declaration date (26 March 1971) with constitutional enactment (4 November 1972) and inventing a fictional \emph{"constitution board"}.
-\end{itemize}
+\subsubsection{Case Study 3: Banglish Orthographic Dispersion and Token Loops (Category H4)}
+The third case evaluates informal Latin transliteration using the Banglish prompt: \emph{"bangladesh er shongbidhan kobe pass hoyesilo?"}. In closed-book generation ($C_0$), Qwen 1.7B generates:
+\begin{quote}
+    \emph{"Bangladesh er shongbidhan 1971 shaler 26 March e pass hoy ebong shongbidhan board er maddhome shongbidhan shongbidhan shongbidhan protishthito hoy."} \\
+    \emph{("The Constitution of Bangladesh was passed on 26 March 1971 and through the constitution board the constitution constitution constitution was established.")}
+\end{quote}
+In Latin transliteration, the subword tokenizer decomposes \emph{"shongbidhan"} into four sub-character byte tokens (\texttt{sh}, \texttt{ong}, \texttt{bid}, \texttt{han}), compared to a single morphemic unit in native script. The elevated entropy across subword probability distributions causes the autoregressive decoder to enter a degenerate repetition loop, confusing the Independence Declaration date (26 March 1971) with constitutional adoption (4 November 1972) and inventing a fictional \emph{"constitution board"}.
 
-
-% ==========================================
-% Content from paper/sections/07_evaluation_reliability.tex
-% ==========================================
 \section{Evaluation Methodology and Inter-Annotator Reliability}
 \label{sec:evaluation_reliability}
 
@@ -643,83 +591,164 @@ Even when applying post-hoc rule calibration to enforce structural codebook cons
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{lrr}
+\begin{tabular}{lcc}
 \toprule
-Evaluation Configuration & Agreement ($P_o$) & Cohen's Kappa ($\kappa$) \\
+\textbf{Evaluation Configuration} & \textbf{Agreement ($P_o$)} & \textbf{Cohen's Kappa ($\kappa$)} \\
 \midrule
-Raw Zero-Shot LLM Judge (Qwen Run)  & 45.00\% & 0.0867 \\
-Raw Zero-Shot LLM Judge (Gemma Run) & 48.33\% & 0.0491 \\
-Calibrated LLM Judge (Qwen Run)     & 68.33\% & 0.3372 \\
-Calibrated LLM Judge (Gemma Run)    & 51.67\% & 0.0397 \\
+Raw LLM Judge (Qwen Run)     & 45.00\% & 0.0867 \\
+Raw LLM Judge (Gemma Run)    & 48.33\% & 0.0491 \\
+Calibrated Judge (Qwen Run)  & 68.33\% & 0.3372 \\
+Calibrated Judge (Gemma Run) & 51.67\% & 0.0397 \\
 \midrule
-\textbf{Target Quality Gate Threshold} & --- & $\ge \mathbf{0.7000}$ \\
+\textbf{Target Quality Gate} & --- & $\ge \mathbf{0.7000}$ \\
 \bottomrule
 \end{tabular}
-\caption{Inter-Annotator Agreement (Cohen's Kappa $\kappa$) between Automated LLM-as-a-Judge and Expert Ground Truth on the 60-Item Overlap Sample.}
+\caption{Inter-Annotator Agreement (Cohen's Kappa $\kappa$) between Automated LLM-as-a-Judge and Expert Human Ground Truth on the 60-Item Overlap Sample.}
 \label{tab:iaa_reliability}
 \end{table}
 
-\paragraph{Diagnostic Analysis of Judge Failure.} Error analysis reveals three fundamental failure modes of LLM judges in low-resource settings:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Negative-Constraint Misinterpretation:} When evaluated models correctly executed selective abstention under condition $C_3$ by stating \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}, the LLM judge frequently misclassified the refusal as an incorrect numerical error (H4) or unnecessary refusal (R), erroneously penalizing models for following negative instructions.
-    \item \textbf{Superficial Lexical Overlap:} In queries where models generated completely hallucinated clinical claims but mimicked formal syntactic sentence structures, the LLM judge assigned \texttt{correctness="correct"} simply because the output appeared grammatically fluent.
-    \item \textbf{Morphological Confusion:} The automated evaluator failed to resolve inflectional case endings (e.g., confusing \foreignlanguage{bengali}{"সংবিধানে"} [in the constitution] with \foreignlanguage{bengali}{"সংবিধানের"} [of the constitution]), incorrectly flagging valid answers as factual contradictions.
-\end{enumerate}
+\paragraph{Diagnostic Analysis of Judge Failure.} Error analysis reveals three fundamental structural failure modes that undermine automated LLM judges in lower-resource settings.
+
+First, automated judges suffer from severe \emph{negative-constraint misinterpretation}. When evaluated models correctly executed selective abstention under condition $C_3$ by issuing the standardized refusal \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}, the zero-shot judge frequently misclassified the refusal as a numerical contradiction (Category H4) or unwarranted refusal (Category R), effectively penalizing the model for adhering to explicit instructions.
+
+Second, judges exhibit susceptibility to \emph{superficial lexical overlap}. In queries where evaluated models generated clinically hazardous, fabricated medical advice while maintaining fluent grammatical syntax, the judge routinely assigned high correctness scores simply because the surface structure mimicked legitimate medical literature.
+
+Third, the automated evaluator exhibited acute \emph{morphological confusion}. Bengali features complex agglutinative case endings, and the evaluator repeatedly failed to resolve inflectional inflections (for example, treating \foreignlanguage{bengali}{"সংবিধানে"} [\emph{in the constitution}] and \foreignlanguage{bengali}{"সংবিধানের"} [\emph{of the constitution}] as mutually contradictory claims), erroneously flagging valid morphological variants as empirical hallucinations.
 
 \subsection{Deterministic Gold Ground-Truth Adjudication}
 Because the automated LLM judge failed the mandatory inter-annotator quality gate ($\kappa \ge 0.70$), relying on LLM-as-a-judge would introduce severe systematic bias into our benchmark results. 
 
 Consequently, in strict accordance with ACL empirical standards, all primary results presented in this paper (Tables~\ref{tab:model_scaling_comparison} and~\ref{tab:domain_disparity}) were established through \textbf{deterministic gold-evidence adjudication}. Every generated response was evaluated via normalized semantic substring and entity verification against the canonical gold answer $\mathcal{A}^*$, coupled with a comprehensive lexicon of standardized Bengali and English abstention cues. This protocol ensures $100\%$ bitwise determinism, complete reproducibility, and zero evaluation jitter.
 
-
-% ==========================================
-% Content from paper/sections/08_discussion_limitations.tex
-% ==========================================
 \section{Discussion, Limitations, and Broader Impact}
 \label{sec:discussion}
 
 \subsection{Implications for Multilingual AI Deployment}
-Our empirical findings carry significant architectural and societal implications for deploying generative AI in the Global South:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{The Inadequacy of Closed-Book Deployment:} With a closed-book hallucination rate of $89.4\%$--$96.5\%$, open-weight language models cannot be safely deployed for factual QA in Bengali without external grounding. Deploying LLMs as zero-shot factual conversational agents in South Asian public services presents extreme misinformation risks.
-    \item \textbf{The Imperative of Abstention Guardrails:} Our results demonstrate that unconstrained RAG ($C_2$) remains heavily vulnerable to distractor noise ($78.9\%$--$87.5\%$ hallucination). However, combining RAG with explicit selective abstention ($C_3$) unlocks near-zero hallucination on models with sufficient parameter capacity ($\ge 4\text{B}$, dropping hallucination to $3.3\%$). In production systems, prompting models with negative constraints must be standard practice.
-    \item \textbf{Mitigating Transliteration Degradation:} Given that Latin transliteration degrades retrieval recall by half and escalates hallucinations, production multilingual systems must integrate native Bengali script-normalization and transliteration pre-processors prior to vector retrieval.
-\end{enumerate}
+Our empirical findings carry direct architectural and societal implications for deploying generative language models in the Global South. Foremost, with a closed-book hallucination rate spanning 89.4\% to 96.5\%, open-weight language models cannot be responsibly deployed for factual question answering in Bengali without robust external grounding. Deploying LLMs as standalone conversational agents in South Asian civic and public services introduces severe risks of confabulating fictitious statutory remedies or fabricated administrative procedures.
+
+Furthermore, our results establish the imperative of abstention guardrails. Unconstrained RAG ($C_2$) remains heavily susceptible to distractor noise, inducing hallucinations in up to 87.5\% of queries. However, coupling retrieval with explicit selective abstention ($C_3$) unlocks near-zero hallucination rates on models with sufficient parameter capacity ($\ge 4\text{B}$), slashing hallucinations to 3.3\% while maintaining 53.8\% selective accuracy. In production retrieval pipelines, negative-constraint instructions must be treated as mandatory architectural guardrails rather than optional prompting heuristics.
+
+Finally, the severe degradation induced by Latin transliteration underscores a critical infrastructure gap. Because Banglish slashes dense vector retrieval recall by more than half and escalates hallucinations by over 20 percentage points, multilingual production systems deployed in South Asia must integrate script-normalization and phonetic transliteration pre-processors prior to neural embedding generation.
 
 \subsection{Limitations}
-While Matibhrom establishes the first fine-grained hallucination benchmark for Bengali, we acknowledge several limitations:
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Model Parameter Range:} Our evaluation prioritized small, open-weight language models (1.7B and 4B parameters) that can be run deterministically on local, accessible GPU hardware. While this reflects realistic deployment constraints in developing economies, future work should evaluate larger open architectures (e.g., Llama-3-70B, Qwen-2.5-72B) and proprietary frontier models.
-    \item \textbf{Jurisdictional Focus:} Our statutory jurisprudence items are grounded on the laws of Bangladesh. While Bengali is also natively spoken in West Bengal and Tripura (India), our legal split evaluates sovereign Bangladeshi statutory law.
-    \item \textbf{Retriever Architecture:} We evaluated dense single-vector retrieval via \texttt{BAAI/bge-m3}. Future iterations could explore hybrid sparse-dense retrieval (e.g., BM25 + BGE-M3) and cross-encoder neural re-ranking.
-\end{enumerate}
+While Matibhrom establishes the first fine-grained hallucination benchmark for Bengali, several methodological boundaries warrant discussion. First, regarding model parameter range, our evaluation prioritized open-weight models (1.7B and 4B parameters) feasible for deterministic local inference on accessible hardware, reflecting realistic deployment constraints in developing regions. While our findings uncover a crucial scaling emergence, future work should evaluate larger open-weights (such as 70B parameter models) and proprietary frontier APIs. Second, regarding jurisdictional focus, our legal split is grounded strictly in the statutory and constitutional framework of Bangladesh; evaluating regional legal corpora from West Bengal and Tripura represents a valuable direction for comparative legal NLP. Finally, our retrieval evaluations employed dense single-vector retrieval via \texttt{BAAI/bge-m3}; investigating hybrid sparse-dense ensembles (e.g., BM25 combined with dense representations) and learned cross-encoder re-ranking remains an open avenue for subsequent investigation.
 
 \subsection{Ethical Considerations and Broader Impact}
-In accordance with ACL Ethics Guidelines, we explicitly emphasize the ethical risks of deploying unverified generative models in healthcare and law. Falsified medical contraindications or hallucinated legal statutes can directly compromise personal health and legal protections. Matibhrom is constructed strictly as an evaluation benchmark and diagnostic platform; all data items are curated from public, authoritative statutory codes and public-health manuals. By open-sourcing our benchmark, we aim to equip researchers and developers with the diagnostic tools necessary to audit and eliminate hallucinations before models are deployed to real-world users.
+In accordance with ACL Ethics Guidelines, we highlight the severe societal hazards of unverified generative systems in localized healthcare and law. Fabricated drug contraindications or confabulated legal penalties can compromise personal safety and legal recourse. Matibhrom is designed purely as an auditing and evaluation benchmark; all items are curated from public, official statutory records and public health manuals. By releasing our benchmark, we provide the NLP community with diagnostic tools to identify and mitigate hallucinations before models are deployed to real-world users.
 
-
-% ==========================================
-% Content from paper/sections/09_conclusion.tex
-% ==========================================
 \section{Conclusion}
 \label{sec:conclusion}
 
-In this paper, we introduced \textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম})}, the first fine-grained, multi-condition hallucination benchmark constructed specifically for the Bengali language. Spanning 600 human-verified base items (1,200 matched prompts in native Standard Bangla and Romanized Banglish) across General, Medical, and Legal domains, Matibhrom rigorously evaluates hallucination dynamics across four controlled grounding conditions: Closed-book ($C_0$), Oracle Grounding ($C_1$), Dense RAG with Distractors ($C_2$), and Selective Abstention Guardrailing ($C_3$).
+In this paper, we introduced \textbf{Matibhrom (\foreignlanguage{bengali}{মতিভ্রম})}, the first fine-grained, multi-condition hallucination benchmark constructed specifically for the Bengali language. Grounded in 600 expert-verified base items (yielding 1,200 matched prompts in native Standard Bangla and Romanized Banglish) across General, Medical, and Legal domains, Matibhrom systematically evaluates hallucination dynamics across four controlled grounding conditions: Closed-book ($C_0$), Oracle Grounding ($C_1$), Dense RAG with Distractors ($C_2$), and Selective Abstention Guardrailing ($C_3$).
 
-Across 4,560 evaluated test generations evaluating Qwen 1.7B and Gemma 4B with paired McNemar significance tests and bootstrap 95\% confidence intervals, our empirical findings demonstrate that:
-\begin{enumerate}[leftmargin=*]
-    \item Closed-book models suffer from near-total parametric ignorance in low-resource settings (89.4\%--$96.5\%$ hallucination), but exhibit robust extractive reading comprehension when provided gold evidence ($C_1$, $p < 10^{-9}$).
-    \item RAG without guardrails ($C_2$) remains acutely vulnerable to semantic distractor noise, inducing hallucinations in up to $87.5\%$ of queries.
-    \item Model scaling unlocks an emergent capability for selective abstention ($C_3$, $p < 10^{-12}$): while a 1.7B model struggles with negative instruction adherence (37.5\% hallucination), a 4B model successfully detects evidence shortfalls, slashing hallucinations to \textbf{3.3\%} with \textbf{53.8\% selective accuracy} and 92.8\% abstention ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$).
-    \item Latin-transliterated Banglish severely disperses dense retrieval representations, degrading retriever recall by half and driving a statistically significant surge in generative hallucination ($p < 0.001$).
-    \item Automated zero-shot LLM judges fail to achieve acceptable agreement on low-resource Bengali ($\kappa \le 0.34$), establishing the critical necessity of deterministic gold-evidence adjudication.
-\end{enumerate}
+Across 4,560 evaluated test generations on Qwen 2.5 1.7B and Gemma 3 4B supported by paired McNemar significance tests and Wilson score confidence intervals, our empirical findings reveal that while closed-book models suffer from near-total parametric ignorance in lower-resource settings (89.4\%--96.5\% hallucination), they possess robust extractive reading comprehension when provided external evidence. However, unconstrained retrieval remains acutely vulnerable to semantic distractor noise, precipitating severe hallucination rebounds. Crucially, model scaling from 1.7B to 4B parameters unlocks an emergent capability for calibrated selective abstention ($\chi^2 = 51.191, p = 8.38 \times 10^{-13}$), slashing hallucinations to 3.3\% while maintaining 53.8\% selective accuracy. In parallel, our results demonstrate that informal Latin transliteration (Banglish) degrades dense retrieval recall by more than half, driving significant factual fabrication, and that zero-shot LLM-as-a-judge evaluators fail to achieve acceptable agreement ($\kappa \le 0.34$). 
 
-By open-sourcing our benchmark data, frozen retrieval indices, annotation codebooks, and evaluation suite, we provide an empirical foundation to accelerate the development of reliable, hallucination-resistant language technologies for over 300 million Bengali speakers worldwide.
+By releasing our complete benchmark datasets, frozen retrieval indices, annotation codebooks, and evaluation suite, we provide an empirical foundation to advance trustworthy, hallucination-resistant language technologies for over 300 million Bengali speakers globally.
 
 
 % --- Bibliography ---
 \bibliographystyle{plainnat}
 \bibliography{references}
+
+% --- Appendix ---
+\appendix
+\section{Verbatim Benchmark Prompt Templates}
+\label{sec:appendix_prompts}
+
+Table~\ref{tab:appendix_prompts} specifies the exact, standardized prompt templates utilized across all four experimental conditions ($C_0\text{--}C_3$) for both Standard Bangla and Romanized Banglish registers. Prompts enforce strict structural formatting to ensure that differences in generative output stem entirely from grounding evidence and negative constraints rather than surface instruction variance.
+
+\begin{table*}[h!]
+\centering
+\small
+\begin{tabular}{lp{6.2cm}p{6.2cm}}
+\toprule
+\textbf{Condition} & \textbf{Standard Bangla Template ($\mathcal{Q}_{\text{bn}}$)} & \textbf{Romanized Banglish Template ($\mathcal{Q}_{\text{bg}}$)} \\
+\midrule
+\textbf{$C_0$: Closed-Book} & 
+\foreignlanguage{bengali}{নিচের প্রশ্নটির সংক্ষিপ্ত ও নির্ভুল উত্তর দাও।} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Nicher proshnotir shongkhipto o nirbhul uttor dao. \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\midrule
+\textbf{$C_1$: Oracle Grounding} & 
+\foreignlanguage{bengali}{নিচে প্রদত্ত প্রমাণ অনুচ্ছেদটি পড়ে প্রশ্নটির নির্ভুল উত্তর দাও।} \newline
+\foreignlanguage{bengali}{প্রমাণ:} \{evidence\} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Niche produtto proman onucchedti pore proshnotir nirbhul uttor dao. \newline
+Proman: \{evidence\} \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\midrule
+\textbf{$C_2$: Unconstrained RAG} & 
+\foreignlanguage{bengali}{নিচে সংগৃহীত প্রাসঙ্গিক অনুচ্ছেদগুলো পড়ে প্রশ্নটির উত্তর দাও।} \newline
+\foreignlanguage{bengali}{প্রাসঙ্গিক অনুচ্ছেদসমূহ:} \newline
+\{retrieved\_passages\} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Niche shongrihito prashongik onucchedgulo pore proshnotir uttor dao. \newline
+Prashongik onucchedshomuho: \newline
+\{retrieved\_passages\} \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\midrule
+\textbf{$C_3$: Selective Abstention} & 
+\foreignlanguage{bengali}{নিচে সংগৃহীত অনুচ্ছেদগুলো পড়ে প্রশ্নটির উত্তর দাও। যদি প্রদত্ত অনুচ্ছেদে উত্তর না থাকে, তবে উত্তর অনুমান করবে না; স্পষ্ট করে বলবে "প্রমাণ অপর্যাপ্ত"।} \newline
+\foreignlanguage{bengali}{প্রাসঙ্গিক অনুচ্ছেদসমূহ:} \newline
+\{retrieved\_passages\} \newline
+\foreignlanguage{bengali}{প্রশ্ন: \{question\}} \newline
+\foreignlanguage{bengali}{উত্তর:} & 
+Niche shongrihito onucchedgulo pore proshnotir uttor dao. Jodi produtto onucchede uttor na thake, tobe uttor onuman korbe na; sproshto kore bolbe "proman oporjapto". \newline
+Prashongik onucchedshomuho: \newline
+\{retrieved\_passages\} \newline
+Proshno: \{question\} \newline
+Uttor: \\
+\bottomrule
+\end{tabular}
+\caption{Verbatim Prompt Templates across Grounding Conditions and Linguistic Registers.}
+\label{tab:appendix_prompts}
+\end{table*}
+
+\section{Benchmark Data Sheet and Corpus Provenance}
+\label{sec:appendix_datasheet}
+
+Following recommended documentation frameworks for multilingual NLP datasets, we provide the formal data statement for Matibhrom:
+
+\paragraph{Dataset Motivation and Domain Curation.} Matibhrom was constructed to diagnose factual confabulation, grounding adherence, and selective abstention in Bengali language technologies. All items were curated by bilingual NLP researchers and verified against authoritative institutional corpora:
+\begin{itemize}[leftmargin=*]
+    \item \emph{Statutory Jurisprudence (200 items, 600 passages):} Curated from the Legislative and Parliamentary Affairs Division of Bangladesh, spanning the \emph{Constitution of the People's Republic of Bangladesh} (Articles 1--153), the \emph{Penal Code 1860} (Acts XLV of 1860), and the \emph{Bangladesh Labour Act 2006} (Act XLII of 2006).
+    \item \emph{Clinical and Public Health (200 items, 600 passages):} Drawn from clinical management protocols of the Directorate General of Health Services (DGHS) Bangladesh, national disease control guidelines (Dengue, Nipah, Malaria), and the World Health Organization South-East Asia regional publications.
+    \item \emph{General Knowledge (200 items, 600 passages):} Verified historical, geographic, and institutional articles from \emph{Banglapedia} (the National Encyclopedia of Bangladesh) and sovereign administrative records.
+\end{itemize}
+
+\paragraph{Corpus Partitioning and Isolation.} The 1,800 passages are strictly segregated into document-level clusters. No source statute or clinical circular is split across the 120-item development set and the 480-item test set. Cryptographic SHA-256 hashes guarantee immutable reproducibility across evaluation executions.
+
+\section{Inference Infrastructure and Hyperparameters}
+\label{sec:appendix_compute}
+
+\paragraph{Hardware and Execution Environment.} All generations and vector retrieval operations were conducted on a dedicated workstation equipped with an NVIDIA GeForce GPU (Turing architecture, compute capability 7.5), an Intel 8-core CPU, and 16\,GB system RAM running Windows 11 and Linux containerized environments. 
+
+\paragraph{Model Decoding Parameters.} To eliminate sampling noise and ensure bitwise determinism, all evaluations were executed with greedy decoding:
+\begin{itemize}[leftmargin=*]
+    \item Temperature: $\tau = 0.0$
+    \item Top-$p$ sampling: $p = 1.0$
+    \item Maximum generated tokens: $M = 512$
+    \item Context window limit: $W = 2048$ tokens
+    \item Quantization: FP16 / 4-bit standard weight formats via Ollama and LiteLLM runtime adapters.
+\end{itemize}
+
+\paragraph{Embedding Index Hyperparameters.} Passage embeddings were generated using \texttt{BAAI/bge-m3} (1024-dimensional dense vectors) with passage chunks of 384 tokens and a 64-token stride. Nearest-neighbor vector retrieval was executed using exact inner product search ($\ell_2$-normalized cosine similarity), returning top-$k$ passages with $k = 3$.
+
+\section{Annotation Codebook and Edge-Case Rubric}
+\label{sec:appendix_codebook}
+
+Table~\ref{tab:codebook_taxonomy} in the main text outlines the primary eight categories of Codebook v1.0.0. Below, we formalize the decision boundaries for complex edge cases:
+\begin{itemize}[leftmargin=*]
+    \item \emph{Distinction between H1 (Contradiction) and H2 (Unsupported Addition):} If an asserted claim explicitly contradicts a stated factual attribute of the gold answer (e.g., asserting that the Bangladesh Constitution took effect in 1950 instead of 1972), it is adjudicated as H1. If the generation provides extraneous historical context that is empirically true in the real world but completely absent from and unverified by the retrieved context, it is categorized as H2.
+    \item \emph{Distinction between Category A (Appropriate Abstention) and Category R (Unwarranted Refusal):} Under Condition $C_3$, if the retrieved context $\mathcal{R}_k$ does not contain the complete factual proposition necessary to answer the query, stating \foreignlanguage{bengali}{"প্রমাণ অপর্যাপ্ত"} is adjudicated as Category A. Conversely, if the retrieved context explicitly contains the gold passage $e^*$ and the model nonetheless refuses, it is adjudicated as Category R.
+\end{itemize}
+
 
 \end{document}

@@ -20,9 +20,13 @@ The introduction of selective abstention instructions ($C_3$) uncovers a strikin
 
 However, direct cross-model paired testing reveals that parameter capacity fundamentally dictates instruction adherence under noisy retrieval:
 \begin{equation}
-    \chi^2_{\text{Qwen vs Gemma (C3)}} = 51.191, \quad p = 8.38 \times 10^{-13} < 0.001 \quad (***)
+\begin{split}
+    \chi^2_{\text{C3}} &= 51.191, \\
+    p &= 8.38 \times 10^{-13} < 0.001 \quad (***)
+\end{split}
+\label{eq:scaling_mcnemar}
 \end{equation}
-While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inability to reliably follow negative constraints under distractors, \textbf{Gemma 4B achieves near-total hallucination eradication}, dropping to an astonishing \textbf{3.3\% hallucination rate} [0.01, 0.06], a $92.8\%$ abstention rate, and a \textbf{53.8\% selective accuracy}. When evidence is insufficient or contradictory, Gemma 4B consistently suppresses generative confabulation and outputs the standardized refusal: \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}.
+While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inability to reliably follow negative constraints under distractors, \textbf{Gemma 4B achieves near-total hallucination eradication}, dropping to an astonishing \textbf{3.3\% hallucination rate} [0.01, 0.06], a $92.8\%$ abstention rate, and a \textbf{53.8\% selective accuracy}. When evidence is insufficient or contradictory, Gemma 4B consistently suppresses generative confabulation and outputs the standardized refusal: \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}}. Crucially, this high abstention rate reflects calibrated epistemic conservatism rather than degenerate under-generation: because the dense retriever frequently returns noisy distractors lacking sufficient gold evidence in $C_3$, answering under uncertainty would guarantee hallucination. When Gemma does elect to answer (the remaining $7.2\%$ substantive coverage), its selective accuracy surges to $53.8\%$ (a 4.4-fold increase over its unconstrained RAG accuracy of $12.3\%$), demonstrating that its decision boundary selectively filters out ungrounded confabulations.
 
 \begin{figure*}[t]
 \centering
@@ -36,22 +40,22 @@ While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inabi
 \small
 \begin{tabular}{llrr}
 \toprule
-Model & Hypothesis Comparison & $\chi^2$ & $p$-value \\
+\textbf{Model} & \textbf{Hypothesis Comparison} & $\chi^2$ & $p$-value \\
 \midrule
-\multirow{4}{*}{Qwen 1.7B} 
+\multirow{4}{*}{Qwen 2.5 1.7B} 
 & $C_0$ vs.\ $C_1$ (Oracle Effect) & 282.183 & $2.51 \times 10^{-63}$ $^{***}$ \\
 & $C_0$ vs.\ $C_2$ (RAG Distractors) & 57.341 & $3.66 \times 10^{-14}$ $^{***}$ \\
 & $C_2$ vs.\ $C_3$ (Abstention Guard) & 444.653 & $1.05 \times 10^{-98}$ $^{***}$ \\
 & Standard Bangla vs.\ Banglish & 26.785 & $2.27 \times 10^{-7}$ $^{***}$ \\
 \midrule
-\multirow{4}{*}{Gemma 4B} 
+\multirow{4}{*}{Gemma 3 4B} 
 & $C_0$ vs.\ $C_1$ (Oracle Effect) & 39.409 & $3.44 \times 10^{-10}$ $^{***}$ \\
 & $C_0$ vs.\ $C_2$ (RAG Distractors) & 8.757 & $3.08 \times 10^{-3}$ $^{**}$ \\
 & $C_2$ vs.\ $C_3$ (Abstention Guard) & 134.007 & $5.44 \times 10^{-31}$ $^{***}$ \\
 & Standard Bangla vs.\ Banglish & 25.681 & $4.03 \times 10^{-7}$ $^{***}$ \\
 \midrule
-Cross-Model & Overall Hallucination Resilience & 58.080 & $2.52 \times 10^{-14}$ $^{***}$ \\
-(Qwen vs Gemma) & $C_3$ Selective Abstention & 51.191 & $8.38 \times 10^{-13}$ $^{***}$ \\
+\textbf{Cross-Model} & Overall Resilience & 58.080 & $2.52 \times 10^{-14}$ $^{***}$ \\
+(Qwen vs.\ Gemma) & $C_3$ Selective Abstention & 51.191 & $8.38 \times 10^{-13}$ $^{***}$ \\
 \bottomrule
 \end{tabular}
 \caption{Paired McNemar Statistical Significance Tests on Matibhrom Test Split ($^{***}p < 0.001$, $^{**}p < 0.01$, $^{*}p < 0.05$).}
@@ -59,17 +63,9 @@ Cross-Model & Overall Hallucination Resilience & 58.080 & $2.52 \times 10^{-14}$
 \end{table}
 
 \subsection{Linguistic Register Degradation (RQ1)}
-A core hypothesis of this study is that informal Latin transliteration (Banglish) destabilizes factual generation. As shown in Table~\ref{tab:mcnemar_tests}, the register effect is highly statistically significant across both architectures:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Qwen 1.7B:} $\chi^2 = 26.785, \quad p = 2.27 \times 10^{-7} < 0.001$ ($***$)
-    \item \textbf{Gemma 4B:} $\chi^2 = 25.681, \quad p = 4.03 \times 10^{-7} < 0.001$ ($***$)
-\end{itemize}
-Dense retrieval diagnostics explain this divergence:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Standard Bangla ($\mathcal{Q}_{\text{bn}}$):} Recall@$k$ = \textbf{66.67\%}, Rank-1 Precision = \textbf{40.00\%}.
-    \item \textbf{Romanized Banglish ($\mathcal{Q}_{\text{banglish}}$):} Recall@$k$ = \textbf{30.00\%}, Rank-1 Precision = \textbf{13.33\%}.
-\end{itemize}
-Because multilingual embedding models (e.g., BGE-M3) are predominantly aligned between native non-Latin scripts and English, unsystematic Latin transliterations scatter vector projections away from target semantic clusters, starving the generative LLM of gold evidence.
+A core hypothesis of this study is that informal Latin transliteration (Banglish) destabilizes factual generation. As shown in Table~\ref{tab:mcnemar_tests}, the register effect is highly statistically significant across both architectures: paired testing confirms significant degradation for Qwen 1.7B ($\chi^2 = 26.785, p = 2.27 \times 10^{-7}$) and Gemma 4B ($\chi^2 = 25.681, p = 4.03 \times 10^{-7}$). 
+
+Dense retrieval diagnostics explain the underlying mechanism for this divergence. For Standard Bangla prompts ($\mathcal{Q}_{\text{bn}}$), the dense bi-encoder achieves a Recall@$k$ of 66.67\% and a Rank-1 Precision of 40.00\%. In contrast, for Romanized Banglish prompts ($\mathcal{Q}_{\text{banglish}}$), Recall@$k$ collapses to 30.00\% while Rank-1 Precision falls to 13.33\%. Because multilingual embedding models such as \texttt{BAAI/bge-m3} are predominantly aligned between native non-Latin scripts and English, unsystematic Latin transliterations scatter vector projections away from target semantic clusters, starving the generative LLM of gold evidence and precipitating factual fabrication.
 
 \subsection{Domain Disparity Breakdown (Table 2)}
 Table~\ref{tab:domain_disparity} delineates performance across the General, Medical, and Legal domains on the test split.

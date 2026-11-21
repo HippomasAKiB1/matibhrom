@@ -27,46 +27,33 @@ Code & Category Name & Operational Definition per Bengali Linguistic Annotation 
 \end{table*}
 
 \subsection{Qualitative Case Studies}
-Below, we examine three representative qualitative failure modes observed during empirical evaluation.
+To elucidate the concrete linguistic mechanisms underlying quantitative errors, we analyze three representative qualitative case studies observed during benchmark evaluation.
 
-\subsubsection{Case Study 1: Cross-Jurisprudential Transposition (H1 / H3)}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Input Prompt ($\mathcal{Q}_{\text{bn}}$):} \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান কবে গৃহীত হয়?"} (\emph{"When was the Constitution of Bangladesh adopted?"})
-    \item \textbf{Gold Ground Truth ($\mathcal{A}^*$):} \foreignlanguage{bengali}{"৪ নভেম্বর ১৯৭২"} (\emph{4 November 1972})
-    \item \textbf{Retrieved Context ($\mathcal{R}_k$ under $C_2$):} Topical distractors discussing local administrative government structures (\texttt{GENERAL-REF-344}).
-    \item \textbf{Model Response (Qwen 1.7B, $C_2$):}
-    \begin{quote}
-        \foreignlanguage{bengali}{\emph{"ভারতের সংবিধান ২৬ নভেম্বর ১৯৪৯ সালে গণপরিষদে গৃহীত হয়েছিল এবং ২৬ জানুয়ারি ১৯৫০ সালে কার্যকর হয়। ... বাংলাদেশের সংবিধানের ক্ষেত্রেও এটি প্রাসঙ্গিক।"}} \\
-        \emph{("The Constitution of India was adopted on 26 November 1949 and took effect on 26 January 1950. ... This is also relevant to the Bangladesh Constitution.")}
-    \end{quote}
-    \item \textbf{Linguistic Analysis:} Because the Bengali pretraining volume is orders of magnitude smaller than English or Hindi corpora, the model's semantic prior for \foreignlanguage{bengali}{"সংবিধান গৃহীত"} (\emph{"constitution adopted"}) is dominated by Indian constitutional history. When the retrieved context fails to contain the exact Bangladeshi date, the model suffers from \emph{cross-jurisprudential transposition}, overwriting the prompt's sovereign entity with high-resource regional priors.
-\end{itemize}
+\subsubsection{Case Study 1: Cross-Jurisprudential Transposition (Categories H1 and H3)}
+In this query, the model is prompted in native Standard Bangla: \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান কবে গৃহীত হয়?"} (\emph{"When was the Constitution of Bangladesh adopted?"}), for which the canonical ground truth is \foreignlanguage{bengali}{"৪ নভেম্বর ১৯৭২"} (4 November 1972). Under unconstrained dense retrieval ($C_2$), the retriever surfaces topical distractors discussing local administrative government structures (\texttt{GENERAL-REF-344}). Unable to identify the target date in the context, Qwen 1.7B generates:
+\begin{quote}
+    \foreignlanguage{bengali}{\emph{"ভারতের সংবিধান ২৬ নভেম্বর ১৯৪৯ সালে গণপরিষদে গৃহীত হয়েছিল এবং ২৬ জানুয়ারি ১৯৫০ সালে কার্যকর হয়। অনুরূপভাবে বাংলাদেশের সংবিধানের ক্ষেত্রেও গণপরিষদীয় প্রক্রিয়া অনুসৃত হয়।"}} \\
+    \emph{("The Constitution of India was adopted in the Constituent Assembly on 26 November 1949 and took effect on 26 January 1950. Similarly, in the case of the Bangladesh Constitution, a constituent assembly process was followed.")}
+\end{quote}
+Because pretraining corpora for Bengali are orders of magnitude smaller than English or Hindi corpora, the model's parametric prior for \foreignlanguage{bengali}{"সংবিধান গৃহীত"} (\emph{"constitution adopted"}) is dominated by Indian constitutional history. When the retrieved context lacks the exact Bangladeshi date, the model suffers from \emph{cross-jurisprudential transposition}, substituting the prompt's sovereign entity with high-resource regional priors and asserting a false historical date.
 
 \subsubsection{Case Study 2: Abstention Rectification under Scaling ($C_2 \rightarrow C_3$)}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Input Prompt ($\mathcal{Q}_{\text{bn}}$):} \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান অনুযায়ী রাষ্ট্রের সব ক্ষমতার মালিক কারা?"} (\emph{"According to the Constitution of Bangladesh, who is the owner of all power in the Republic?"})
-    \item \textbf{Gold Ground Truth ($\mathcal{A}^*$):} \foreignlanguage{bengali}{"জনগণ"} (\emph{"The People"} --- Article 7(1)).
-    \item \textbf{Retrieved Context ($\mathcal{R}_k$ under $C_2 / C_3$):} Administrative transport distractors discussing the Matarbari deep-sea port.
-    \item \textbf{Generation under $C_2$ (Gemma 4B):}
-    \begin{quote}
-        \foreignlanguage{bengali}{\emph{"বাংলাদেশের সমুদ্রবন্দর ও আন্তর্জাতিক বাণিজ্যের জন্য গভীর সমুদ্রবন্দর হিসেবে মাতারবাড়ী বন্দর প্রকল্প রাষ্ট্রের অর্থনৈতিক ক্ষমতার মূল কেন্দ্র।"}} \\
-        \emph{("The Matarbari deep sea port project is the core center of the state's economic power...")}
-    \end{quote}
-    \item \textbf{Generation under $C_3$ (Gemma 4B):}
-    \begin{quote}
-        \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}} \\
-        \emph{("Evidence is insufficient, therefore I cannot answer.")}
-    \end{quote}
-    \item \textbf{Linguistic Analysis:} Under unconstrained RAG ($C_2$), the model attempts to force a syntactic bridge between \foreignlanguage{bengali}{"ক্ষমতার মালিক"} (\emph{"owner of power"}) and the distractor's phrase \foreignlanguage{bengali}{"অর্থনৈতিক ক্ষমতা"} (\emph{"economic power"}). Under $C_3$, Gemma 4B correctly detects that Article 7(1) is absent from the passage, successfully executing an appropriate abstention (Category A).
-\end{itemize}
+The second case examines the prompt \foreignlanguage{bengali}{"বাংলাদেশের সংবিধান অনুযায়ী রাষ্ট্রের সব ক্ষমতার মালিক কারা?"} (\emph{"According to the Constitution of Bangladesh, who is the owner of all power in the Republic?"}), targeting Article 7(1) with gold answer \foreignlanguage{bengali}{"জনগণ"} (\emph{"The People"}). The retrieved context under conditions $C_2$ and $C_3$ consists of administrative transport passages discussing deep-sea port developments. Under unconstrained RAG ($C_2$), Gemma 4B attempts to bridge the semantic gap between the query and the off-target evidence, confabulating:
+\begin{quote}
+    \foreignlanguage{bengali}{\emph{"বাংলাদেশের সমুদ্রবন্দর ও আন্তর্জাতিক বাণিজ্যের জন্য গভীর সমুদ্রবন্দর হিসেবে মাতারবাড়ী বন্দর প্রকল্প রাষ্ট্রের অর্থনৈতিক ক্ষমতার মূল কেন্দ্র হিসেবে কাজ করে।"}} \\
+    \emph{("As a deep sea port for Bangladesh's maritime and international commerce, the Matarbari port project serves as the core center of the state's economic power.")}
+\end{quote}
+Here, the model forces an artificial semantic connection between \foreignlanguage{bengali}{"ক্ষমতার মালিক"} (\emph{"owner of power"}) and the passage's mention of \foreignlanguage{bengali}{"অর্থনৈতিক ক্ষমতা"} (\emph{"economic power"}). However, when augmented with the selective abstention instruction under condition $C_3$, Gemma 4B correctly recognizes that Article 7(1) is absent from the context and outputs the standardized refusal:
+\begin{quote}
+    \foreignlanguage{bengali}{\emph{"প্রমাণ অপর্যাপ্ত, তাই আমি উত্তর দিতে পারছি না।"}} \\
+    \emph{("Evidence is insufficient, therefore I cannot answer.")}
+\end{quote}
+This illustrates appropriate selective abstention (Category A), wherein parameter capacity enables the model to suppress confabulation in the presence of distracting information.
 
-\subsubsection{Case Study 3: Banglish Orthographic Dispersion and Token Loops (H4)}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Input Prompt ($\mathcal{Q}_{\text{banglish}}$):} \emph{"bangladesh er shongbidhan kobe pass hoyesilo?"}
-    \item \textbf{Model Response (Qwen 1.7B, $C_0$):}
-    \begin{quote}
-        \emph{"Bangladesh er shongbidhan 1971 shaler 26 March e pass hoy... ebong shongbidhan shongbidhan shongbidhan board er maddhome..."} \\
-        \emph{("The Constitution of Bangladesh was passed on 26 March 1971... and through the constitution constitution constitution board...")}
-    \end{quote}
-    \item \textbf{Linguistic Analysis:} In Latin transliteration, the subword tokenizer decomposes \emph{"shongbidhan"} into four sub-character byte tokens (`sh`, `ong`, `bid`, `han`), compared to a single morpheme in native script. The high entropy in subword probability distribution causes the autoregressive decoder to enter a degenerate repetition loop, confusing the Independence Declaration date (26 March 1971) with constitutional enactment (4 November 1972) and inventing a fictional \emph{"constitution board"}.
-\end{itemize}
+\subsubsection{Case Study 3: Banglish Orthographic Dispersion and Token Loops (Category H4)}
+The third case evaluates informal Latin transliteration using the Banglish prompt: \emph{"bangladesh er shongbidhan kobe pass hoyesilo?"}. In closed-book generation ($C_0$), Qwen 1.7B generates:
+\begin{quote}
+    \emph{"Bangladesh er shongbidhan 1971 shaler 26 March e pass hoy ebong shongbidhan board er maddhome shongbidhan shongbidhan shongbidhan protishthito hoy."} \\
+    \emph{("The Constitution of Bangladesh was passed on 26 March 1971 and through the constitution board the constitution constitution constitution was established.")}
+\end{quote}
+In Latin transliteration, the subword tokenizer decomposes \emph{"shongbidhan"} into four sub-character byte tokens (\texttt{sh}, \texttt{ong}, \texttt{bid}, \texttt{han}), compared to a single morphemic unit in native script. The elevated entropy across subword probability distributions causes the autoregressive decoder to enter a degenerate repetition loop, confusing the Independence Declaration date (26 March 1971) with constitutional adoption (4 November 1972) and inventing a fictional \emph{"constitution board"}.

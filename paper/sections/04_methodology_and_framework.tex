@@ -37,51 +37,51 @@ The prompt explicitly mandates: \foreignlanguage{bengali}{\emph{"যদি প�
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-    scale=0.92, every node/.style={transform shape},
+    scale=0.95, every node/.style={transform shape},
     % Stage Group Containers
-    stagebox/.style={draw=slate!40, rounded corners=6pt, fill=slate!3, line width=0.8pt, inner sep=8pt},
-    stagetitle/.style={font=\bfseries\sffamily\footnotesize, color=slate!80, anchor=north west},
+    stagebox/.style={draw=slate!40, rounded corners=6pt, fill=slate!3, line width=0.8pt, inner sep=6pt},
+    stagetitle/.style={font=\bfseries\sffamily\scriptsize, color=slate!80, anchor=north west},
     % Functional Node Styles
-    datanode/.style={draw=teal!80, rounded corners=4pt, fill=teal!6, line width=0.9pt, text width=2.5cm, minimum height=1.2cm, align=center, font=\sffamily\scriptsize},
-    retrnode/.style={draw=indigo!80, rounded corners=4pt, fill=indigo!6, line width=0.9pt, text width=2.5cm, minimum height=1.2cm, align=center, font=\sffamily\scriptsize},
-    condnode/.style={draw=blue!80, rounded corners=4pt, fill=blue!6, line width=0.9pt, text width=2.5cm, minimum height=1.05cm, align=center, font=\sffamily\scriptsize},
-    evalnode/.style={draw=violet!80, rounded corners=4pt, fill=violet!6, line width=0.9pt, text width=2.5cm, minimum height=1.2cm, align=center, font=\sffamily\scriptsize},
+    datanode/.style={draw=teal!80, rounded corners=4pt, fill=teal!6, line width=0.9pt, text width=2.6cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
+    retrnode/.style={draw=indigo!80, rounded corners=4pt, fill=indigo!6, line width=0.9pt, text width=2.6cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
+    condnode/.style={draw=blue!80, rounded corners=4pt, fill=blue!6, line width=0.9pt, text width=2.15cm, minimum height=1.35cm, align=center, font=\sffamily\tiny},
+    evalnode/.style={draw=violet!80, rounded corners=4pt, fill=violet!6, line width=0.9pt, text width=2.6cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
     % Flow Arrows
-    flowarrow/.style={->, >=stealth, line width=1.1pt, color=slate!75},
+    flowarrow/.style={->, >=stealth, line width=1.0pt, color=slate!75},
     subarrow/.style={->, >=stealth, line width=0.8pt, color=slate!55, dashed}
 ]
     \definecolor{slate}{RGB}{30, 41, 59}
     \definecolor{indigo}{RGB}{79, 70, 229}
 
     % ==================== STAGE 1: INGESTION ====================
-    \draw[stagebox] (-0.3, -3.8) rectangle (2.9, 3.8);
-    \node[stagetitle] at (-0.1, 3.65) {I. Corpus \& Queries};
+    \draw[stagebox] (-0.2, -2.6) rectangle (3.2, 2.6);
+    \node[stagetitle] at (-0.05, 2.45) {I. Corpus \& Queries};
     
-    \node[datanode] (queries) at (1.3, 1.8) {\textbf{Dual-Register Queries}\\Standard Bangla ($\mathcal{Q}_{\text{bn}}$)\\$\updownarrow$\\Romanized Banglish ($\mathcal{Q}_{\text{bg}}$)};
-    \node[datanode] (corpus) at (1.3, -1.8) {\textbf{Frozen Corpus $\mathcal{D}$}\\1,800 Chunked Passages\\(600 Gold + 1,200 Noise)};
+    \node[datanode] (queries) at (1.5, 1.15) {\textbf{Dual-Register Queries}\\Standard Bangla ($\mathcal{Q}_{\text{bn}}$)\\$\updownarrow$\\Romanized Banglish ($\mathcal{Q}_{\text{bg}}$)};
+    \node[datanode] (corpus) at (1.5, -1.15) {\textbf{Frozen Corpus $\mathcal{D}$}\\1,800 Chunked Passages\\(600 Gold + 1,200 Distractors)};
 
     % ==================== STAGE 2: RETRIEVAL ====================
-    \draw[stagebox] (3.4, -3.8) rectangle (6.6, 3.8);
-    \node[stagetitle] at (3.6, 3.65) {II. Dense Indexing};
+    \draw[stagebox] (3.6, -2.6) rectangle (7.0, 2.6);
+    \node[stagetitle] at (3.75, 2.45) {II. Dense Indexing};
     
-    \node[retrnode] (encoder) at (5.0, 1.8) {\textbf{Bi-Encoder}\\\texttt{BAAI/bge-m3}\\($d=1024$ Embedding)};
-    \node[retrnode] (index) at (5.0, -1.8) {\textbf{Inner-Product Index}\\Frozen Vector DB\\Top-$k$ Ranking ($k=3$)};
+    \node[retrnode] (encoder) at (5.3, 1.15) {\textbf{Dense Bi-Encoder}\\\texttt{BAAI/bge-m3}\\($d=1024$ Embeddings)};
+    \node[retrnode] (index) at (5.3, -1.15) {\textbf{Inner-Product Index}\\Frozen Vector DB\\Top-$k$ Ranking ($k=3$)};
 
     % ==================== STAGE 3: INFERENCE ====================
-    \draw[stagebox] (7.1, -3.8) rectangle (10.3, 3.8);
-    \node[stagetitle] at (7.3, 3.65) {III. Controlled Inference};
+    \draw[stagebox] (7.4, -2.6) rectangle (12.8, 2.6);
+    \node[stagetitle] at (7.55, 2.45) {III. Controlled Grounding Conditions};
     
-    \node[condnode] (c0) at (8.7, 2.4) {\textbf{$C_0$: Closed-Book}\\Parametric Recall\\$\hat{y}^{(0)} \sim \mathcal{M}_\theta(q)$};
-    \node[condnode] (c1) at (8.7, 0.8) {\textbf{$C_1$: Oracle Context}\\Gold Evidence $e^*$\\\emph{Extractive Ceiling}};
-    \node[condnode] (c2) at (8.7, -0.8) {\textbf{$C_2$: Unconstrained RAG}\\Top-$k$ with Distractors\\Realistic Production RAG};
-    \node[condnode] (c3) at (8.7, -2.4) {\textbf{$C_3$: Selective Abstention}\\Top-$k$ + Negative Constraint\\\emph{"প্রমাণ অপর্যাপ্ত"}};
+    \node[condnode] (c0) at (8.7, 1.15) {\textbf{$C_0$: Closed-Book}\\Parametric Recall\\$\hat{y}^{(0)} \sim \mathcal{M}_\theta(q)$};
+    \node[condnode] (c1) at (11.5, 1.15) {\textbf{$C_1$: Oracle Context}\\Gold Evidence $e^*$\\\emph{Extractive Ceiling}};
+    \node[condnode] (c2) at (8.7, -1.15) {\textbf{$C_2$: Dense RAG}\\Top-$k$ with Distractors\\Realistic RAG};
+    \node[condnode] (c3) at (11.5, -1.15) {\textbf{$C_3$: Selective Guard}\\Top-$k$ + Negative Rule\\\foreignlanguage{bengali}{\scriptsize\emph{"প্রমাণ অপর্যাপ্ত"}}};
 
     % ==================== STAGE 4: EVALUATION ====================
-    \draw[stagebox] (10.8, -3.8) rectangle (14.0, 3.8);
-    \node[stagetitle] at (11.0, 3.65) {IV. Dual Adjudication};
+    \draw[stagebox] (13.2, -2.6) rectangle (16.6, 2.6);
+    \node[stagetitle] at (13.35, 2.45) {IV. Dual Adjudication};
     
-    \node[evalnode] (evalgold) at (12.4, 1.8) {\textbf{Deterministic Gold}\\\textbf{Adjudication}\\Substring \& Cues\\$\kappa_{\text{determ}} = 1.000$};
-    \node[evalnode] (evalstats) at (12.4, -1.8) {\textbf{Statistical Testing}\\Paired McNemar $\chi^2$\\95\% Wilson Score CIs\\Bootstrap ($B=1,000$)};
+    \node[evalnode] (evalgold) at (14.9, 1.15) {\textbf{Deterministic Gold}\\\textbf{Adjudication}\\Substring \& Cues\\$\kappa_{\text{determ}} = 1.000$};
+    \node[evalnode] (evalstats) at (14.9, -1.15) {\textbf{Statistical Testing}\\Paired McNemar $\chi^2$\\95\% Wilson Score CIs\\Bootstrap ($B=1,000$)};
 
     % ==================== ROUTING ARROWS ====================
     % Stage 1 to 2
@@ -90,16 +90,14 @@ The prompt explicitly mandates: \foreignlanguage{bengali}{\emph{"যদি প�
     \draw[flowarrow] (encoder) -- (index);
 
     % Stage 2 to 3
-    \draw[flowarrow] (queries.east) -- ++(0.4, 0) |- (c0.west);
-    \draw[flowarrow] (corpus.east) -- ++(0.3, 0) |- (c1.west);
-    \draw[flowarrow] (index.east) -- ++(0.3, 0) |- (c2.west);
-    \draw[flowarrow] (index.east) -- ++(0.3, 0) |- (c3.west);
+    \draw[flowarrow] (encoder.east) -- (c0.west);
+    \draw[flowarrow] (corpus.east) -- ++(0.2, 0) |- (c1.west);
+    \draw[flowarrow] (index.east) -- (c2.west);
+    \draw[flowarrow] (index.east) -- ++(0.2, 0) |- (c3.west);
 
     % Stage 3 to 4
-    \draw[flowarrow] (c0.east) -- ++(0.3, 0) |- (evalgold.west);
-    \draw[flowarrow] (c1.east) -- ++(0.3, 0) |- (evalgold.west);
-    \draw[flowarrow] (c2.east) -- ++(0.3, 0) |- (evalgold.west);
-    \draw[flowarrow] (c3.east) -- ++(0.3, 0) |- (evalgold.west);
+    \draw[flowarrow] (c1.east) -- (evalgold.west);
+    \draw[flowarrow] (c3.east) -- ++(0.2, 0) |- (evalgold.west);
     \draw[flowarrow] (evalgold) -- (evalstats);
 
 \end{tikzpicture}

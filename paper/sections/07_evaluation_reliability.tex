@@ -10,12 +10,13 @@ As reported in Table~\ref{tab:iaa_reliability}, raw zero-shot LLM evaluation exh
 \end{equation}
 Even when applying post-hoc rule calibration to enforce structural codebook consistency (e.g., mapping any error categorized as H1--H5 strictly to \texttt{hallucination="yes"}), agreement reaches only $\kappa = 0.3372$ ($P_o = 68.33\%$).
 
-\begin{table}[h]
+\begin{table}[t]
 \centering
-\small
+\footnotesize
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcc}
 \toprule
-\textbf{Evaluation Configuration} & \textbf{Agreement ($P_o$)} & \textbf{Cohen's Kappa ($\kappa$)} \\
+\textbf{Evaluation Configuration} & \textbf{Agreement ($P_o$)} & \textbf{Cohen's $\mathbf{\kappa}$} \\
 \midrule
 Raw LLM Judge (Qwen Run)     & 45.00\% & 0.0867 \\
 Raw LLM Judge (Gemma Run)    & 48.33\% & 0.0491 \\

@@ -1,0 +1,12 @@
+COMMAND: D:\GG\MikTex\miktex\bin\x64\bibtex.exe main
+EXIT CODE: 0
+DURATION: 0.27s
+
+=== STDOUT ===
+This is BibTeX, Version 0.99e (MiKTeX 25.12)
+The top-level auxiliary file: main.aux
+The style file: plainnat.bst
+Database file #1: references.bib
+
+
+=== STDERR ===

@@ -16,3 +16,6 @@ configs/annotation_tokens.json
 .vscode/
 .DS_Store
 Thumbs.db
+revision_audit/compiled/build_tree/
+matibhrom.zip
+

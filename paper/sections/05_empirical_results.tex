@@ -37,28 +37,30 @@ While Qwen 1.7B continues to hallucinate on $37.5\%$ of queries due to its inabi
 
 \begin{table}[t]
 \centering
-\small
-\begin{tabular}{llrr}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrr}
 \toprule
-\textbf{Model} & \textbf{Hypothesis Comparison} & $\chi^2$ & $p$-value \\
+\textbf{Hypothesis Comparison} & $\mathbf{\chi^2}$ & $\mathbf{p}$\textbf{-value} \\
 \midrule
-\multirow{4}{*}{Qwen 2.5 1.7B} 
-& $C_0$ vs.\ $C_1$ (Oracle Effect) & 282.183 & $2.51 \times 10^{-63}$ $^{***}$ \\
-& $C_0$ vs.\ $C_2$ (RAG Distractors) & 57.341 & $3.66 \times 10^{-14}$ $^{***}$ \\
-& $C_2$ vs.\ $C_3$ (Abstention Guard) & 444.653 & $1.05 \times 10^{-98}$ $^{***}$ \\
-& Standard Bangla vs.\ Banglish & 26.785 & $2.27 \times 10^{-7}$ $^{***}$ \\
+\multicolumn{3}{l}{\textbf{Qwen 2.5 1.7B}} \\
+\quad $C_0$ vs.\ $C_1$ (Oracle Grounding) & 282.183 & $< 10^{-60}$ $^{***}$ \\
+\quad $C_0$ vs.\ $C_2$ (RAG Distractors)  &  57.341 & $< 10^{-13}$ $^{***}$ \\
+\quad $C_2$ vs.\ $C_3$ (Abstention Guard) & 444.653 & $< 10^{-90}$ $^{***}$ \\
+\quad Standard Bangla vs.\ Banglish       &  26.785 & $< 10^{-6\phantom{0}}$ $^{***}$ \\
 \midrule
-\multirow{4}{*}{Gemma 3 4B} 
-& $C_0$ vs.\ $C_1$ (Oracle Effect) & 39.409 & $3.44 \times 10^{-10}$ $^{***}$ \\
-& $C_0$ vs.\ $C_2$ (RAG Distractors) & 8.757 & $3.08 \times 10^{-3}$ $^{**}$ \\
-& $C_2$ vs.\ $C_3$ (Abstention Guard) & 134.007 & $5.44 \times 10^{-31}$ $^{***}$ \\
-& Standard Bangla vs.\ Banglish & 25.681 & $4.03 \times 10^{-7}$ $^{***}$ \\
+\multicolumn{3}{l}{\textbf{Gemma 3 4B}} \\
+\quad $C_0$ vs.\ $C_1$ (Oracle Grounding) &  39.409 & $< 10^{-9\phantom{0}}$ $^{***}$ \\
+\quad $C_0$ vs.\ $C_2$ (RAG Distractors)  &   8.757 & $0.0031$ $^{**}$ \\
+\quad $C_2$ vs.\ $C_3$ (Abstention Guard) & 134.007 & $< 10^{-30}$ $^{***}$ \\
+\quad Standard Bangla vs.\ Banglish       &  25.681 & $< 10^{-6\phantom{0}}$ $^{***}$ \\
 \midrule
-\textbf{Cross-Model} & Overall Resilience & 58.080 & $2.52 \times 10^{-14}$ $^{***}$ \\
-(Qwen vs.\ Gemma) & $C_3$ Selective Abstention & 51.191 & $8.38 \times 10^{-13}$ $^{***}$ \\
+\multicolumn{3}{l}{\textbf{Cross-Model Scaling (Qwen vs.\ Gemma)}} \\
+\quad Overall Benchmark Resilience        &  58.080 & $< 10^{-13}$ $^{***}$ \\
+\quad $C_3$ Selective Abstention Emergence & 51.191 & $< 10^{-12}$ $^{***}$ \\
 \bottomrule
 \end{tabular}
-\caption{Paired McNemar Statistical Significance Tests on Matibhrom Test Split ($^{***}p < 0.001$, $^{**}p < 0.01$, $^{*}p < 0.05$).}
+\caption{Paired McNemar Statistical Significance Tests on the Matibhrom Test Split ($^{***}p < 0.001$, $^{**}p < 0.01$).}
 \label{tab:mcnemar_tests}
 \end{table}
 

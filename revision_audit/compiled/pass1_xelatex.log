@@ -1,0 +1,771 @@
+COMMAND: D:\GG\MikTex\miktex\bin\x64\xelatex.exe --enable-installer -interaction=nonstopmode -synctex=1 main.tex
+EXIT CODE: 0
+DURATION: 4.82s
+
+=== STDOUT ===
+This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(D:\GG\MikTes\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(D:\GG\MikTes\tex/latex/base\size11.clo))
+(D:\GG\MikTes\tex/latex/geometry\geometry.sty
+(D:\GG\MikTes\tex/latex/graphics\keyval.sty)
+(D:\GG\MikTes\tex/generic/iftex\ifvtex.sty
+(D:\GG\MikTes\tex/generic/iftex\iftex.sty))
+(D:\GG\MikTes\tex/latex/geometry\geometry.cfg))
+(D:\GG\MikTes\tex/latex/fontspec\fontspec.sty
+(D:\GG\MikTes\tex/latex/l3packages/xparse\xparse.sty
+(D:\GG\MikTes\tex/latex/l3kernel\expl3.sty
+(D:\GG\MikTes\tex/latex/l3backend\l3backend-xetex.def)))
+(D:\GG\MikTes\tex/latex/fontspec\fontspec-xetex.sty
+(D:\GG\MikTes\tex/latex/base\fontenc.sty)
+(D:\GG\MikTes\tex/latex/fontspec\fontspec.cfg)))Running miktex-makemf.exe...
+Running miktex-hbf2gf.exe...
+
+(D:\GG\MikTes\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(D:\GG\MikTes\tex/latex/amsmath\amstext.sty
+(D:\GG\MikTes\tex/latex/amsmath\amsgen.sty))
+(D:\GG\MikTes\tex/latex/amsmath\amsbsy.sty)
+(D:\GG\MikTes\tex/latex/amsmath\amsopn.sty))
+(D:\GG\MikTes\tex/latex/amsfonts\amssymb.sty
+(D:\GG\MikTes\tex/latex/amsfonts\amsfonts.sty))
+(D:\GG\MikTes\tex/latex/mathtools\mathtools.sty
+(D:\GG\MikTes\tex/latex/tools\calc.sty)
+(D:\GG\MikTes\tex/latex/mathtools\mhsetup.sty))
+(D:\GG\MikTes\tex/latex/algorithms\algorithm.sty
+(D:\GG\MikTes\tex/latex/float\float.sty)
+(D:\GG\MikTes\tex/latex/base\ifthen.sty))
+(D:\GG\MikTes\tex/latex/algorithmicx\algpseudocode.sty
+(D:\GG\MikTes\tex/latex/algorithmicx\algorithmicx.sty
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (D:\GG\MikTes\tex/latex/booktabs\booktabs.sty)
+(D:\GG\MikTes\tex/latex/multirow\multirow.sty)
+(D:\GG\MikTes\tex/latex/graphics\graphicx.sty
+(D:\GG\MikTes\tex/latex/graphics\graphics.sty
+(D:\GG\MikTes\tex/latex/graphics\trig.sty)
+(D:\GG\MikTes\tex/latex/graphics-cfg\graphics.cfg)
+(D:\GG\MikTes\tex/latex/graphics-def\xetex.def)))
+(D:\GG\MikTes\tex/latex/pgf/frontendlayer\tikz.sty
+(D:\GG\MikTes\tex/latex/pgf/basiclayer\pgf.sty
+(D:\GG\MikTes\tex/latex/pgf/utilities\pgfrcs.sty
+(D:\GG\MikTes\tex/generic/pgf/utilities\pgfutil-common.tex)
+(D:\GG\MikTes\tex/generic/pgf/utilities\pgfutil-latex.def)
+(D:\GG\MikTes\tex/generic/pgf/utilities\pgfrcs.code.tex
+(D:\GG\MikTes\tex/generic/pgf\pgf.revision.tex)))
+(D:\GG\MikTes\tex/latex/pgf/basiclayer\pgfcore.sty
+(D:\GG\MikTes\tex/latex/pgf/systemlayer\pgfsys.sty
+(D:\GG\MikTes\tex/generic/pgf/systemlayer\pgfsys.code.tex
+(D:\GG\MikTes\tex/generic/pgf/utilities\pgfkeys.code.tex
+(D:\GG\MikTes\tex/generic/pgf/utilities\pgfkeyslibraryfiltered.code.tex))
+(D:\GG\MikTes\tex/generic/pgf/systemlayer\pgf.cfg)
+(D:\GG\MikTes\tex/generic/pgf/systemlayer\pgfsys-xetex.def
+(D:\GG\MikTes\tex/generic/pgf/systemlayer\pgfsys-dvipdfmx.def
+(D:\GG\MikTes\tex/generic/pgf/systemlayer\pgfsys-common-pdf.def))))
+(D:\GG\MikTes\tex/generic/pgf/systemlayer\pgfsyssoftpath.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/systemlayer\pgfsysprotocol.code.tex))
+(D:\GG\MikTes\tex/latex/xcolor\xcolor.sty
+(D:\GG\MikTes\tex/latex/graphics-cfg\color.cfg)
+(D:\GG\MikTes\tex/latex/graphics\mathcolor.ltx))
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcore.code.tex
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmath.code.tex
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathutil.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathparser.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.basic.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.trigonometric.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.random.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.comparison.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.base.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.round.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.misc.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfunctions.integerarithmetics.code.tex
+) (D:\GG\MikTes\tex/generic/pgf/math\pgfmathcalc.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmathfloat.code.tex))
+(D:\GG\MikTes\tex/generic/pgf/math\pgfint.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorepoints.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorepathconstruct.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorepathusage.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorescopes.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcoregraphicstate.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcoretransformations.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorequick.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcoreobjects.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorepathprocessing.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorearrows.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcoreshade.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcoreimage.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcoreexternal.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorelayers.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcoretransparency.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorepatterns.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/basiclayer\pgfcorerdf.code.tex)))
+(D:\GG\MikTes\tex/generic/pgf/modules\pgfmoduleshapes.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/modules\pgfmoduleplot.code.tex)
+(D:\GG\MikTes\tex/latex/pgf/compatibility\pgfcomp-version-0-65.sty)
+(D:\GG\MikTes\tex/latex/pgf/compatibility\pgfcomp-version-1-18.sty))
+(D:\GG\MikTes\tex/latex/pgf/utilities\pgffor.sty
+(D:\GG\MikTes\tex/latex/pgf/utilities\pgfkeys.sty
+(D:\GG\MikTes\tex/generic/pgf/utilities\pgfkeys.code.tex))
+(D:\GG\MikTes\tex/latex/pgf/math\pgfmath.sty
+(D:\GG\MikTes\tex/generic/pgf/math\pgfmath.code.tex))
+(D:\GG\MikTes\tex/generic/pgf/utilities\pgffor.code.tex))
+(D:\GG\MikTes\tex/generic/pgf/frontendlayer/tikz\tikz.code.tex
+(D:\GG\MikTes\tex/generic/pgf/libraries\pgflibraryplothandlers.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/modules\pgfmodulematrix.code.tex)
+(D:\GG\MikTes\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarytopaths.c
+ode.tex)))
+(D:\GG\MikTes\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryshapes.ge
+ometric.code.tex
+(D:\GG\MikTes\tex/generic/pgf/libraries/shapes\pgflibraryshapes.geometric.code.
+tex))
+(D:\GG\MikTes\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryarrows.co
+de.tex (D:\GG\MikTes\tex/generic/pgf/libraries\pgflibraryarrows.code.tex))
+(D:\GG\MikTes\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarypositioni
+ng.code.tex) (D:\GG\MikTes\tex/latex/enumitem\enumitem.sty)
+(D:\GG\MikTes\tex/latex/hyperref\hyperref.sty
+(D:\GG\MikTes\tex/latex/kvsetkeys\kvsetkeys.sty)
+(D:\GG\MikTes\tex/generic/kvdefinekeys\kvdefinekeys.sty)
+(D:\GG\MikTes\tex/generic/pdfescape\pdfescape.sty
+(D:\GG\MikTes\tex/generic/ltxcmds\ltxcmds.sty)
+(D:\GG\MikTes\tex/generic/pdftexcmds\pdftexcmds.sty
+(D:\GG\MikTes\tex/generic/infwarerr\infwarerr.sty)))
+(D:\GG\MikTes\tex/latex/hycolor\hycolor.sty)
+(D:\GG\MikTes\tex/latex/hyperref\nameref.sty
+(D:\GG\MikTes\tex/latex/refcount\refcount.sty)
+(D:\GG\MikTes\tex/generic/gettitlestring\gettitlestring.sty
+(D:\GG\MikTes\tex/latex/kvoptions\kvoptions.sty)))
+(D:\GG\MikTes\tex/latex/etoolbox\etoolbox.sty)
+(D:\GG\MikTes\tex/generic/stringenc\stringenc.sty)
+(D:\GG\MikTes\tex/latex/hyperref\pd1enc.def)
+(D:\GG\MikTes\tex/generic/intcalc\intcalc.sty)
+(D:\GG\MikTes\tex/latex/hyperref\puenc.def) (D:\GG\MikTes\tex/latex/url\url.sty
+) (D:\GG\MikTes\tex/generic/bitset\bitset.sty
+(D:\GG\MikTes\tex/generic/bigintcalc\bigintcalc.sty)))
+(D:\GG\MikTes\tex/latex/hyperref\hxetex.def
+(D:\GG\MikTes\tex/latex/rerunfilecheck\rerunfilecheck.sty
+(D:\GG\MikTes\tex/generic/uniquecounter\uniquecounter.sty)))
+(D:\GG\MikTes\tex/latex/cleveref\cleveref.sty)
+==> First Aid for cleveref.sty applied!
+(D:\GG\MikTes\tex/latex/natbib\natbib.sty)
+No file main.aux.
+*geometry* driver: auto-detecting
+*geometry* detected driver: xetex
+
+Package hyperref Warning: Rerun to get /PageLabels entry.
+
+
+LaTeX Font Warning: Font shape `TU/NotoSerifBengali.ttf(0)/b/n' undefined
+(Font)              using `TU/NotoSerifBengali.ttf(0)/m/n' instead on input lin
+e 137.
+
+(D:\GG\MikTes\tex/latex/amsfonts\umsa.fd)
+(D:\GG\MikTes\tex/latex/amsfonts\umsb.fd)
+Underfull \hbox (badness 2359) in paragraph at lines 140--141
+\TU/TimesNewRoman(0)/m/n/10.95 English benchmarks frequently suffer from catas-
+
+
+Underfull \hbox (badness 1424) in paragraph at lines 140--141
+\TU/TimesNewRoman(0)/m/n/10.95 ken native language globally, with over 300 mil-
+
+
+Underfull \hbox (badness 1009) in paragraph at lines 140--141
+\TU/TimesNewRoman(0)/m/n/10.95 largely uncharacterized across formal versus cod
+e-
+
+Underfull \hbox (badness 1092) in paragraph at lines 140--141
+\TU/TimesNewRoman(0)/m/n/10.95 evaluate open-weight language models across four
+
+
+Underfull \hbox (badness 1490) in paragraph at lines 142--144
+[]\TU/TimesNewRoman(0)/m/n/10.95 Across 4,560 evaluated test generations ($\OML
+/cmm/m/it/10.95 N \OT1/cmr/m/n/10.95 =
+
+Package natbib Warning: Citation `ahuja2023mega' on page 1 undefined on input l
+ine 148.
+
+
+Package natbib Warning: Citation `bang2023multitask' on page 1 undefined on inp
+ut line 148.
+
+
+Package natbib Warning: Citation `maynez2020faithfulness' on page 1 undefined o
+n input line 148.
+
+
+Package natbib Warning: Citation `ji2023survey' on page 1 undefined on input li
+ne 148.
+
+
+Package natbib Warning: Citation `tonmoy2024comprehensive' on page 1 undefined 
+on input line 148.
+
+
+Underfull \hbox (badness 1142) in paragraph at lines 148--149
+\TU/TimesNewRoman(0)/m/n/10.95 hibit severe structural asymmetries [\TU/TimesNe
+wRoman(0)/b/n/10.95 ? ? \TU/TimesNewRoman(0)/m/n/10.95 ]. In
+
+Package natbib Warning: Citation `lin2022truthfulqa' on page 1 undefined on inp
+ut line 150.
+
+
+Package natbib Warning: Citation `min2023factscore' on page 1 undefined on inpu
+t line 150.
+
+
+Package natbib Warning: Citation `li2023halueval' on page 1 undefined on input 
+line 150.
+
+
+Underfull \hbox (badness 5548) in paragraph at lines 150--151
+[]\TU/TimesNewRoman(0)/m/n/10.95 Despite substantial recent progress in factual
+-
+
+Underfull \hbox (badness 7522) in paragraph at lines 150--151
+\TU/TimesNewRoman(0)/m/n/10.95 ity benchmarking—such as TruthfulQA [\TU/TimesNe
+wRoman(0)/b/n/10.95 ? \TU/TimesNewRoman(0)/m/n/10.95 ],
+
+Package natbib Warning: Citation `hasan2023banglatokenizer' on page 1 undefined
+ on input line 152.
+
+[1]
+
+Package natbib Warning: Citation `saha2024robustness' on page 2 undefined on in
+put line 154.
+
+
+Package natbib Warning: Citation `chowdhury20245dialects' on page 2 undefined o
+n input line 154.
+
+
+Underfull \hbox (badness 1748) in paragraph at lines 154--155
+\TU/TimesNewRoman(0)/m/n/10.95 manized transliteration. Hundreds of millions of
+
+
+Package natbib Warning: Citation `pal2023medhalt' on page 2 undefined on input 
+line 156.
+
+
+Package natbib Warning: Citation `guha2023legalbench' on page 2 undefined on in
+put line 156.
+
+
+Underfull \hbox (badness 3439) in paragraph at lines 156--157
+[]\TU/TimesNewRoman(0)/m/n/10.95 Third, localized societal applications in publ
+ic
+
+Package natbib Warning: Citation `lewis2020rag' on page 2 undefined on input li
+ne 158.
+
+
+Package natbib Warning: Citation `cuconasu2024power' on page 2 undefined on inp
+ut line 158.
+
+
+Package natbib Warning: Citation `park2024robust' on page 2 undefined on input 
+line 158.
+
+
+Package natbib Warning: Citation `cole2023selectively' on page 2 undefined on i
+nput line 158.
+
+
+Package natbib Warning: Citation `yin2023large' on page 2 undefined on input li
+ne 158.
+
+
+Underfull \hbox (badness 5374) in paragraph at lines 158--159
+[]\TU/TimesNewRoman(0)/m/n/10.95 Finally, while Retrieval-Augmented Generation
+
+Underfull \hbox (badness 3407) in paragraph at lines 160--161
+[]\TU/TimesNewRoman(0)/m/n/10.95 To systematically investigate these phenomena,
+
+
+Underfull \hbox (badness 3281) in paragraph at lines 160--161
+\TU/TimesNewRoman(0)/m/n/10.95 we introduce \TU/TimesNewRoman(0)/b/n/10.95 Mati
+bhrom (\TU/NotoSerifBengali.ttf(0)/m/n/10.95 মতিভ্রম\TU/TimesNewRoman(0)/b/n/10
+.95 )\TU/TimesNewRoman(0)/m/n/10.95 —derived from
+
+Underfull \hbox (badness 4726) in paragraph at lines 160--161
+\TU/TimesNewRoman(0)/m/n/10.95 perception—the first fine-grained, multi-conditi
+on
+
+Underfull \hbox (badness 1231) in paragraph at lines 160--161
+\TU/TimesNewRoman(0)/m/n/10.95 ory failure from extractive reading comprehensio
+n
+
+Underfull \hbox (badness 1648) in paragraph at lines 162--163
+\TU/TimesNewRoman(0)/m/n/10.95 prompts in native Standard Bangla and Banglish)
+
+Underfull \hbox (badness 1394) in paragraph at lines 167--168
+\TU/TimesNewRoman(0)/m/n/10.95 low-resource factual disparities, (3) script tra
+nslit-
+
+Underfull \hbox (badness 1248) in paragraph at lines 167--168
+\TU/TimesNewRoman(0)/m/n/10.95 eration and subword tokenization bottlenecks, an
+d
+
+Package natbib Warning: Citation `maynez2020faithfulness' on page 2 undefined o
+n input line 170.
+
+
+Package natbib Warning: Citation `ji2023survey' on page 2 undefined on input li
+ne 170.
+
+
+Package natbib Warning: Citation `lin2022truthfulqa' on page 2 undefined on inp
+ut line 170.
+
+
+Package natbib Warning: Citation `min2023factscore' on page 2 undefined on inpu
+t line 170.
+
+
+Package natbib Warning: Citation `li2023halueval' on page 2 undefined on input 
+line 170.
+
+
+Package natbib Warning: Citation `mishra2024fava' on page 2 undefined on input 
+line 170.
+
+
+Package natbib Warning: Citation `laban2022summac' on page 2 undefined on input
+ line 170.
+
+[2]
+Underfull \hbox (badness 4608) in paragraph at lines 172--172
+[]\TU/TimesNewRoman(0)/b/n/12 Multilingual Evaluation and Regional
+
+Package natbib Warning: Citation `ahuja2023mega' on page 3 undefined on input l
+ine 173.
+
+
+Package natbib Warning: Citation `bang2023multitask' on page 3 undefined on inp
+ut line 173.
+
+
+Package natbib Warning: Citation `zhu2024polyfever' on page 3 undefined on inpu
+t line 173.
+
+
+Package natbib Warning: Citation `clark2020tydi' on page 3 undefined on input l
+ine 173.
+
+
+Package natbib Warning: Citation `goyal2022flores' on page 3 undefined on input
+ line 173.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 175--175
+[]\TU/TimesNewRoman(0)/b/n/12 Script Transliteration and Tokenizer
+
+Package natbib Warning: Citation `hasan2023banglatokenizer' on page 3 undefined
+ on input line 176.
+
+
+Package natbib Warning: Citation `saha2024robustness' on page 3 undefined on in
+put line 176.
+
+
+Package natbib Warning: Citation `chowdhury20245dialects' on page 3 undefined o
+n input line 176.
+
+
+Underfull \hbox (badness 1762) in paragraph at lines 176--177
+\TU/TimesNewRoman(0)/m/n/10.95 In languages employing complex Brahmic-derived
+
+Package natbib Warning: Citation `lewis2020rag' on page 3 undefined on input li
+ne 179.
+
+
+Package natbib Warning: Citation `cuconasu2024power' on page 3 undefined on inp
+ut line 179.
+
+
+Package natbib Warning: Citation `park2024robust' on page 3 undefined on input 
+line 179.
+
+
+Package natbib Warning: Citation `katsis2025mtrag' on page 3 undefined on input
+ line 179.
+
+
+Package natbib Warning: Citation `kadavath2022language' on page 3 undefined on 
+input line 179.
+
+
+Package natbib Warning: Citation `cole2023selectively' on page 3 undefined on i
+nput line 179.
+
+
+Package natbib Warning: Citation `yin2023large' on page 3 undefined on input li
+ne 179.
+
+
+Underfull \hbox (badness 1092) in paragraph at lines 179--180
+\TU/TimesNewRoman(0)/m/n/10.95 Retrieval-Augmented Generation (RAG) [\TU/TimesN
+ewRoman(0)/b/n/10.95 ? \TU/TimesNewRoman(0)/m/n/10.95 ] is
+
+Underfull \hbox (badness 1515) in paragraph at lines 185--186
+\TU/TimesNewRoman(0)/m/n/10.95 Matibhrom is constructed to satisfy three founda
+-
+
+Underfull \hbox (badness 1448) in paragraph at lines 185--186
+\TU/TimesNewRoman(0)/m/n/10.95 stakes domains: General Knowledge (200 items),
+[3]
+
+Package natbib Warning: Citation `chen2024bge' on page 4 undefined on input lin
+e 205.
+
+
+Underfull \hbox (badness 1960) in paragraph at lines 207--207
+[]\TU/TimesNewRoman(0)/b/n/12 Leakage-Free Document-Isolated Split-
+
+Underfull \hbox (badness 1968) in paragraph at lines 210--211
+[]\TU/TimesNewRoman(0)/m/n/10.95 Under this partitioning, no evidence document,
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 220--220
+[]\TU/TimesNewRoman(0)/b/n/14.4 Methodology and Evaluation
+[4]
+Underfull \hbox (badness 2443) in paragraph at lines 250--251
+ []\TU/TimesNewRoman(0)/b/n/10.95 Condition $\OML/cmm/m/it/10.95 C[]$\TU/TimesN
+ewRoman(0)/b/n/10.95 : Selective Abstention Guardrail.[]
+
+LaTeX Font Warning: Font shape `TU/NotoSerifBengali.ttf(0)/m/it' undefined
+(Font)              using `TU/NotoSerifBengali.ttf(0)/m/n' instead on input lin
+e 254.
+
+
+Underfull \hbox (badness 5756) in paragraph at lines 328--329
+\TU/TimesNewRoman(0)/m/n/10.95 For a sample of $\OML/cmm/m/it/10.95 N$ \TU/Time
+sNewRoman(0)/m/n/10.95 evaluated generations, ev-
+
+Underfull \hbox (badness 10000) in paragraph at lines 328--329
+\TU/TimesNewRoman(0)/m/n/10.95 ery output $[]$ is adjudicated into correctness
+
+Underfull \hbox (badness 10000) in paragraph at lines 328--329
+\OML/cmm/m/it/10.95 c[] \OMS/cmsy/m/n/10.95 2 f[]\OML/cmm/m/it/10.95 ; []; []\O
+MS/cmsy/m/n/10.95 g$\TU/TimesNewRoman(0)/m/n/10.95 , hallucina-
+
+Underfull \hbox (badness 4967) in paragraph at lines 328--329
+\TU/TimesNewRoman(0)/m/n/10.95 tion indicator $\OML/cmm/m/it/10.95 h[] \OMS/cms
+y/m/n/10.95 2 f[]\OML/cmm/m/it/10.95 ; []\OMS/cmsy/m/n/10.95 g$\TU/TimesNewRoma
+n(0)/m/n/10.95 , error category
+
+Underfull \hbox (badness 10000) in paragraph at lines 342--343
+ []\TU/TimesNewRoman(0)/b/n/10.95 Selective Accuracy ($\OMS/cmsy/m/n/10.95 A[]$
+\TU/TimesNewRoman(0)/b/n/10.95 ).[] \TU/TimesNewRoman(0)/m/n/10.95 Accuracy com
+puted
+
+Underfull \hbox (badness 1968) in paragraph at lines 358--358
+[]\TU/TimesNewRoman(0)/b/n/12 Statistical Significance and Hypothesis
+
+Package natbib Warning: Citation `mcnemar1947note' on page 5 undefined on input
+ line 359.
+
+
+Package natbib Warning: Citation `wilson1927probable' on page 5 undefined on in
+put line 364.
+
+
+Package natbib Warning: Citation `brown2001interval' on page 5 undefined on inp
+ut line 364.
+
+
+LaTeX Warning: Reference `alg:matibhrom_pipeline' on page 5 undefined on input 
+line 367.
+
+
+Underfull \hbox (badness 5359) in paragraph at lines 373--374
+[]\TU/TimesNewRoman(0)/m/n/10.95 Base items $\OMS/cmsy/m/n/10.95 I$\TU/TimesNew
+Roman(0)/m/n/10.95 , Corpus $\OMS/cmsy/m/n/10.95 D$\TU/TimesNewRoman(0)/m/n/10.
+95 , Embedding
+
+Underfull \hbox (badness 6944) in paragraph at lines 373--374
+\TU/TimesNewRoman(0)/m/n/10.95 model $\OML/cmm/m/it/10.95 f[]$\TU/TimesNewRoman
+(0)/m/n/10.95 , LLMs $\OMS/cmsy/m/n/10.95 M[]$\TU/TimesNewRoman(0)/m/n/10.95 , 
+Conditions $\OMS/cmsy/m/n/10.95 C \OT1/cmr/m/n/10.95 =
+
+LaTeX Warning: Reference `eq:hallucination_rate' on page 5 undefined on input l
+ine 394.
+
+
+LaTeX Warning: Reference `eq:abstention_rate' on page 5 undefined on input line
+ 394.
+
+
+LaTeX Warning: Reference `eq:mcnemar' on page 5 undefined on input line 395.
+
+[5]
+Underfull \hbox (badness 10000) in paragraph at lines 402--402
+[]\TU/TimesNewRoman(0)/b/n/12 Cross-Model Grounding Comparison
+
+LaTeX Warning: Reference `tab:model_scaling_comparison' on page 6 undefined on 
+input line 403.
+
+
+Package natbib Warning: Citation `qwen2024qwen' on page 6 undefined on input li
+ne 403.
+
+
+Package natbib Warning: Citation `team2024gemma' on page 6 undefined on input l
+ine 403.
+
+
+Underfull \hbox (badness 4647) in paragraph at lines 432--433
+ []\TU/TimesNewRoman(0)/b/n/10.95 Parametric Ignorance in Closed-Book Settings
+
+LaTeX Warning: Reference `tab:mcnemar_tests' on page 6 undefined on input line 
+435.
+
+
+Underfull \hbox (badness 1303) in paragraph at lines 435--436
+\TU/TimesNewRoman(0)/m/n/10.95 in hallucinations, cutting the rate down to $\OT
+1/cmr/m/n/10.95 64\OML/cmm/m/it/10.95 :\OT1/cmr/m/n/10.95 4[]$
+
+LaTeX Warning: Reference `tab:mcnemar_tests' on page 6 undefined on input line 
+438.
+
+[6]
+Underfull \hbox (badness 1292) in paragraph at lines 485--485
+[]\TU/TimesNewRoman(0)/m/n/10.95 Table 2: []Paired McNemar Statistical Signific
+ance
+
+LaTeX Warning: Reference `tab:mcnemar_tests' on page 7 undefined on input line 
+490.
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \hbox (badness 1371) in paragraph at lines 492--493
+[]\TU/TimesNewRoman(0)/m/n/10.95 Dense retrieval diagnostics explain the underl
+y-
+
+LaTeX Warning: Reference `tab:domain_disparity' on page 7 undefined on input li
+ne 495.
+
+
+Underfull \hbox (badness 1668) in paragraph at lines 522--523
+\TU/TimesNewRoman(0)/m/n/10.95 and $\OT1/cmr/m/n/10.95 18\OML/cmm/m/it/10.95 :\
+OT1/cmr/m/n/10.95 0[]$\TU/TimesNewRoman(0)/m/n/10.95 ), where clinical terms wi
+thout precise
+[7]
+Underfull \hbox (badness 1215) in paragraph at lines 531--531
+[]\TU/TimesNewRoman(0)/b/n/14.4 Qualitative Error Taxonomy and
+
+Package natbib Warning: Citation `maynez2020faithfulness' on page 8 undefined o
+n input line 535.
+
+
+Package natbib Warning: Citation `ji2023survey' on page 8 undefined on input li
+ne 535.
+
+
+LaTeX Warning: Reference `tab:codebook_taxonomy' on page 8 undefined on input l
+ine 535.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 550--550
+[]\TU/TimesNewRoman(0)/m/n/10 Appropriate Selective Ab-
+
+Underfull \hbox (badness 3849) in paragraph at lines 565--567
+[]\TU/NotoSerifBengali.ttf(0)/m/it/10.95 ”ভারতের সংবিধান ২৬ নভেম্বর ১৯৪৯ সালে
+
+Underfull \hbox (badness 3108) in paragraph at lines 565--567
+\TU/NotoSerifBengali.ttf(0)/m/it/10.95 গণপরিষদে গৃহীত হয়েছিল এবং ২৬ জানুয়ারি
+
+Underfull \hbox (badness 10000) in paragraph at lines 565--567
+\TU/NotoSerifBengali.ttf(0)/m/it/10.95 ১৯৫০ সালে কার্যকর হয়। অনুরূপভাবে
+
+Underfull \hbox (badness 5490) in paragraph at lines 565--567
+\TU/NotoSerifBengali.ttf(0)/m/it/10.95 বাংলাদেশের সংবিধানের ক্ষেত্রেও গণপরিষদীয
+়
+
+Underfull \hbox (badness 1163) in paragraph at lines 565--567
+\TU/TimesNewRoman(0)/m/it/10.95 Similarly, in the case of the Bangladesh
+[8]
+Underfull \hbox (badness 1742) in paragraph at lines 568--569
+\TU/TimesNewRoman(0)/m/it/10.95 cross-jurisprudential transposition\TU/TimesNew
+Roman(0)/m/n/10.95 , substituting the
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 570.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 570.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\rightarrow' on input line 570.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 570.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 570.
+
+
+Underfull \hbox (badness 3158) in paragraph at lines 573--575
+\TU/TimesNewRoman(0)/m/it/10.95 (”As a deep sea port for Bangladesh’s
+
+Underfull \hbox (badness 10000) in paragraph at lines 586--588
+\TU/TimesNewRoman(0)/m/it/10.95 (”The Constitution of Bangladesh was
+
+Underfull \hbox (badness 2351) in paragraph at lines 586--588
+\TU/TimesNewRoman(0)/m/it/10.95 passed on 26 March 1971 and through
+
+Underfull \hbox (badness 10000) in paragraph at lines 586--588
+\TU/TimesNewRoman(0)/m/it/10.95 the constitution board the constitution
+[9]
+
+Package natbib Warning: Citation `li2023halueval' on page 10 undefined on input
+ line 595.
+
+
+LaTeX Warning: Reference `tab:iaa_reliability' on page 10 undefined on input li
+ne 597.
+
+
+Underfull \hbox (badness 2478) in paragraph at lines 600--602
+\TU/TimesNewRoman(0)/m/n/10.95 force structural codebook consistency (e.g., map
+-
+
+Underfull \hbox (badness 3179) in paragraph at lines 600--602
+\TU/TimesNewRoman(0)/m/n/10.95 ping any error categorized as H1–H5 strictly to
+
+Underfull \hbox (badness 3930) in paragraph at lines 600--602
+\TU/lmtt/m/n/10.95 hallucination="yes"\TU/TimesNewRoman(0)/m/n/10.95 ), agreeme
+nt reaches only
+
+Underfull \hbox (badness 2189) in paragraph at lines 623--624
+\TU/TimesNewRoman(0)/m/n/10.95 that undermine automated LLM judges in lower-
+[10]
+
+LaTeX Warning: Reference `tab:model_scaling_comparison' on page 11 undefined on
+ input line 634.
+
+
+LaTeX Warning: Reference `tab:domain_disparity' on page 11 undefined on input l
+ine 634.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 636--636
+[]\TU/TimesNewRoman(0)/b/n/14.4 Discussion, Limitations, and
+
+Underfull \hbox (badness 1371) in paragraph at lines 640--641
+\TU/TimesNewRoman(0)/m/n/10.95 societal implications for deploying generative l
+an-
+
+Underfull \hbox (badness 1701) in paragraph at lines 642--643
+\TU/TimesNewRoman(0)/m/n/10.95 negative-constraint instructions must be treated
+ as
+[11]
+Underfull \hbox (badness 1205) in paragraph at lines 655--656
+\TU/TimesNewRoman(0)/m/n/10.95 the first fine-grained, multi-condition hallucin
+ation
+
+Underfull \hbox (badness 2173) in paragraph at lines 655--656
+\TU/TimesNewRoman(0)/m/n/10.95 language. Grounded in 600 expert-verified base
+
+Underfull \hbox (badness 2181) in paragraph at lines 659--660
+[]\TU/TimesNewRoman(0)/m/n/10.95 By releasing our complete benchmark datasets,
+No file main.bbl.
+
+Underfull \hbox (badness 10000) in paragraph at lines 668--668
+[]\TU/TimesNewRoman(0)/b/n/14.4 Verbatim Benchmark Prompt
+
+LaTeX Warning: Reference `tab:appendix_prompts' on page 12 undefined on input l
+ine 671.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 704--709
+[]\TU/TimesNewRoman(0)/m/n/10 Niche shongrihito prashongik
+
+Underfull \hbox (badness 10000) in paragraph at lines 704--709
+\TU/TimesNewRoman(0)/m/n/10 onucchedgulo pore proshnotir uttor
+
+Underfull \hbox (badness 2790) in paragraph at lines 716--721
+[]\TU/TimesNewRoman(0)/m/n/10 Niche shongrihito onucchedgulo pore
+
+Underfull \hbox (badness 3209) in paragraph at lines 716--721
+\TU/TimesNewRoman(0)/m/n/10 proshnotir uttor dao. Jodi produtto
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[12]
+Underfull \hbox (badness 1701) in paragraph at lines 735--736
+\TU/TimesNewRoman(0)/m/n/10.95 lines (Dengue, Nipah, Malaria), and the World
+
+Underfull \hbox (badness 1394) in paragraph at lines 744--745
+\TU/TimesNewRoman(0)/m/n/10.95 erations and vector retrieval operations were co
+n-
+[13]
+
+LaTeX Warning: Reference `tab:codebook_taxonomy' on page 14 undefined on input 
+line 760.
+
+
+Underfull \hbox (badness 1635) in paragraph at lines 762--763
+[]\TU/TimesNewRoman(0)/m/it/10.95 Distinction between H1 (Contradiction) and H2
+
+
+Package natbib Warning: There were undefined citations.
+
+[14] (main.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `main.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+ )
+(see the transcript file for additional information)
+Output written on main.pdf (14 pages).
+SyncTeX written on main.synctex.gz.
+Transcript written on main.log.
+
+
+=== STDERR ===
+
+
+Sorry, but miktex-makemf did not succeed.
+
+
+
+The log file hopefully contains the information to get MiKTeX going again:
+
+
+
+  C:\Users\AKiB\AppData\Local\MiKTeX\miktex\log\miktex-makemf.log
+
+Couldn't open `TeX Gyre Term.cfg'
+
+
+
+hbf2gf (CJK ver. 4.8.4)
+
+
+
+
+Sorry, but miktex-maketfm did not succeed.
+
+The log file hopefully contains the information to get MiKTeX going again:
+
+  C:\Users\AKiB\AppData\Local\MiKTeX\miktex\log\miktex-maketfm.log

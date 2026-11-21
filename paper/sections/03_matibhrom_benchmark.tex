@@ -8,8 +8,11 @@ General Knowledge queries evaluate national history (such as the 1971 Liberation
 
 Every benchmark item is formally specified as a structured data tuple:
 \begin{equation}
-    \mathcal{I}_i = \big( \text{id}_i, \text{dom}_i, \mathcal{Q}_{\text{bn}, i}, \mathcal{Q}_{\text{bg}, i}, \mathcal{A}^*_i, e^*_i, \tau_i, \rho_i, \mathcal{S}_i \big)
-    \label{eq:item_schema}
+\begin{split}
+    \mathcal{I}_i = \big( &\text{id}_i, \text{dom}_i, \mathcal{Q}_{\text{bn}, i}, \mathcal{Q}_{\text{bg}, i}, \\
+    &\mathcal{A}^*_i, e^*_i, \tau_i, \rho_i, \mathcal{S}_i \big)
+\end{split}
+\label{eq:item_schema}
 \end{equation}
 where $\text{dom}_i \in \{\text{General}, \text{Medical}, \text{Legal}\}$ denotes the domain, $\mathcal{Q}_{\text{bn}, i}$ is the native Bengali prompt in Eastern Nagari script, $\mathcal{Q}_{\text{bg}, i}$ is the matched Romanized Banglish prompt, $\mathcal{A}^*_i$ is the canonical gold answer, $e^*_i$ is the unique identifier for the gold evidence passage, $\tau_i$ denotes the answer type (entity, numeric, date, citation, short explanation, procedure), $\rho_i \in \{\text{normal}, \text{high-stakes}\}$ indicates the risk tier, and $\mathcal{S}_i \in \{\text{Dev}, \text{Test}\}$ designates the dataset split.
 
@@ -26,7 +29,10 @@ A frequent methodological defect in RAG benchmarking is retrieval leakage, where
 
 Under this partitioning, no evidence document, statutory section, or clinical advisory is shared across splits:
 \begin{equation}
-    \operatorname{DocGroup}(i) \cap \operatorname{DocGroup}(j) = \emptyset, \quad \forall i \in \mathcal{S}_{\text{Test}}, \; j \in \mathcal{S}_{\text{Dev}}
-    \label{eq:document_isolation}
+\begin{split}
+    \operatorname{DocGroup}(i) \cap \operatorname{DocGroup}(j) = \emptyset, \\
+    \forall i \in \mathcal{S}_{\text{Test}}, \; j \in \mathcal{S}_{\text{Dev}}
+\end{split}
+\label{eq:document_isolation}
 \end{equation}
 Furthermore, benchmark provenance is cryptographically locked: the retrieval corpus SHA-256 digest is \texttt{906f912f07690ba0}, and the compiled index digest is \texttt{idx\_1794819485\_906f912f07690ba0}. Any modification to the underlying text or embedding parameters immediately invalidates the execution harness.

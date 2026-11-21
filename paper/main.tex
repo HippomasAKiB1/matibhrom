@@ -256,67 +256,78 @@ The prompt explicitly mandates: \foreignlanguage{bengali}{\emph{"যদি প�
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-    scale=0.95, every node/.style={transform shape},
-    % Stage Group Containers
-    stagebox/.style={draw=slate!40, rounded corners=6pt, fill=slate!3, line width=0.8pt, inner sep=6pt},
+    scale=0.96, every node/.style={transform shape},
+    stagebox/.style={draw=slate!35, rounded corners=6pt, fill=slate!2, line width=0.8pt},
     stagetitle/.style={font=\bfseries\sffamily\scriptsize, color=slate!80, anchor=north west},
-    % Functional Node Styles
-    datanode/.style={draw=teal!80, rounded corners=4pt, fill=teal!6, line width=0.9pt, text width=2.6cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
-    retrnode/.style={draw=indigo!80, rounded corners=4pt, fill=indigo!6, line width=0.9pt, text width=2.6cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
-    condnode/.style={draw=blue!80, rounded corners=4pt, fill=blue!6, line width=0.9pt, text width=2.15cm, minimum height=1.35cm, align=center, font=\sffamily\tiny},
-    evalnode/.style={draw=violet!80, rounded corners=4pt, fill=violet!6, line width=0.9pt, text width=2.6cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
-    % Flow Arrows
+    datanode/.style={draw=teal!70, rounded corners=4pt, fill=teal!5, line width=0.9pt, text width=3.1cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
+    retrnode/.style={draw=indigo!70, rounded corners=4pt, fill=indigo!5, line width=0.9pt, text width=2.9cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
+    condnode/.style={draw=blue!70, rounded corners=4pt, fill=blue!5, line width=0.9pt, text width=3.3cm, minimum height=1.1cm, align=center, font=\sffamily\scriptsize},
+    evalnode/.style={draw=violet!70, rounded corners=4pt, fill=violet!5, line width=0.9pt, text width=3.0cm, minimum height=1.35cm, align=center, font=\sffamily\scriptsize},
     flowarrow/.style={->, >=stealth, line width=1.0pt, color=slate!75},
-    subarrow/.style={->, >=stealth, line width=0.8pt, color=slate!55, dashed}
+    brancharrow/.style={->, >=stealth, line width=0.85pt, color=slate!65},
+    busline/.style={line width=0.85pt, color=slate!65}
 ]
     \definecolor{slate}{RGB}{30, 41, 59}
     \definecolor{indigo}{RGB}{79, 70, 229}
+    \definecolor{teal}{RGB}{13, 148, 136}
+    \definecolor{blue}{RGB}{37, 99, 235}
+    \definecolor{violet}{RGB}{124, 58, 237}
 
     % ==================== STAGE 1: INGESTION ====================
-    \draw[stagebox] (-0.2, -2.6) rectangle (3.2, 2.6);
-    \node[stagetitle] at (-0.05, 2.45) {I. Corpus \& Queries};
+    \draw[stagebox] (-0.3, -3.4) rectangle (3.3, 3.4);
+    \node[stagetitle] at (-0.15, 3.22) {I. Corpus \& Queries};
     
-    \node[datanode] (queries) at (1.5, 1.15) {\textbf{Dual-Register Queries}\\Standard Bangla ($\mathcal{Q}_{\text{bn}}$)\\$\updownarrow$\\Romanized Banglish ($\mathcal{Q}_{\text{bg}}$)};
-    \node[datanode] (corpus) at (1.5, -1.15) {\textbf{Frozen Corpus $\mathcal{D}$}\\1,800 Chunked Passages\\(600 Gold + 1,200 Distractors)};
+    \node[datanode] (queries) at (1.5, 1.45) {\textbf{Dual-Register Queries}\\Standard Bangla\\($\mathcal{Q}_{\text{bn}}$)\\$\updownarrow$\\Romanized Banglish\\($\mathcal{Q}_{\text{bg}}$)};
+    \node[datanode] (corpus) at (1.5, -1.45) {\textbf{Frozen Corpus $\mathcal{D}$}\\1,800 Chunked Passages\\(600 Gold + 1,200 Distractors)};
 
     % ==================== STAGE 2: RETRIEVAL ====================
-    \draw[stagebox] (3.6, -2.6) rectangle (7.0, 2.6);
-    \node[stagetitle] at (3.75, 2.45) {II. Dense Indexing};
+    \draw[stagebox] (3.8, -3.4) rectangle (7.2, 3.4);
+    \node[stagetitle] at (3.95, 3.22) {II. Dense Indexing};
     
-    \node[retrnode] (encoder) at (5.3, 1.15) {\textbf{Dense Bi-Encoder}\\\texttt{BAAI/bge-m3}\\($d=1024$ Embeddings)};
-    \node[retrnode] (index) at (5.3, -1.15) {\textbf{Inner-Product Index}\\Frozen Vector DB\\Top-$k$ Ranking ($k=3$)};
+    \node[retrnode] (encoder) at (5.5, 1.45) {\textbf{Dense Bi-Encoder}\\\texttt{BAAI/bge-m3}\\($d=1024$ Embeddings)};
+    \node[retrnode] (index) at (5.5, -1.45) {\textbf{Inner-Product Index}\\Frozen Vector DB\\Top-$k$ Ranking ($k=3$)};
 
-    % ==================== STAGE 3: INFERENCE ====================
-    \draw[stagebox] (7.4, -2.6) rectangle (12.8, 2.6);
-    \node[stagetitle] at (7.55, 2.45) {III. Controlled Grounding Conditions};
+    % ==================== STAGE 3: CONDITIONS ====================
+    \draw[stagebox] (7.7, -3.4) rectangle (11.7, 3.4);
+    \node[stagetitle] at (7.85, 3.22) {III. Controlled Conditions};
     
-    \node[condnode] (c0) at (8.7, 1.15) {\textbf{$C_0$: Closed-Book}\\Parametric Recall\\$\hat{y}^{(0)} \sim \mathcal{M}_\theta(q)$};
-    \node[condnode] (c1) at (11.5, 1.15) {\textbf{$C_1$: Oracle Context}\\Gold Evidence $e^*$\\\emph{Extractive Ceiling}};
-    \node[condnode] (c2) at (8.7, -1.15) {\textbf{$C_2$: Dense RAG}\\Top-$k$ with Distractors\\Realistic RAG};
-    \node[condnode] (c3) at (11.5, -1.15) {\textbf{$C_3$: Selective Guard}\\Top-$k$ + Negative Rule\\\foreignlanguage{bengali}{\scriptsize\emph{"প্রমাণ অপর্যাপ্ত"}}};
+    \node[condnode] (c0) at (9.7, 2.25) {\textbf{$C_0$: Closed-Book}\\Parametric Recall ($\hat{y}^{(0)}$)};
+    \node[condnode] (c1) at (9.7, 0.75) {\textbf{$C_1$: Oracle Grounding}\\Gold Evidence $e^*$ (Extractive Ceiling)};
+    \node[condnode] (c2) at (9.7, -0.75) {\textbf{$C_2$: Dense RAG}\\Top-$k$ Distractors ($\mathcal{R}_k$)};
+    \node[condnode] (c3) at (9.7, -2.25) {\textbf{$C_3$: Selective Abstention}\\Negative Mandate\\(\foreignlanguage{bengali}{\scriptsize\emph{"প্রমাণ অপর্যাপ্ত"}})};
 
     % ==================== STAGE 4: EVALUATION ====================
-    \draw[stagebox] (13.2, -2.6) rectangle (16.6, 2.6);
-    \node[stagetitle] at (13.35, 2.45) {IV. Dual Adjudication};
+    \draw[stagebox] (12.7, -3.4) rectangle (16.2, 3.4);
+    \node[stagetitle] at (12.85, 3.22) {IV. Dual Adjudication};
     
-    \node[evalnode] (evalgold) at (14.9, 1.15) {\textbf{Deterministic Gold}\\\textbf{Adjudication}\\Substring \& Cues\\$\kappa_{\text{determ}} = 1.000$};
-    \node[evalnode] (evalstats) at (14.9, -1.15) {\textbf{Statistical Testing}\\Paired McNemar $\chi^2$\\95\% Wilson Score CIs\\Bootstrap ($B=1,000$)};
+    \node[evalnode] (evalgold) at (14.45, 1.45) {\textbf{Deterministic Gold}\\\textbf{Adjudication}\\Substring \& Cue Rules\\$\kappa_{\text{determ}} = 1.000$};
+    \node[evalnode] (evalstats) at (14.45, -1.45) {\textbf{Statistical Testing}\\Paired McNemar $\chi^2$\\95\% Wilson Score CIs\\Bootstrap ($B=1,000$)};
 
-    % ==================== ROUTING ARROWS ====================
-    % Stage 1 to 2
+    % ==================== ROUTING ====================
+    % Stage 1 to Stage 2
     \draw[flowarrow] (queries) -- (encoder);
     \draw[flowarrow] (corpus) -- (index);
     \draw[flowarrow] (encoder) -- (index);
 
-    % Stage 2 to 3
-    \draw[flowarrow] (encoder.east) -- (c0.west);
-    \draw[flowarrow] (corpus.east) -- ++(0.2, 0) |- (c1.west);
-    \draw[flowarrow] (index.east) -- (c2.west);
-    \draw[flowarrow] (index.east) -- ++(0.2, 0) |- (c3.west);
+    % Stage 2 to Stage 3 via clean channel bus (x = 7.45)
+    \draw[busline] (encoder.east) -- (7.45, 1.45);
+    \draw[busline] (index.east) -- (7.45, -1.45);
+    \draw[busline] (7.45, 2.25) -- (7.45, 0.75);
+    \draw[busline] (7.45, -0.75) -- (7.45, -2.25);
+    \draw[brancharrow] (7.45, 2.25) -- (c0.west);
+    \draw[brancharrow] (7.45, 0.75) -- (c1.west);
+    \draw[brancharrow] (7.45, -0.75) -- (c2.west);
+    \draw[brancharrow] (7.45, -2.25) -- (c3.west);
 
-    % Stage 3 to 4
-    \draw[flowarrow] (c1.east) -- (evalgold.west);
-    \draw[flowarrow] (c3.east) -- ++(0.2, 0) |- (evalgold.west);
+    % Stage 3 to Stage 4 via clean collector bus (x = 12.15)
+    \draw[busline] (c0.east) -- (12.15, 2.25);
+    \draw[busline] (c1.east) -- (12.15, 0.75);
+    \draw[busline] (c2.east) -- (12.15, -0.75);
+    \draw[busline] (c3.east) -- (12.15, -2.25);
+    \draw[busline] (12.15, 2.25) -- (12.15, -2.25);
+    \draw[flowarrow] (12.15, 1.45) -- node[above, font=\sffamily\scriptsize\bfseries, color=slate!85] {$\hat{y}^{(c)}$} (evalgold.west);
+
+    % Stage 4 internal
     \draw[flowarrow] (evalgold) -- (evalstats);
 
 \end{tikzpicture}

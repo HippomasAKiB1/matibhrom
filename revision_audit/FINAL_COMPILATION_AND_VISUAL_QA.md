@@ -77,12 +77,19 @@ The compilation log (`main.log`) was forensically analyzed for warnings, errors,
 Every page was rendered to high-resolution (2x scale) PNG format using `pypdfium2` and individually inspected via image rendering.
 
 ### 5.1 Figure 1 (Methodology Architecture — Page 6)
-- **Previous Defect:** Vertical container overlap in Stage III (`c0`--`c3`), text clipping in stage title ("III. Controlled Inferenc"), and cramped routing arrows.
+- **Previous Defect:** In earlier revisions, arrows between stages cut horizontally straight through the interior text of boxes $C_0$ and $C_2$ to reach $C_1$ and $C_3$.
+- **User Instruction:** *"see the arrows are going through the boxes which is not standard for diagram Fix the methodology diagram"*
 - **Visual Inspection of Final Render:**
-  - Stage III now utilizes a balanced **$2 \times 2$ grid layout** ($C_0$ and $C_1$ on top; $C_2$ and $C_3$ on bottom) across a 5.4cm wide container.
-  - **Zero overlapping boxes.** Generous vertical and horizontal clearance around all 8 functional nodes.
-  - Stage title *"III. Controlled Grounding Conditions"* fits completely inside the container header without clipping.
-  - Orthogonal routing arrows between dense retrieval index and conditions $C_2/C_3$ are clean and non-overlapping.
+  - **Orthogonal Channel & Collector Bus Architecture:**
+    - Stage I (Corpus & Queries) feeds Stage II (Dense Indexing) via clean, unencumbered horizontal flow arrows (`queries` $\to$ `encoder` and `corpus` $\to$ `index`).
+    - Channel between Stage II and Stage III (at $x=7.45$) uses an orthogonal distribution bus: `encoder.east` branches cleanly into $C_0$ and $C_1$, and `index.east` branches cleanly into $C_2$ and $C_3$ in open channel space.
+    - **Zero arrows pass through or touch any box interior.**
+    - Channel between Stage III and Stage IV (at $x=12.15$) uses a unified collector bus: all four condition outputs ($C_0, C_1, C_2, C_3$) join the bus, which delivers a single crisp arrow labeled $\hat{y}^{(c)}$ into Stage IV Deterministic Gold Adjudication.
+    - Inside Stage IV, deterministic adjudication feeds down into paired statistical hypothesis testing.
+  - **Typography & Font Fidelity:**
+    - Box titles and text fit cleanly without hyphenation (`Romanized Banglish` and `($\mathcal{Q}_{\text{bg}}$)` cleanly formatted).
+    - Bengali text inside Condition $C_3$ renders authentically via Noto Serif Bengali (`"প্রমাণ অপর্যাপ্ত"`).
+    - Stage container headers (`I. Corpus & Queries`, `II. Dense Indexing`, `III. Controlled Conditions`, `IV. Dual Adjudication`) are beautifully framed with generous interior margins.
 
 ### 5.2 Table 2 & Table 3 (Domain Disparity & McNemar Tests — Pages 7 & 8)
 - **Previous Defect:** Table 2 bled 112 pt past the single-column margin. Table 3 bled 42 pt past the column boundary, directly colliding with the Section 6 section heading.
